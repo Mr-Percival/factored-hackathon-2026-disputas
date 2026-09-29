@@ -6,7 +6,10 @@ Cada conversación se verificó corriendo el agente real sobre la base completa 
 liviana de demo. Fuente de verdad: [`docs/demo/demo_customers.json`](demo/demo_customers.json), que tiene los IDs, los
 mensajes exactos por turno y el resultado esperado.
 
-> **Regla de oro:** copiar y pegar los mensajes tal cual (el router de línea base es por reglas). No improvisar en vivo.
+> **Regla de oro:** en la presentación, usar los mensajes tal cual (la UI los ofrece como sugerencias de un clic). La
+> demo corre con el router aprendido (intención) + reglas (monto, fecha, país, consentimiento): entiende variaciones,
+> pero el guion es lo verificado. Qué entiende y qué no: [README · Qué entiende el agente](../README.md#qué-entiende-el-agente-y-qué-no).
+> Si el jurado improvisa en el link, está bien: cuando no entiende, pregunta en vez de adivinar.
 
 ## 0. Antes de salir a escena (5 min antes)
 
@@ -107,7 +110,7 @@ herramientas. Con la sesión vencida, **ninguna herramienta responde**: la sesi�
 
 ### Escena 6: cierre (3:25–3:40)
 "El modelo interpreta y redacta; el código decide y actúa. Cada regla tiene un ID y una versión, cada acción pide
-confirmación y se verifica, y cada handoff lleva el paquete completo. Estos 13 escenarios se verifican automáticamente
+confirmación y se verifica, y cada handoff lleva el paquete completo. Estos 14 escenarios se verifican automáticamente
 antes de cada deploy."
 
 ## 2. Escenas de reserva (para preguntas o para reemplazar una que falle)

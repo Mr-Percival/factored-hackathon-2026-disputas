@@ -78,8 +78,9 @@ export function App() {
           <summary className="w-fit cursor-pointer">Limitaciones conocidas</summary>
           <ul className="mt-1 list-disc pl-5">
             <li>
-              Entiende por reglas y palabras clave (línea base): funciona mejor con monto, fecha o país (“no
-              reconozco un cargo de 77 dólares”). Si no entiende, pregunta en vez de adivinar.
+              La intención la decide un modelo local aprendido y los datos salen de reglas: funciona mejor con
+              monto, fecha o país (“no reconozco un cargo de 151 dólares”). Si no entiende, pregunta en vez de
+              adivinar.
             </li>
             <li>Las sesiones duran 15 minutos y viven en la memoria del servidor: un reinicio las borra.</li>
             <li>Identidad, herramientas y política son un sandbox: ninguna acción mueve dinero real.</li>

@@ -19,7 +19,7 @@ idioma y segmento. El dataset no trae conversaciones etiquetadas válidas (ADR 0
 - **División doble:** por `customer_id` (dev/test) y por **redacción** (plantillas v1 para dev, v2 para test, escritas
   después de ajustar). Solo se reporta test.
 - Líneas base ingenuas para dar escala: B0 (transferir todo) y B1 (automatizar sin política ni confirmación). Los
-  sistemas se registran por nombre (`SYSTEMS` en `evals/runner.py`), así el router por embeddings o el LLM se
+  sistemas se registran por nombre (`SYSTEMS` en `src/bankagent/evals/runner.py`), así el router por embeddings o el LLM se
   comparan sobre los mismos casos con una línea.
 
 ## Alternativas consideradas

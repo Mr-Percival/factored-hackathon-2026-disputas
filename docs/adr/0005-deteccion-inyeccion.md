@@ -1,6 +1,6 @@
 # 0005 · Detección de inyección: regex bloquea por defecto; el clasificador preentrenado es opt-in
 
-- **Estado:** propuesta
+- **Estado:** aceptada (regex por defecto en `guard.py`; clasificador opt-in con `BANKAGENT_INJECTION_DETECTOR`)
 - **Fecha:** 2026-09-29
 - **Autor(es):** equipo (issues #8 y #9)
 

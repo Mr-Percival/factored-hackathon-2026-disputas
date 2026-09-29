@@ -201,7 +201,7 @@ flowchart LR
 ```
 - **Los datos del organizador nunca pasan por el repo.** Se bajan con secretos en un runner efímero, la base se hornea
   en la imagen y la imagen vive en GHCR como paquete **privado**; Render la toma con una credencial de solo lectura.
-- Cada deploy usa la imagen exacta del commit (`:sha`) y pasa por `verify_demo.py` (13 escenarios) y un smoke test
+- Cada deploy usa la imagen exacta del commit (`:sha`) y pasa por `verify_demo.py` (14 escenarios) y un smoke test
   (`/readyz`, `/api/scenarios`) antes de avisar a Render.
 - Plan gratis de Render: 512 MB, 0.1 CPU, se duerme a los 15 min; `keepalive.yml` lo mantiene despierto hasta la final.
   Memoria medida en local: ~200 MB tras 39 sesiones de demo.

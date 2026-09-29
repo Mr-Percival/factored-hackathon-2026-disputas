@@ -1,6 +1,6 @@
 # 0004 · Router y writer con LLM: modelos, versiones, caminos alternativos y privacidad
 
-- **Estado:** propuesta
+- **Estado:** aceptada (implementado; apagado en la demo porque no hay API paga: el agente corre con la línea base y el router aprendido)
 - **Fecha:** 2026-09-28
 - **Autor(es):** equipo (issues #6 y #7)
 
@@ -86,5 +86,5 @@ US$0.01 y agrega dos llamadas en serie por turno (≈ 1–2 s con Haiku).
   "15/06/2026"). Se acepta: la plantilla es correcta; la tasa de `writer_fallback` se mide en la evaluación.
 - Con más tiempo: caché de prompts cuando el system prompt supere el mínimo cacheable; streaming del writer
   para bajar la latencia percibida; ejemplos few-shot por dialecto evaluados contra hablantes; router con
-  modelo de decisión propio (Jev) comparado contra Haiku; presupuesto de costo por conversación con corte
+  modelo de intención propio comparado contra Haiku (el router aprendido local ya existe, [ADR 0009](0009-router-aprendido.md)); presupuesto de costo por conversación con corte
   automático a la línea base; un segundo proveedor detrás de `LLMClient` para resiliencia.

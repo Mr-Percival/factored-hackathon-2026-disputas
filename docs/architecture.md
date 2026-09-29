@@ -3,6 +3,11 @@
 > Un agente de disputas de cargos no reconocidos. **El modelo interpreta y redacta; el código decide y actúa.**
 
 > Cómo se operaría en producción (topología, capacidad, monitoreo, acceso, retención, runbook): [`operations.md`](operations.md).
+> Decisiones con alternativas descartadas: [`adr/`](adr/README.md).
+
+**Sistema de la demo:** router híbrido (intención con el modelo local aprendido, slots y consentimiento con reglas) +
+política en YAML + plantillas es/pt. El router y el writer con LLM están implementados detrás de las mismas interfaces,
+con fallback a la línea base, pero **apagados** (sin API paga).
 
 ## 1. Vista general: canal web + 4 capas
 
@@ -18,7 +23,7 @@ flowchart LR
     API -->|mensaje + token<br/>el token nunca sale del servidor| G
 
     subgraph A[Agente · LangGraph]
-        G[Guard<br/>inyección · PII] --> R[Entender<br/>intención + datos]
+        G[Guard<br/>normaliza · inyección · PII] --> R[Entender · HybridRouter<br/>intención: modelo local<br/>datos y consentimiento: reglas]
         R --> F[Buscar<br/>transacción / tarjeta]
         F --> D[Decidir<br/>política]
         D --> X[Actuar<br/>con confirmación]
@@ -53,6 +58,7 @@ flowchart LR
 | Datos | Contrato por tabla, cuarentena, upsert incremental, linaje | Reproducible y auditable; los problemas se reportan, no se ocultan |
 | Herramientas | Única puerta a los datos; derivan el cliente del token | Los permisos no dependen del prompt |
 | Política | Reglas declarativas y versionadas | El modelo nunca decide la elegibilidad |
+| Entender | `HybridRouter`: el modelo aprendido (0.2 MB, CPU) elige la intención o se abstiene; `RuleRouter` extrae monto, fecha, país, opción y el "sí" de cada acción | El modelo mejora la parte difícil (qué quiere el cliente) sin tocar lo que habilita acciones; si no carga, responde RuleRouter y la traza lo dice ([ADR 0009](adr/0009-router-aprendido.md)) |
 | Agente | Orquesta pasos explícitos | Cada transición está declarada y queda trazada |
 
 ## 2. Quién decide qué
@@ -61,7 +67,7 @@ flowchart LR
 |---|---|---|
 | ¿La sesión es válida? ¿El dato es suyo? | `identity.py` + `tools.py` | Código |
 | ¿El mensaje es un ataque? | `guard.py` (`InjectionDetector`) | Patrones (default) · clasificador ONNX opt-in, evaluado en [ADR 0005](adr/0005-deteccion-inyeccion.md) |
-| ¿Qué quiere el cliente? | `Router` (interfaz) | Reglas (línea base) · router aprendido local: intención con modelo, slots y consentimiento con reglas ([ADR 0009](adr/0009-router-aprendido.md)) · LLM |
+| ¿Qué quiere el cliente? | `Router` (interfaz) | Router aprendido local (**default de la demo**): intención con modelo, slots y consentimiento con reglas ([ADR 0009](adr/0009-router-aprendido.md)) · reglas (línea base y fallback) · LLM (apagado) |
 | ¿Cuál es la transacción? | `search_transactions` + aclaración | Código; pregunta si hay más de una |
 | ¿Procede la disputa o va a un humano? | `policy.yaml` | Reglas con ID |
 | ¿Ejecutar la acción? | Cliente (confirmación) + `tools.py` (verificación) | Humano + código |
@@ -69,7 +75,9 @@ flowchart LR
 
 ## 3. El grafo
 
-Generado desde el código (`Agent.mermaid()`); cada nodo solo puede ir a los destinos declarados en `EDGES`.
+Las aristas son exactamente las de `graph.EDGES` (11 nodos, 28 aristas, 19 caminos START→END, listados en
+[`graph-paths.md`](graph-paths.md), que un test regenera y compara); las etiquetas resumen cuándo se toma cada una.
+Cada nodo solo puede ir a los destinos declarados: una transición no declarada falla cerrada.
 
 ```mermaid
 flowchart TD
@@ -91,10 +99,12 @@ flowchart TD
     find_transaction -->|0 o varias: pregunta| respond
     find_transaction -->|herramienta caída · 3 aclaraciones| handoff
     select_option --> decide
+    select_option -->|opción inválida: re-pregunta · tarjeta elegida: pide confirmar| respond
     select_option -->|3 aclaraciones| handoff
     check_dispute -->|disputa verificada del cliente| respond
     check_dispute -->|no encontrada| handoff
-    find_card --> respond
+    find_card -->|pide elegir o confirmar el bloqueo| respond
+    find_card -->|sin tarjetas activas| handoff
     decide -->|regla handoff| handoff
     decide -->|rechazo / pedir confirmación| respond
     act -->|verificado| respond
@@ -112,25 +122,27 @@ El estado persiste entre turnos (checkpointer por conversación). Así funcionan
 
 ## 4. Una disputa de punta a punta
 
+Escena 1 del [guion de la demo](demo-script.md) (cliente real `CLI-ZT72318S7XDV`).
+
 ```mermaid
 sequenceDiagram
     actor C as Cliente
     participant A as Agente
     participant T as Herramientas
     participant P as Política
-    C->>A: "No reconozco un cargo de 77 dólares"
+    C->>A: "Hola, me llegó un cargo de 151 dólares que no reconozco"
     A->>A: guard (sin ataque, PII enmascarada)
-    A->>A: understand → disputa, monto≈77
-    A->>T: search_transactions(token, 69–85)
+    A->>A: understand → disputa (modelo), monto≈151 (reglas)
+    A->>T: search_transactions(token, 136–166)
     T-->>A: 1 transacción (solo del dueño del token)
     A->>T: get_transaction · get_profile · dispute_history
     A->>P: decide_dispute(hechos verificados)
     P-->>A: auto_with_confirmation (ninguna regla de bloqueo)
-    A-->>C: "Encontré el cargo … ¿Abro la disputa? ¿Bloqueo también la tarjeta?"
+    A-->>C: "Encontré el cargo: 18/05/2026 · 150.86 USD · Gasolinera Express … ¿disputa y bloqueo de ****2444?"
     C->>A: "sí, ambas" (o "solo la disputa": cada acción tiene su consentimiento)
     A->>T: open_dispute(confirmed) · block_card(confirmed)
     T-->>A: verified=true
-    A-->>C: "Abrí la disputa DSP-… y bloqueé la tarjeta ****4111"
+    A-->>C: "Abrí la disputa DSP-… y bloqueé la tarjeta ****2444"
 ```
 
 ## 5. Datos: raw → serving
@@ -207,3 +219,20 @@ sequenceDiagram
   al cerrar o vencer la sesión; tope de 200 sesiones. Solo en la demo: en producción el almacén ops es único.
 - **Escenarios como datos:** `docs/demo/demo_customers.json` (clientes reales, con `BANKAGENT_DB`) o
   `config/demo_scenarios.json` (fixture). Los `customer_id` listados son la allowlist del login simulado.
+
+## 8. Build y deploy
+
+```mermaid
+flowchart LR
+    PR[pull request] --> CI["ci.yml<br/>pytest · check_docs · ci_guard con ambos routers<br/>web: lint · tipos · tests · e2e · imagen"]
+    M[push a main] --> D[deploy.yml]
+    S3[(S3 del organizador)] -->|secretos| D
+    D -->|pipeline + verify_demo 14/14| DB[(base de demo<br/>runner efímero)]
+    DB --> IMG[imagen Docker<br/>API + SPA + base]
+    IMG -->|smoke test /readyz| GHCR[(GHCR privado)]
+    GHCR -->|deploy hook| R[Render]
+```
+
+Los datos del organizador nunca pasan por el repo: se bajan en el runner, se hornean en la imagen y la imagen es
+privada. Detalle y límites del plan gratuito: [`operations.md`](operations.md#deploy-de-la-demo-render).
+`scripts/deploy_hf.py` queda como alternativa opcional (Hugging Face Spaces con Docker), no es el camino de la demo.
