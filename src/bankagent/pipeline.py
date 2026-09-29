@@ -89,6 +89,7 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
     con.execute("CREATE TABLE IF NOT EXISTS _processed_files (file_id VARCHAR PRIMARY KEY, path VARCHAR, table_name VARCHAR, run_id VARCHAR)")
     run_id = dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
     report = {"run_id": run_id, "started_at": dt.datetime.now().isoformat(), "raw_dir": os.path.abspath(raw_dir),
+              "out_db": os.path.abspath(out_db),
               "sample_customers": sample_customers, "normalizations": norm, "tables": {}}
 
     for table in LOAD_ORDER:
