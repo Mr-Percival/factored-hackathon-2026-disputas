@@ -460,7 +460,10 @@ una alerta con cualquier `action_not_verified` > 0, que se revisa a mano en el c
 
 ### H1. ¿Cómo usaron asistentes de IA para construir esto y cómo controlaron la calidad?
 **Respuesta.** Mucho, y lo decimos. Usamos Claude Code con subagentes, cada uno en un worktree aislado y una rama por
-issue, y todo entró por PR con la CI en verde y una aprobación humana (squash merge, `CONTRIBUTING.md`). Los controles no dependen de confiar en el asistente: CI con tests sin datos ni
+issue, y todo entró por PR (squash merge) con la CI en verde. **Ojo, dicho con honestidad:** `CONTRIBUTING.md` pide
+una aprobación humana por PR, pero por el plazo la mayoría de los PRs los integró el agente orquestador con la CI en
+verde, bajo autorización explícita del líder del equipo; no hubo revisión línea a línea de cada PR por otra persona.
+Por eso los controles no dependen de confiar en el asistente ni en una revisión humana: CI con tests sin datos ni
 llaves, la guardia de regresión con los dos routers, `check_docs.py` que falla si un documento cita un archivo o test
 que no existe, y sets de test **congelados por hash** que el generador se niega a reescribir. También usamos
 asistentes para escribir el corpus de intención (un autor por sesión aislada) y la traducción al portugués, y eso está
@@ -468,9 +471,11 @@ declarado como limitación.
 **Evidencia.** [`CONTRIBUTING.md`](../../CONTRIBUTING.md) · `scripts/check_docs.py` · `scripts/ci_guard.py` ·
 `tests/test_evals.py::test_frozen_test_set_is_not_overwritten` · [`reports/intent_router.md`](../../reports/intent_router.md) §Datos (procedencia).
 **Límite.** Asistentes que escriben código y casos comparten sesgos; por eso el test v3 lo tiene que escribir una
-persona que no haya visto el sistema. La responsabilidad de cada decisión es del equipo.
+persona que no haya visto el sistema. La revisión humana por PR fue la excepción, no la regla: en un equipo real
+activaríamos la protección de rama (1 aprobación obligatoria) y no integraría el agente. La responsabilidad de cada
+decisión es del equipo.
 **Repregunta.** *"¿Qué hicieron ustedes, entonces?"* → Elegir el flujo y las restricciones, escribir los issues con
-criterios de aceptación, revisar los PRs, decidir los trade-offs de los ADR y declarar las limitaciones. Tengan a mano
+criterios de aceptación, revisar los resultados clave (reportes, demos, hallazgos del jurado simulado), decidir los trade-offs de los ADR y declarar las limitaciones. Tengan a mano
 un ejemplo concreto de revisión que haya cambiado algo (p. ej. el primer borrador de test 114/115 que se descartó).
 
 ### H2. ¿Por qué deberíamos creer cualquier número si todo es sintético?
