@@ -89,6 +89,7 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
     con.execute("CREATE TABLE IF NOT EXISTS _processed_files (file_id VARCHAR PRIMARY KEY, path VARCHAR, table_name VARCHAR, run_id VARCHAR)")
     run_id = dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
     report = {"run_id": run_id, "started_at": dt.datetime.now().isoformat(), "raw_dir": os.path.abspath(raw_dir),
+              "out_db": os.path.abspath(out_db),
               "sample_customers": sample_customers, "normalizations": norm, "tables": {}}
 
     for table in LOAD_ORDER:
@@ -99,9 +100,14 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
         con.execute(f"ALTER TABLE quarantine_{table} ADD COLUMN IF NOT EXISTS _run_id VARCHAR")
 
         files = sorted(glob.glob(os.path.join(raw_dir, spec["source"]), recursive=True))
+        # Huella de la entrega: si el organizador regenera los datos (ya pasó: ver reports/snapshot_diff.md),
+        # cambia la huella y cualquier artefacto que referencie IDs (casos de eval, guion de demo) debe regenerarse.
+        fingerprint = hashlib.sha256("\n".join(
+            f"{os.path.relpath(f, raw_dir).replace(os.sep, '/')}|{os.path.getsize(f)}" for f in files).encode()).hexdigest()[:16]
         done = {r[0] for r in con.execute("SELECT file_id FROM _processed_files WHERE table_name = ?", [table]).fetchall()}
         new_files = [f for f in files if _file_id(f) not in done]
-        stats = {"files_total": len(files), "files_new": len(new_files), "rows_in": 0, "rows_loaded": 0,
+        stats = {"files_total": len(files), "files_new": len(new_files), "source_fingerprint": fingerprint,
+                 "rows_in": 0, "rows_loaded": 0,
                  "rows_quarantined": 0, "failed_checks": {}, "warnings": {}}
         if not new_files:
             report["tables"][table] = stats
