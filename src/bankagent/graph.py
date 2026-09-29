@@ -23,7 +23,7 @@ from typing import Annotated, Any, TypedDict
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
-from .guard import detect_injection, redact
+from .guard import InjectionDetector, detector_from_env, redact
 from .identity import AuthError
 from .policy import PolicyEngine
 from .responses import TemplateWriter, fmt_option, fmt_txn
@@ -77,10 +77,12 @@ EDGES: dict[str, list[str]] = {
 
 class Agent:
     def __init__(self, tools: BankTools, policy: PolicyEngine, router: Router | None = None,
-                 writer: TemplateWriter | None = None, min_confidence: float = 0.6, max_retries: int = 2):
+                 writer: TemplateWriter | None = None, min_confidence: float = 0.6, max_retries: int = 2,
+                 detector: InjectionDetector | None = None):
         self.tools, self.policy = tools, policy
         self.router = router or RuleRouter()
         self.writer = writer or TemplateWriter()
+        self.detector = detector or detector_from_env()  # regex salvo que se pida otro (ADR 0004)
         self.min_confidence, self.max_retries = min_confidence, max_retries
         self.graph = self._build().compile(checkpointer=InMemorySaver())
 
@@ -151,10 +153,10 @@ class Agent:
         self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
         text = s["user_text"]
         msg = {"role": "user", "turn": s["turn"], "text": redact(text)}
-        pattern = detect_injection(text)
-        if pattern:
+        reason = self.detector.detect(text)
+        if reason:
             return {"next": "respond", "outcome": "blocked", "reply_key": "blocked_input",
-                    "conversation": [msg], "detail": f"injection_pattern={pattern}"}
+                    "conversation": [msg], "detail": f"injection {self.detector.name}: {reason}"}
         return {"next": "understand", "conversation": [msg]}
 
     def understand(self, s: State, calls) -> dict:
