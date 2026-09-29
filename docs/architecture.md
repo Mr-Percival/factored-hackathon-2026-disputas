@@ -55,7 +55,7 @@ flowchart LR
 | ¿Cuál es la transacción? | `search_transactions` + aclaración | Código; pregunta si hay más de una |
 | ¿Procede la disputa o va a un humano? | `policy.yaml` | Reglas con ID |
 | ¿Ejecutar la acción? | Cliente (confirmación) + `tools.py` (verificación) | Humano + código |
-| ¿Cómo se dice? | `Writer` | Plantillas (línea base) · LLM + verificador *(próximo)* |
+| ¿Cómo se dice? | `Writer` | Plantillas (línea base) · LLM + verificador determinista ([ADR 0004](adr/0004-llm-acotado-router-writer.md)) |
 
 ## 3. El grafo
 

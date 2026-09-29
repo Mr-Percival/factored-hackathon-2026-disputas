@@ -24,6 +24,10 @@ src/bankagent/
   guard.py              detección de inyección + enmascarado de PII
   understanding.py      interfaz Router + RuleRouter (línea base es/pt)
   responses.py          redacción por plantillas es/pt (línea base)
+  llm.py                cliente LLM agnóstico de proveedor (Anthropic + Fake para tests)
+  llm_router.py         LLMRouter: salida estructurada validada, cae a reglas ante cualquier falla
+  llm_writer.py         LLMWriter + verify_reply: tono/dialecto sin agregar datos, cae a plantillas
+  factory.py            build_agent(db, router="rules|llm", writer="templates|llm")
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
@@ -45,6 +49,19 @@ python -m bankagent.pipeline --sample-customers 500 --out data/demo.duckdb   # b
 python -m bankagent.chat --customer CLI-XXXXXXXX
 ```
 
+## Cómo activar el LLM
+El agente funciona completo sin LLM (reglas + plantillas). Para activar el router y/o el writer con modelo:
+```bash
+pip install -e ".[llm]"                               # agrega el SDK de Anthropic
+export ANTHROPIC_API_KEY=...                          # en .env o en el entorno; nunca en el repo
+python -m bankagent.chat --customer CLI-XXXXXXXX --router llm --writer llm
+# /trace muestra por turno: modelo@versión de prompt, latencia, tokens, costo estimado y si hubo fallback
+```
+Desde código (UI, evaluación): `build_agent("data/serving.duckdb", router="llm", writer="llm")`.
+Modelos por defecto: Claude Haiku 4.5 en ambos (`BANKAGENT_ROUTER_MODEL` / `BANKAGENT_WRITER_MODEL` para
+cambiarlos). Sin key, los componentes LLM caen a la línea base y la traza lo registra (`fallback: no_client`).
+Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-router-writer.md).
+
 ## Qué es real, qué es sintético
 | Insumo | Origen |
 |---|---|
@@ -58,7 +75,7 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 - [x] Pipeline con contratos, cuarentena, upsert incremental y linaje
 - [x] Herramientas con permisos por sesión, política, guard, grafo, línea base es/pt
 - [x] 25 tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos
-- [ ] Router y writer con LLM, más un verificador de salida
+- [x] Router y writer con LLM (salida estructurada, reintentos acotados, fallback a la línea base) y verificador determinista de respuestas
 - [ ] Evaluación: línea base contra agente sobre casos reservados; inyección con datasets públicos
 - [ ] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [ ] Interfaz web, deploy, slides y video
