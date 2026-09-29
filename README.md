@@ -86,7 +86,7 @@ python -m bankagent.pipeline                          # -> data/serving.duckdb +
 # Base liviana para el deploy (~5 MB): clientes del guion de demo + muestra determinista. Ver docs/demo-script.md
 python scripts/select_demo_customers.py                                       # -> docs/demo/demo_customers.json
 python -m bankagent.pipeline --out data/demo/demo.duckdb --sample-customers 500 --include-customers docs/demo/demo_customers.json
-python scripts/verify_demo.py --db data/demo/demo.duckdb                      # 13/13 escenarios o código 1
+python scripts/verify_demo.py --db data/demo/demo.duckdb                      # 14/14 escenarios o código 1
 
 python -m bankagent.chat --customer CLI-XXXXXXXX
 

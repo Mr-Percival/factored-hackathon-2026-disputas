@@ -26,7 +26,20 @@ INJECTION_PATTERNS = [
     r"(system|sistema) ?prompt",
     r"modo (desarrollador|developer|dios)|developer mode|jailbreak",
     r"(ahora )?(eres|es|agora voce e|you are now) (un|uma|um|a)? ?(admin|administrador|root|otro asistente)",
-    r"(cuenta|conta|datos|dados|saldo|transacc\w*|movimient\w*) de (otro|otra|outro|outra|mi (vecino|jefe|hermano)|[A-Z][a-z]+ [A-Z])",
+    # Datos de OTRO cliente/usuario (explícito). Ya no se marca "la cuenta de María López, mi esposa" ni "los
+    # movimientos de mi hermano": son reclamos legítimos y frecuentes; además, las herramientas solo ven la sesión.
+    r"(cuenta|conta|datos|dados|saldo|transacc\w*|transac\w*|movimient\w*|tarjeta|cartao) (de|do|da) "
+    r"(otro|otra|outro|outra) (cliente|usuario|usuaria|titular|persona|pessoa)",
+    r"(muestra\w*|mostra\w*|mostre|dame|dime|pasame|ver|consulta\w*|revisa\w*|quiero ver|quero ver)\b.{0,40}\b"
+    r"(de|do|da) (otro|otra|outro|outra) (cliente|usuario|usuaria|titular)",
+    r"ignor\w* (\w+ ){0,3}(anterior\w*|previ\w*|antes|above|acima|todo lo que)",
+    r"(olvida\w*|esquec\w*|forget) (todo|tudo|everything)",
+    r"(finja|finge|fingi\w*|pretend\w*|haz de cuenta|hace de cuenta|faz de conta|actua como|atue como|act as|simul\w*)"
+    r"\b.{0,40}\b(admin\w*|root|sistema|system|desarrollador|developer|superusuario|gerente|dios|sin restric\w*|"
+    r"sem restric\w*)",
+    r"</?\s*(user|system|assistant|usuario|sistema)\s*>",  # etiquetas de rol inyectadas
+    r"^\s*(system|assistant)\s*:|\b(system|assistant)\s*:\s*(approve|ignore|you|reveal)",
+    r"approve\w* (the |a )?refund",
     r"\bCLI-[A-Z0-9]{6,}\b",  # pedir un cliente por su ID interno
     r"(aprueba|aprova|autoriza|reembolsa|reembolsar|transfiere|transfira)\b.*\b(sin|sem) (validar|verificar|confirmar)",
 ]
@@ -44,6 +57,11 @@ def _fold(text: str) -> str:
     return "".join(c for c in t if not unicodedata.combining(c))
 
 
+# Letras sueltas separadas por espacios ("I g n o r a   t u s ..."): se juntan y se buscan estas raíces.
+SPACED_OUT = re.compile(r"(?:\b\w\b\s+){5,}\b\w\b")
+SPACED_ROOTS = ("ignor", "instruc", "system", "prompt", "admin", "olvida", "regla", "jailbreak", "esquec")
+
+
 def detect_injection(text: str) -> str | None:
     """Devuelve el patrón que coincidió (para el registro) o None."""
     folded = _fold(text)
@@ -51,6 +69,9 @@ def detect_injection(text: str) -> str | None:
         flags = 0 if p.startswith(r"\bCLI") or "[A-Z]" in p else re.IGNORECASE
         if re.search(p, folded, flags):
             return p
+    spaced = "".join(SPACED_OUT.findall(folded)).lower()
+    if spaced and sum(r in re.sub(r"\s+", "", spaced) for r in SPACED_ROOTS) >= 1:
+        return "spaced_out_letters"
     return None
 
 

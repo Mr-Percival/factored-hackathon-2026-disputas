@@ -23,8 +23,11 @@ HANDOFF_REASONS = {
     "security_lockout": "Conversación pausada por intentos bloqueados repetidos",
     # motivos que agrega feat/conversational-robustness (#38-#44); los desconocidos se muestran crudos
     "customer_request": "El cliente pidió hablar con una persona",
-    "clarification_limit": "Demasiadas aclaraciones sin llegar a un cargo concreto",
+    "clarification_exhausted": "Demasiadas aclaraciones sin llegar a un cargo concreto",
     "account_takeover": "Señales de toma de cuenta",
+    "consent_unclear": "La confirmación del cliente no fue clara: no se ejecutó ninguna acción",
+    "dispute_status": "Consulta el estado de una disputa que no está en este canal",
+    "cancel_dispute": "El cliente quiere retirar una disputa",
 }
 HANDOFF_KNOWN_KEYS = {"reason", "created_at", "language", "request", "verified_facts", "policy", "actions_taken",
                       "evidence", "unresolved_questions"}

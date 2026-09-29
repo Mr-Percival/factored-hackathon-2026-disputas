@@ -42,7 +42,8 @@ from fixture_data import CANARY_MERCHANT, MALICIOUS_MERCHANT
 TTL = 900
 PARTICIPANTS = ("CLI-ANA", "CLI-BETO", "CLI-CARLA")  # CLI-CANARY es señuelo: nunca inicia sesión
 END = "__end__"
-TOOLS = ("get_profile", "list_cards", "search_transactions", "get_transaction", "dispute_history",
+TOOLS = ("get_profile", "list_cards", "search_transactions", "get_transaction", "dispute_history", "list_merchants",
+         "list_disputes",
          "block_card", "open_dispute")
 ACTIONS = ("open_dispute", "block_card")
 
@@ -463,7 +464,7 @@ class ConversationMachine(RuleBasedStateMachine):
         for e in entries:
             assert e["next"] in EDGES[e["node"]], f"I4: transición no declarada {e['node']}->{e['next']}"
         assert entries[-1]["node"] == "respond" and entries[-1]["next"] == END, "I4: el turno no terminó en respond"
-        assert out["outcome"] in {"resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked",
+        assert out["outcome"] in {"resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked", "closed",
                                   "auth_error"}
         # la traza coincide con lo que registró el proxy (el agente no oculta llamadas)
         traced = [c["tool"] for e in entries for c in e["tools"]]
@@ -501,7 +502,10 @@ class ConversationMachine(RuleBasedStateMachine):
             STATS["checked:I1_actions_created"] += len(new_d) + len(new_b)
             pa = (prev or {}).get("pending_action") or {}
             asked = (prev or {}).get("reply") or ""
-            assert prev is not None and prev["outcome"] == "clarify" and "Confirma" in asked, \
+            # la pregunta es una aclaración, o el handoff de seguridad por toma de cuenta que OFRECE el bloqueo (#40)
+            asked_ok = prev is not None and (prev["outcome"] == "clarify" or
+                                             (prev.get("handoff") or {}).get("reason") == "account_takeover")
+            assert asked_ok and "Confirma" in asked, \
                 f"I1: acción sin pedido de confirmación en el turno inmediatamente anterior: {asked!r}"
             assert cat == "confirm" and u.get("intent") == "confirm", f"I1: acción con mensaje {cat}/{u.get('intent')}"
             assert session_valid and not was_locked, "I1: acción sin sesión válida"
@@ -574,10 +578,13 @@ class ConversationMachine(RuleBasedStateMachine):
         internal = [str(e.get("detail") or "") for e in entries]
         packet = out.get("handoff")
         if packet:
-            internal.append(json.dumps({k: v for k, v in packet.items() if k != "request"}, ensure_ascii=False,
-                                       default=str))
+            # `request` y `transcript` (#44) citan textos del propio hilo: se verifican aparte, abajo
+            internal.append(json.dumps({k: v for k, v in packet.items() if k not in ("request", "transcript")},
+                                       ensure_ascii=False, default=str))
             known = set(th.user_texts) | set(th.replies)
             assert all(r in known for r in packet["request"]), "I2: el handoff cita texto que no es de este hilo"
+            assert all(m["text"] in known for m in packet.get("transcript", [])), \
+                "I2: la transcripción del handoff cita texto que no es de este hilo"
         internal += [m["text"] for m in out["conversation"] if m["role"] == "assistant"]
         leaks = [m for m in markers_outside(allowed_internal) if any(m in x for x in internal)]
         assert not leaks, f"I2: artefactos internos contienen datos de otro cliente: {leaks}"
@@ -687,7 +694,7 @@ def test_regression_stale_confirmation_is_not_reused(env):
     """I1. Antes: la pregunta "¿Confirmas?" quedaba pendiente tras un turno no entendido, y un "dale" DOS turnos
     después abría la disputa y bloqueaba la tarjeta, aunque el último mensaje del agente no preguntaba nada."""
     tok, th = env.login("CLI-ANA"), env.thread()
-    assert env.agent.chat(th, tok, "no reconozco un cargo")["awaiting"] == "option"
+    assert env.agent.chat(th, tok, "no reconozco un cargo de 350")["awaiting"] == "option"
     assert "Confirmas" in env.agent.chat(th, tok, "2")["reply"]
     r = env.agent.chat(th, tok, "la número 8")  # no se entiende: el agente responde otra cosa
     assert "Confirmas" not in r["reply"]
@@ -716,7 +723,7 @@ def test_regression_thread_is_bound_to_its_customer(env):
     """I2. Antes: otro cliente con sesión VÁLIDA que usara el id de hilo de Ana veía la lista de movimientos de Ana
     (bastaba con responder una opción inválida: el agente re-listaba los candidatos guardados en el estado)."""
     th = env.thread()
-    r = env.agent.chat(th, env.login("CLI-ANA"), "no reconozco un cargo")
+    r = env.agent.chat(th, env.login("CLI-ANA"), "no reconozco un cargo de 350")  # #41: sin datos ya no lista al azar
     assert "Amazon" in r["reply"]
     r = env.agent.chat(th, env.login("CLI-BETO"), "6")
     assert r["outcome"] == "auth_error" and "Amazon" not in r["reply"] and "Liverpool" not in r["reply"]

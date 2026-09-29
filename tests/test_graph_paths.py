@@ -123,8 +123,12 @@ def test_understand_routes_to_act_only_on_fresh_confirmation(stub_agent):
         else:
             assert out["next"] == exp, (awaiting, intent, conf, pending, out["next"])
         if awaiting == "confirmation" and out["next"] not in ("act", "cancel"):
-            # una confirmación que no se usó en su turno se descarta: no puede reusarse más adelante
-            assert out.get("awaiting") is None and out.get("pending_action") is None
+            # una confirmación que no se usó en su turno se descarta: no puede reusarse más adelante. Única excepción
+            # (#38): una respuesta ambigua a una pregunta FRESCA se re-pregunta en este turno, y esa nueva pregunta
+            # vale solo para el turno siguiente (asked_turn = TURN).
+            reasked = out.get("reply_prefix") and (out.get("pending_action") or {}).get("asked_turn") == TURN
+            assert (out.get("awaiting") is None and out.get("pending_action") is None) or \
+                (pending == "fresh" and reasked), (awaiting, intent, conf, pending)
         if awaiting == "confirmation" and pending != "fresh":
             assert router.seen[-1][1] is None, "a una confirmación vieja el router no la ve como pendiente"
         table.append((awaiting, intent, conf, pending, out["next"]))
@@ -145,4 +149,6 @@ def test_regression_low_confidence_confirm_does_not_act(stub_agent):
              "pending_action": {"type": "block_card", "block_card": "PRD-ANA-CC", "card_label": "****1111",
                                 "asked_turn": 2}}
     out = agent.understand(state, [])
-    assert out["next"] == "respond" and out["pending_action"] is None
+    # #38: no actúa; re-pregunta explícitamente y esa pregunta nueva vale solo para el turno siguiente
+    assert out["next"] == "respond" and out["reply_prefix"] == "reask_consent"
+    assert out["pending_action"]["asked_turn"] == 3

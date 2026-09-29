@@ -71,6 +71,7 @@ def observe(r: dict) -> dict:
         "txn_id": (r.get("txn") or {}).get("transaction_id"),
         "candidate_ids": [c["transaction_id"] for c in (r.get("candidates") or []) if "transaction_id" in c],
         "dispute_and_block_verified": verified,
+        "actions_verified": sorted(k for k in ("dispute", "block") if (ar.get(k) or {}).get("verified")),
         "reply": r.get("reply") or "",
     }
 

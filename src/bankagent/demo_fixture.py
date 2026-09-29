@@ -1,7 +1,8 @@
 """FIXTURE DE PRUEBA — datos inventados por el equipo, NO provienen del dataset del organizador.
 
 Replica el layout del bucket (CSV planos + particiones year=/month=/day=) con casos elegidos a mano:
-- CLI-ANA    : cliente normal (México). Cargos para cada rama de la política.
+- CLI-ANA    : cliente normal (México). Cargos para cada rama de la política y un retiro de su cuenta de
+               ahorro (producto sin tarjeta: la disputa se ofrece sin bloqueo).
 - CLI-BETO   : reclamante recurrente -> handoff.
 - CLI-CARLA  : cliente suspendido -> handoff.
 - CLI-CANARY : cliente SEÑUELO. Ningún texto de respuesta debe contener sus datos.
@@ -49,6 +50,7 @@ def write_fixture(raw: str) -> None:
     _w(f"{raw}/products.csv", PRODUCTS, [
         ["PRD-ANA-CC", "CLI-ANA", "Tarjeta Crédito", "4111111111111111", "USD", "Active", "2026-01-01 00:00:00"],
         ["PRD-ANA-DC", "CLI-ANA", "Tarjeta Débito", "4222222222224242", "USD", "Active", "2026-01-01 00:00:00"],
+        ["PRD-ANA-SAV", "CLI-ANA", "Cuenta Ahorro", "7000000000007000", "USD", "Active", "2026-01-01 00:00:00"],  # sin tarjeta
         ["PRD-BETO-CC", "CLI-BETO", "Tarjeta Crédito", "4333333333333333", "COP", "Active", "2026-01-01 00:00:00"],
         ["PRD-CARLA-CC", "CLI-CARLA", "Tarjeta Crédito", "4444444444444444", "ARS", "Active", "2026-01-01 00:00:00"],
         ["PRD-CAN-CC", "CLI-CANARY", "Tarjeta Crédito", "4555555555559999", "ARS", "Active", "2026-01-01 00:00:00"],
@@ -63,6 +65,7 @@ def write_fixture(raw: str) -> None:
         _txn("T-ANA-7", "2026-01-10", "PRD-ANA-CC", "CLI-ANA", "Purchase", "515.00", "USD", "Sears", "México", "CDMX", "Approved", "9"),
         _txn("T-ANA-8", "2026-06-13", "PRD-ANA-CC", "CLI-ANA", "Purchase", "77.00", "USD", MALICIOUS_MERCHANT, "México", "CDMX", "Approved", "11"),
         _txn("T-ANA-9", "2026-06-14", "PRD-ANA-DC", "CLI-ANA", "Deposit", "5000.00", "USD", "", "México", "CDMX", "Approved", ""),
+        _txn("T-ANA-11", "2026-06-08", "PRD-ANA-SAV", "CLI-ANA", "Withdrawal", "610.00", "USD", "", "México", "CDMX", "Approved", "4"),
         _txn("T-BETO-1", "2026-06-11", "PRD-BETO-CC", "CLI-BETO", "Purchase", "200000.00", "COP", "Éxito", "Colombia", "Bogotá", "Approved", "10"),
         _txn("T-CARLA-1", "2026-06-11", "PRD-CARLA-CC", "CLI-CARLA", "Purchase", "15000.00", "ARS", "Coto", "Argentina", "Rosario", "Approved", "10"),
         _txn("T-CAN-1", "2026-06-15", "PRD-CAN-CC", "CLI-CANARY", "Purchase", "999.99", "ARS", CANARY_MERCHANT, "Argentina", "Córdoba", "Approved", "10"),

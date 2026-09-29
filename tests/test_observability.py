@@ -36,7 +36,7 @@ def test_one_json_line_per_node_without_pii(env, capture, monkeypatch):
     lines = [json.loads(x) for x in capture]
     assert [x["node"] for x in lines] == [e["node"] for e in r["trace"]]
     ft = next(x for x in lines if x["node"] == "find_transaction")
-    assert ft["tools"][0]["tool"] == "search_transactions" and ft["tool_errors"] == 0 and ft["ms"] >= 0
+    assert [t["tool"] for t in ft["tools"]] == ["list_merchants", "search_transactions"] and ft["tool_errors"] == 0 and ft["ms"] >= 0
     raw = "\n".join(capture)
     assert tok not in raw and "4111 1111" not in raw and "reconozco" not in raw
 

@@ -77,17 +77,23 @@ flowchart TD
     guard -->|sesión inválida / ataque| respond
     guard -->|3 intentos bloqueados| handoff
     guard --> understand
-    understand -->|"sí" a acción pendiente| act
+    understand -->|"sí" a acción pendiente (por acción)| act
+    understand -->|confirmación ambigua 2 veces| handoff
     understand -->|"no"| cancel
     understand -->|elige opción| select_option
     understand -->|disputa| find_transaction
     understand -->|bloqueo| find_card
-    understand -->|fuera de alcance| handoff
-    understand -->|poca confianza| respond
+    understand -->|fuera de alcance · pide humano · toma de cuenta · cancelar disputa| handoff
+    understand -->|"¿en qué va mi disputa?"| check_dispute
+    understand -->|poca confianza · "gracias" · "ninguna de esas"| respond
+    understand -->|3 aclaraciones seguidas| handoff
     find_transaction -->|1 candidata| decide
     find_transaction -->|0 o varias: pregunta| respond
-    find_transaction -->|herramienta caída| handoff
+    find_transaction -->|herramienta caída · 3 aclaraciones| handoff
     select_option --> decide
+    select_option -->|3 aclaraciones| handoff
+    check_dispute -->|disputa verificada del cliente| respond
+    check_dispute -->|no encontrada| handoff
     find_card --> respond
     decide -->|regla handoff| handoff
     decide -->|rechazo / pedir confirmación| respond
@@ -99,6 +105,10 @@ flowchart TD
 ```
 
 El estado persiste entre turnos (checkpointer por conversación). Así funcionan las aclaraciones ("¿cuál de estas?") y las confirmaciones ("¿confirmas?"). Dos reglas acotan ese estado (#31): una confirmación solo vale en el turno **inmediatamente** posterior a la pregunta (si en medio hubo otro turno, se descarta), y la conversación queda atada al cliente de su primer turno autenticado (la sesión de otro cliente recibe `forbidden`). Todos los caminos posibles del grafo están en [`graph-paths.md`](graph-paths.md).
+
+**Handoff (#44).** El paquete es un caso listo para el asesor, versionado (`handoff/v1`, [`handoff.schema.json`](handoff.schema.json)): `handoff_id` que el cliente recibe en su idioma y que queda en el log de auditoría, cola/prioridad/SLA/siguiente paso y preguntas abiertas por motivo desde `policy.yaml`, lo que el cliente reclamó (`customer_claim`) frente a lo verificado (`match`), hechos con lista blanca de campos y la herramienta que falló (`failures`).
+
+**Conversación libre (#38–#40).** Cada acción tiene su consentimiento (disputa y bloqueo por separado); una respuesta ambigua se re-pregunta una vez y luego pasa a un humano (`consent_unclear`). El cliente puede pedir un humano en cualquier momento (`customer_request`); "me hackearon" / "me clonaron la tarjeta" va con prioridad a seguridad (`account_takeover`) y ofrece el bloqueo; tres aclaraciones seguidas sin avanzar pasan a un humano (`clarification_exhausted`, umbral en `policy.yaml`); "gracias" cierra (`closed`). El idioma de la sesión es pegajoso: "ok" o "1" no cambian una conversación en portugués a español. **Datos del mensaje (#41):** fechas con nombre de mes o relativas ("hace tres semanas", "em maio"), montos con multiplicador ("2 millones", "20 lucas", "2 palos") y sin confundir IDs (`DSP-…`), la tarjeta ("mi tarjeta 4152") ni cantidades ("3 cargos de 20"). El comercio se busca SOLO entre los comercios del propio cliente (`list_merchants`, por token). Sin ningún dato el agente pide uno antes de listar; las candidatas se ordenan: dentro del plazo de D05 (`dispute.window_days`), luego cercanía al monto, luego recencia.
 
 ## 4. Una disputa de punta a punta
 
@@ -116,8 +126,8 @@ sequenceDiagram
     A->>T: get_transaction · get_profile · dispute_history
     A->>P: decide_dispute(hechos verificados)
     P-->>A: auto_with_confirmation (ninguna regla de bloqueo)
-    A-->>C: "Encontré el cargo … ¿Confirmas?"
-    C->>A: "sí"
+    A-->>C: "Encontré el cargo … ¿Abro la disputa? ¿Bloqueo también la tarjeta?"
+    C->>A: "sí, ambas" (o "solo la disputa": cada acción tiene su consentimiento)
     A->>T: open_dispute(confirmed) · block_card(confirmed)
     T-->>A: verified=true
     A-->>C: "Abrí la disputa DSP-… y bloqueé la tarjeta ****4111"

@@ -20,7 +20,10 @@ from ..tools import BankTools
 
 REQUIRED = ("reason", "created_at", "language", "request", "verified_facts", "policy", "actions_taken", "evidence",
             "unresolved_questions", "summary")
-TECHNICAL_REASONS = ("out_of_scope", "tool_failure", "security_lockout", "action_not_verified", "no_active_card")
+TECHNICAL_REASONS = ("out_of_scope", "tool_failure", "security_lockout", "action_not_verified", "no_active_card",
+                     # motivos conversacionales (#40)
+                     "consent_unclear", "customer_request", "account_takeover", "clarification_exhausted",
+                     "dispute_status", "cancel_dispute")
 TXN_FIELDS = ("transaction_id", "transaction_date", "amount", "currency", "transaction_status", "transaction_type")
 CUSTOMER_FIELDS = ("customer_status", "segment", "complaints_last_90d", "is_repeat_complainer")
 
