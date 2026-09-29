@@ -2,7 +2,8 @@
 
 `Router` es la interfaz; hay que poder cambiar la implementación sin tocar el grafo:
 - RuleRouter  : reglas y palabras clave (LÍNEA BASE, sin red, determinista)
-- JevRouter   : modelo de decisión Jev (pendiente)
+- HybridRouter: intención con el modelo local aprendido (`embedding_router.py`, ADR 0009); slots,
+                idioma y consentimiento con RuleRouter
 - LLMRouter   : LLM con salida estructurada (`llm_router.py`), cae a RuleRouter ante cualquier falla
 Todas devuelven el mismo `Understanding`; el grafo decide qué hacer según `confidence`.
 """

@@ -4,7 +4,7 @@ Equipo de 4 · entrega el **5 de octubre de 2026**. Objetivo: cambios pequeños,
 
 ## Flujo de trabajo
 1. **Toma un issue** y asígnatelo. Si algo no tiene issue, créalo antes de empezar.
-2. **Rama desde `main`:** `tipo/descripcion-corta`, por ejemplo `feat/llm-router`, `fix/guard-pt`, `docs/threat-model`.
+2. **Rama desde `main`:** `tipo/descripcion-corta`, por ejemplo `feat/llm-router`, `fix/guard-pt`, `chore/lockfile`.
 3. **Commits** con [Conventional Commits](https://www.conventionalcommits.org/es/): `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`.
 4. **PR hacia `main`** con la plantilla completa. Se necesita **1 aprobación** y la **CI en verde**. Squash merge.
 5. Los PR deben ser chicos (menos de ~400 líneas). Si crece, pártelo.

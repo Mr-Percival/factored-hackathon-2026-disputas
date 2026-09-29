@@ -3,14 +3,20 @@
 #     PYTHONPATH=src python scripts/make_deck.py
 # `value: null` => la slide muestra [[PENDIENTE: ...]] y make_deck.py lo lista al final.
 # Nunca poner un número que no esté en el reporte citado en `source`.
+# Sistema de la demo = router aprendido (`embeddings`, lite) + reglas + plantillas, sin LLM (ADR 0009).
 
-eval_agent:        {value: "86% resolución segura (49/57) · 0/115 inseguros", source: "reports/eval.md (#12, tras #54)", desc: "agente (reglas + plantillas, sin LLM) en casos reservados congelados"}
-eval_baseline:     {value: "sin política: 82/115 inseguros · deriva todo: 0/57 resueltos", source: "reports/eval.md (#12)", desc: "líneas base B1 (automatiza sin política) y B0 (transfiere todo)"}
-eval_cases:        {value: "115 casos + 44 variantes de dialecto, 3 corridas", source: "reports/eval.md (#12)", desc: "generados por el equipo por construcción; test congelado por hash"}
+eval_agent:        {value: "109/115 correctos", source: "reports/eval_router.md (#64)", desc: "agente de la demo (router aprendido + plantillas, sin LLM) en el test congelado (segunda medición)"}
+eval_agent_detail: {value: "55/57 resoluciones seguras · 0/115 inseguros · 0/38 transferencias faltantes", source: "reports/eval_router.md (#64)", desc: "resolución automática segura, resultados inseguros y transferencias faltantes del sistema de la demo"}
+eval_rules:        {value: "reglas: 104/115 correctos · 51/57 · 7/38 faltantes", source: "reports/eval_router.md (#64)", desc: "línea base RuleRouter en el mismo test"}
+eval_baseline:     {value: "sin política (B1): 82/115 inseguros · todo a humano (B0): 0/57 resueltos", source: "reports/eval.md (#12)", desc: "líneas base ingenuas B1 (automatiza sin política ni confirmación) y B0 (transfiere todo)"}
+eval_cases:        {value: "115 casos + 44 variantes de dialecto, 3 corridas", source: "reports/eval_router.md (#64)", desc: "generados por el equipo por construcción; test congelado por hash, fuga leve declarada en evals/cases/README.md"}
+ml_router:         {value: "F1 0.877 vs 0.548", source: "reports/intent_router.md (#42)", desc: "macro-F1 de intención del router aprendido lite vs RuleRouter (test por autor, n=306)"}
+ml_router_detail:  {value: "acción equivocada 1.6% vs 18.6% de los mensajes", source: "reports/intent_router.md (#42)", desc: "mensajes en los que el grafo propondría una disputa o un bloqueo indebido"}
 inj_detection:     {value: "regex AUC 0.55 · clasificador AUC 0.97", source: "reports/injection_eval.md (#8/#9)", desc: "detección de inyección en splits de prueba públicos (n=1123 ataques)"}
 inj_fpr:           {value: "regex 0/58 · clasificador 20/58 en mensajes bancarios", source: "reports/injection_eval.md (#8/#9)", desc: "falsas alarmas sobre mensajes legítimos del dominio (por eso el regex queda por defecto)"}
-inj_harm:          {value: "0/2.531 ataques con daño, incluso con el guard apagado", source: "reports/injection_eval.md (#8)", desc: "directos 0/1123 · en confirmación 0/1123 · persistentes 0/225 · indirectos 0/60"}
-fairness:          {value: "10/11 grupos con la misma decisión", source: "reports/eval.md (#13)", desc: "misma decisión entre variantes MX/CO/AR/pt-BR"}
+inj_harm:          {value: "0/2.531 con daño (datasets públicos, aun sin guard)", source: "reports/injection_eval.md (#8)", desc: "directos 0/1123 · en confirmación 0/1123 · persistentes 0/225 · indirectos 0/60"}
+redteam:           {value: "0/308 tras 3 rondas (antes: 40/110 · 34/99 · 30/99)", source: "reports/redteam.md (#33)", desc: "red team adaptativo del equipo: daño por ronda antes de los arreglos y final con ambos routers"}
+fairness:          {value: "10/11", source: "reports/eval_router.md (#64)", desc: "grupos con la misma decisión entre variantes MX/CO/AR/pt-BR"}
 capacity:          {value: "p95 233 ms por turno · ~61 turnos/s por réplica (sin LLM, costo $0)", source: "reports/capacity.md (#19)", desc: "latencia p95 y costo por conversación"}
 demo_url:          {value: null, source: "deploy (#15)", desc: "URL de la demo desplegada"}
 replay_auto:       {value: "33% [30–36%] (SIMULACIÓN, n=1000)", source: "reports/replay.md (#30)", desc: "quejas reales que el agente resolvería solo y seguro en el replay (del total; 38% sin transacción plausible)"}

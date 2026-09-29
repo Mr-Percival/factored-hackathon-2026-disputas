@@ -5,7 +5,7 @@
   `RegexDetector` (patrones, LÍNEA BASE y default) y `ClassifierDetector` (modelo preentrenado ONNX,
   opt-in con BANKAGENT_INJECTION_DETECTOR). Decisión y métricas: docs/adr/0005-deteccion-inyeccion.md.
 - Enmascara PII (números de tarjeta/documento, emails, teléfonos) antes de que el texto llegue a un
-  proveedor externo (LLM / Jev) o a los logs.
+  proveedor externo (LLM) o a los logs.
 """
 from __future__ import annotations
 
