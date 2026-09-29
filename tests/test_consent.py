@@ -43,8 +43,9 @@ CONFIRMATIONS = [
     ("no sé, creo que sí", "unclear", []), ("mmm no estoy seguro", "unclear", []), ("capaz", "unclear", []),
     ("tal vez", "unclear", []), ("puede ser", "unclear", []), ("¿sí?", "unclear", []), ("sí y no", "unclear", []),
     ("no sé qué hacer", "unclear", []), ("dejame pensar", "unclear", []), ("solo bloqueá la tarjeta", "unclear", []),
-    ("não sei", "unclear", []), ("acho que sim", "unclear", []), ("talvez", "unclear", []), ("pode ser", "unclear", []),
-    ("sei lá", "unclear", []), ("no bloquees la tarjeta", "unclear", ["block_card"]),
+    ("não sei", "unclear", []), ("acho que sim", "unclear", []), ("talvez", "unclear", []), ("pode ser", "confirm", []),
+    ("sei lá", "unclear", []), ("no bloquees la tarjeta", "unclear", ["block_card"]), ("joya", "confirm", []),
+    ("sí, ¿cuánto demora?", "confirm", []),
     ("no, no la bloquees", "unclear", ["block_card"]), ("não bloqueie o cartão", "unclear", ["block_card"]),
     ("no, no la reconozco", "unclear", []),
 ]

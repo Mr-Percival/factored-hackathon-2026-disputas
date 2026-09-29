@@ -39,6 +39,10 @@ INTENTS = [
     ("cuál es mi saldo?", "out_of_scope"), ("quiero un préstamo", "out_of_scope"),
     # la tarjeta de crédito nombra el producto: sigue siendo una disputa
     ("me cobraron algo raro en la tarjeta de crédito", "dispute_charge"),
+    # palabras de estado dentro de otras ("Estados Unidos") no son una consulta de disputa
+    ("quiero abrir una disputa por un cargo en Estados Unidos", "dispute_charge"),
+    ("quiero levantar una aclaración por un cargo", "dispute_charge"), ("quiero reportar como robada mi tarjeta", "block_card"),
+    ("quiero una tarjeta adicional", "out_of_scope"), ("cuál es mi CBU?", "out_of_scope"), ("quiero contratar seguros", "out_of_scope"),
 ]
 
 

@@ -86,10 +86,13 @@ KEYWORDS: dict[str, list[str]] = {
                        # pt-BR natural (#39): "vi um lançamento desconhecido", "compra estranha na fatura"
                        "desconhec*", "nao autorizei", "nao autorizad*", "estranh*", "contestacao",
                        "nao reconhe*", "no reconoc*", "no autoric*", "cargo raro", "cobro raro", "movimiento raro",
-                       "yo no fui", "pero yo no fui"],
-    "block_card": ["bloque*", "robaron", "roubaram", "roubad*", "perdi*", "extravi*", "afanaron"],
+                       "yo no fui", "pero yo no fui", "aclaracion", "levantar un reporte", "cargo indebido",
+                       "cobro indebido", "cobranca indevida"],
+    "block_card": ["bloque*", "robaron", "roubaram", "roubad*", "perdi*", "extravi*", "afanaron", "robada", "robado",
+                   "reportar como robada", "reportarla", "reportar mi tarjeta", "desactiv*", "congelar", "congela"],
     "out_of_scope": ["credito", "prestamo", "emprestimo", "hipoteca", "inversion", "invertir", "investimento", "investir",
-                     "aplicacao", "seguro", "tasa", "saldo", "plazo fijo", "cdt", "cupo", "limite", "direccion", "endereco"],
+                     "aplicacao", "seguro", "seguros", "tasa", "saldo", "plazo fijo", "cdt", "cupo", "limite", "direccion",
+                     "endereco", "cbu", "clabe", "tarjeta adicional", "cartao adicional", "extracto", "chequera", "pix"],
 }
 # "tarjeta de crédito" nombra el producto, no pide un crédito
 PRODUCT_NAMES = re.compile(r"(tarjeta|cartao|targeta) de (credito|debito)")
@@ -186,7 +189,9 @@ AFFIRM = ["si", "sim", "claro", "dale", "ok", "okay", "okey", "confirmo", "confi
           "simon", "va", "sale", "vale", "yes", "yep", "bueno", "si quiero", "si por favor", "dale nomas",
           "isso", "com certeza", "pode", "pode sim", "pode fazer", "pode abrir", "manda ver", "bora", "fechado",
           "beleza", "ta bom", "esta bem", "tudo bem", "certo", "confirmar", "abre", "abra", "sim quero",
-          "e isso", "isso mesmo", "claro que sim", "por favor faca", "faca", "faz", "faz isso"]
+          "e isso", "isso mesmo", "claro que sim", "por favor faca", "faca", "faz", "faz isso", "pode ser",
+          # confirmaciones regionales: "joya" (AR), "de diez", "bárbaro", "genial" responden a la pregunta pendiente
+          "joya", "joia", "de diez", "barbaro", "genial", "buenisimo", "excelente", "perfeito", "otimo", "demais"]
 DENY = ["no", "nao", "nop", "nope", "nel", "cancelar", "cancela", "cancelalo", "mejor no", "melhor nao", "nem pensar",
         "de ninguna manera", "para nada", "ninguna", "ninguno", "nenhuma", "nenhum", "negativo", "no quiero",
         "nao quero", "todavia no", "ainda nao", "dejalo", "deja asi", "olvidalo", "no gracias", "nao obrigado",
@@ -198,7 +203,7 @@ DENY = ["no", "nao", "nop", "nope", "nel", "cancelar", "cancela", "cancelalo", "
         "reconheco sim", "eu reconheco", "ja reconheci", "era mia", "era mio", "era minha", "era meu", "fui yo",
         "fui eu"]
 HEDGE = ["no se", "nose", "nao sei", "sei la", "creo", "creo que si", "tal vez", "talvez", "quizas", "quiza", "capaz",
-         "puede ser", "pode ser", "no estoy seguro", "no estoy segura", "no estoy muy seguro", "nao tenho certeza",
+         "puede ser", "no estoy seguro", "no estoy segura", "no estoy muy seguro", "nao tenho certeza",
          "nao estou seguro", "nao estou segura", "acho", "acho que sim", "sera", "mmm", "hmm", "mm", "depende",
          "no entiendo", "nao entendi", "a lo mejor", "mas o menos", "mais ou menos", "no se si", "espera", "espere",
          "dejame pensar", "deixa eu pensar", "ni idea", "vou pensar", "lo pienso", "lo voy a pensar", "no se que",
@@ -222,15 +227,15 @@ def _strip(t: str, phrases: list[str]) -> tuple[str, bool]:
     return t, hit
 
 
-def _scan(t: str) -> set[str]:
-    """Etiquetas (hedge/yes/no) presentes. La frase más larga gana y se consume: "no quiero" es un no, no un
-    "quiero"; "no se" es duda, no un "no"; "claro que si" es un sí."""
+def _scan(t: str) -> tuple[set[str], str]:
+    """(etiquetas hedge/yes/no presentes, texto sobrante). La frase más larga gana y se consume: "no quiero"
+    es un no, no un "quiero"; "no se" es duda, no un "no"; "claro que si" es un sí."""
     found = set()
     for phrase, label in sorted(_CONFIRM_LEXICON, key=lambda x: len(x[0]), reverse=True):
         t, n = re.subn(rf"(?<![a-z]){re.escape(phrase)}(?![a-z])", " ", t)
         if n:
             found.add(label)
-    return found
+    return found, t
 
 
 def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
@@ -246,10 +251,12 @@ def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
         denials.append("block_card")
     rest, both = _strip(rest, [re.escape(x) for x in BOTH_ACTIONS])
     rest, restated = _strip(rest, RESTATEMENTS)
-    labels = _scan(rest)
+    labels, leftover = _scan(rest)
     yes = "yes" in labels or only_main or both
     no = "no" in labels
-    if "hedge" in labels or "?" in rest:
+    # "¿sí?" es una duda; "sí, ¿cuánto demora?" es un sí con una pregunta aparte
+    question_only = "?" in rest and not re.sub(r"[^a-z0-9]", "", leftover)
+    if "hedge" in labels or question_only:
         return "unclear", denials
     if yes and no:
         # "no, no la reconozco, ábrela": el "no" acompaña al reclamo repetido y el pedido es explícito
@@ -414,12 +421,13 @@ HUMAN_REQUEST = [r"asesor\w*", r"humano\w*", r"humana\w*", r"operador\w*", r"eje
                  r"persona (real|de verdad|de carne)", r"pessoa (real|de verdade)",
                  r"(hablar|comunicar\w*|pasar\w*|pasame|pasenme|contactar\w*) con (alguien|una persona|un\w* agente)",
                  r"falar com (alguem|uma pessoa|um agente)", r"atendimento humano", r"quiero una persona",
-                 r"quero uma pessoa", r"(llamen|me llame|me liguem|ligar) "]
+                 r"quero uma pessoa", r"que me llamen", r"me liguem"]
 CASE_ID = re.compile(r"\bdsp-?[a-z0-9]{3,}\b")
-DISPUTE_REF = r"(disputa|reclamo|reclamacion|caso|contestacao|queja|dsp-?[a-z0-9]{3,})"
-DISPUTE_STATUS = [rf"(en que va|como va|estado|estatus|status|seguimiento|novedad\w*|avance|andamento|como esta|"
-                  rf"que paso con|cuando (me )?(responden|resuelven)|ya (se )?resolvi\w*) .*{DISPUTE_REF}",
-                  rf"{DISPUTE_REF}.* (en que va|como va|estado|status|andamento|como esta)"]
+# Palabras completas: "estado" no debe coincidir con "Estados Unidos", ni "caso" con "en caso de que".
+DISPUTE_REF = r"(disputa|reclamo|reclamacion|mi caso|contestacao|dsp-?[a-z0-9]{3,})(?![a-z])"
+_STATUS = r"(en que va|como va|el estado|estatus|status|seguimiento|novedades|andamento|como esta|que paso con)(?![a-z])"
+DISPUTE_STATUS = [rf"{_STATUS}.*{DISPUTE_REF}", rf"{DISPUTE_REF}.*{_STATUS}",
+                  rf"cuando (me )?(responden|resuelven|contestan).*{DISPUTE_REF}"]
 CANCEL_DISPUTE = [rf"(cancel\w*|retir\w*|anul\w*|desist\w*|quitar|borrar) (la |mi |a |minha |el |o )?{DISPUTE_REF}",
                   r"ya (lo )?reconoci", r"ja reconheci", r"si (lo|la) reconozco", r"era mia", r"era meu", r"era minha"]
 CLOSING = ["gracias", "muchas gracias", "mil gracias", "obrigado", "obrigada", "valeu", "eso es todo", "es todo",
