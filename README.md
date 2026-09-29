@@ -5,6 +5,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 > El modelo interpreta y redacta; **el código decide y actúa**. Permisos en las herramientas, política en un YAML
 > versionado, toda acción con confirmación y verificada, handoff con contexto completo.
 
+- **Para el jurado — cada punto del enunciado con su evidencia:** [`docs/rubric-evidence.md`](docs/rubric-evidence.md)
 - Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
