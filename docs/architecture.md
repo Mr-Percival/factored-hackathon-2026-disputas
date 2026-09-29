@@ -65,6 +65,7 @@ Generado desde el código (`Agent.mermaid()`); cada nodo solo puede ir a los des
 flowchart TD
     START([inicio]) --> guard
     guard -->|sesión inválida / ataque| respond
+    guard -->|3 intentos bloqueados| handoff
     guard --> understand
     understand -->|"sí" a acción pendiente| act
     understand -->|"no"| cancel
@@ -152,3 +153,5 @@ flowchart LR
 ```
 
 **Defensa en profundidad:** aunque el guard no detecte un ataque, el ataque no tiene con qué hacer daño. El cliente sale del token y no del texto, cada acción requiere confirmación y se verifica, y la política no está en el prompt. Por eso reportamos por separado la **detección** (el guard) y el **daño** (registros señuelo).
+
+Amenazas, controles, tests y riesgo residual (OWASP Top 10 LLM 2025): [`threat-model.md`](threat-model.md).
