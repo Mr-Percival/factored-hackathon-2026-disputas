@@ -39,7 +39,7 @@ indebidos en español y portugués. El modelo interpreta y redacta; **el código
 sesión, política versionada, confirmación y verificación de cada acción, handoff con contexto completo).
 
 - Datos **sintéticos** del organizador · política **sintética** · no mueve dinero.
-- Modo reglas (sin LLM): cero costo por conversación.
+- Sin LLM: intención con un router aprendido local (0.2 MB, CPU) y reglas; cero costo por conversación.
 - Cada sesión de demo es independiente: elegí un escenario a la izquierda o escribí libremente.
 
 Código fuente, evaluación y documentación: repositorio del equipo en GitHub.
