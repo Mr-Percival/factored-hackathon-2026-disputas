@@ -1,0 +1,2 @@
+# Para Streamlit Community Cloud (instala el paquete con el extra de la UI). Local: pip install -e ".[ui]"
+-e .[ui]
