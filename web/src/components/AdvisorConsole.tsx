@@ -111,7 +111,14 @@ export function AdvisorConsole({ handoff }: { handoff: Handoff | null }) {
           <ClipboardList aria-hidden="true" className="size-4" />
           Paquete completo (JSON)
         </summary>
-        <pre className="max-h-80 overflow-auto border-t border-border p-3 text-xs">
+        <pre
+          // Desplazable: enfocable para leerlo con teclado (axe scrollable-region-focusable, WCAG 2.1.1).
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- región desplazable
+          tabIndex={0}
+          role="region"
+          aria-label="Paquete completo del handoff en JSON"
+          className="max-h-80 overflow-auto border-t border-border p-3 text-xs"
+        >
           {JSON.stringify(handoff, null, 2)}
         </pre>
       </details>

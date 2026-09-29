@@ -37,3 +37,6 @@ node_modules/
 web/dist/
 web/coverage/
 *.tsbuildinfo
+web/test-results/
+web/playwright-report/
+web/blob-report/

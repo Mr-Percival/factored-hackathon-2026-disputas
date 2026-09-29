@@ -10,7 +10,8 @@ import type { Demo } from "@/state/useDemo";
 type Tab = "why" | "advisor";
 
 export function InsightPanel({ demo }: { demo: Demo }) {
-  const [tab, setTab] = useState<Tab>("why");
+  // Si se monta con un handoff ya abierto (en móvil las pestañas desmontan el panel), abre la consola.
+  const [tab, setTab] = useState<Tab>(demo.handoff ? "advisor" : "why");
   const [seenHandoff, setSeenHandoff] = useState(demo.handoffSeq);
 
   // Cada handoff nuevo abre la consola del asesor y se anuncia, sin robar el foco del chat
