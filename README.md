@@ -2,22 +2,84 @@
 
 Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no reconocidos / cobros indebidos + bloqueo de tarjeta**.
 
-> El modelo interpreta y redacta; **el código decide y actúa**. Permisos en las herramientas, política en un YAML
-> versionado, toda acción con confirmación y verificada, handoff con contexto completo.
+Un agente en español y portugués que atiende el reclamo de punta a punta: encuentra el cargo, aplica una política
+versionada, pide confirmación por acción, abre la disputa y bloquea la tarjeta **solo si la verificación lo confirma**,
+y si no debe resolver pasa el caso a un humano con el paquete completo. **El modelo interpreta; el código decide y actúa.**
 
-- **Para el jurado — cada punto del enunciado con su evidencia:** [`docs/rubric-evidence.md`](docs/rubric-evidence.md)
-- Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
-- Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
-- Evaluación offline (línea base, métricas de la rúbrica, equidad por dialecto): [`reports/eval.md`](reports/eval.md)
-- Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
-- Propiedades demostradas (I1–I8 con Hypothesis sobre conversaciones aleatorias + verificación estática de todos los caminos del grafo): [`docs/threat-model.md#propiedades-demostradas`](docs/threat-model.md#propiedades-demostradas) · caminos: [`docs/graph-paths.md`](docs/graph-paths.md)
-- Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
-- **Demo web** (FastAPI + React, un contenedor): sección [Demo web](#demo-web) · decisión en [ADR 0008](docs/adr/0008-frontend-web.md)
-- Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
+| Para el jurado | |
+|---|---|
+| Demo en vivo | [[PENDIENTE: deploy]] (mientras tanto: [Demo web](#demo-web) en local, un contenedor) |
+| Cada punto del enunciado con su evidencia | [`docs/rubric-evidence.md`](docs/rubric-evidence.md) |
+| Arquitectura y diagramas | [`docs/architecture.md`](docs/architecture.md) · decisiones: [`docs/adr/`](docs/adr/README.md) |
+| Deck (6 slides + notas) | [`docs/pitch/deck.pdf`](docs/pitch/deck.pdf) · [`deck.pptx`](docs/pitch/deck.pptx) · [`deck.md`](docs/pitch/deck.md) |
+| Video (3:50) | [[PENDIENTE: video]] · guion: [`docs/pitch/video_script.md`](docs/pitch/video_script.md) |
+| Guion de la demo (clientes reales, verificado) | [`docs/demo-script.md`](docs/demo-script.md) |
+| Seguridad y operación | [`docs/threat-model.md`](docs/threat-model.md) · [`docs/operations.md`](docs/operations.md) |
+
+## Resultados clave
+
+Todo es **medición offline** sobre datos sintéticos del organizador, con casos y clientes simulados generados por el
+equipo, salvo donde dice SIMULACIÓN. El sistema de la demo es el **router aprendido** (`embeddings`, lite) + reglas +
+plantillas, **sin LLM** (implementado pero apagado: sin API paga).
+
+| Qué | Resultado | Fuente |
+|---|---|---|
+| Agente de la demo en el test congelado (115 casos + 44 variantes de dialecto, 3 corridas) | **109/115** resultados correctos · resolución automática segura **55/57** · **0/115** inseguros (cota 95% ≤ 2.6%) · 0/38 transferencias faltantes | [`reports/eval_router.md`](reports/eval_router.md) |
+| Línea base de reglas (`RuleRouter`, mismo test) | 104/115 correctos · 51/57 · 0/115 inseguros · 7/38 transferencias faltantes | [`reports/eval_router.md`](reports/eval_router.md) |
+| Líneas base ingenuas (escala) | B1, automatiza sin política ni confirmación: **82/115 inseguros** · B0, todo a humano: 0/57 resueltos | [`reports/eval.md`](reports/eval.md) |
+| Componente aprendido: intención (corpus propio, split por autor, n=306) | macro-F1 **0.877** [0.83, 0.91] vs 0.548 de reglas · mensajes con acción equivocada 1.6% vs 18.6% | [`reports/intent_router.md`](reports/intent_router.md) · [ADR 0009](docs/adr/0009-router-aprendido.md) |
+| Inyección con datasets públicos | daño **0/2.531** aun con el guard apagado · detección: regex por defecto; el clasificador (AUC 0.97) queda opt-in por 20/58 falsas alarmas en mensajes bancarios | [`reports/injection_eval.md`](reports/injection_eval.md) · [ADR 0005](docs/adr/0005-deteccion-inyeccion.md) |
+| Red team adaptativo del equipo | 3 rondas, 308 ataques: cada ronda encontró daño real (40/110, 34/99, 30/99) que se corrigió en la raíz → **0/308** con ambos routers | [`reports/redteam.md`](reports/redteam.md) |
+| Invariantes (I1–I8) y caminos del grafo | Hypothesis sobre conversaciones aleatorias (perfil `ci`: 200 conversaciones, 0 violaciones) + los 19 caminos START→END verificados estáticamente | [`docs/threat-model.md`](docs/threat-model.md#propiedades-demostradas) · [`docs/graph-paths.md`](docs/graph-paths.md) |
+| Equidad por dialecto (MX · CO · AR · pt-BR) | 10/11 grupos con la misma decisión | [`reports/eval_router.md`](reports/eval_router.md) |
+| Replay de 1.000 quejas históricas | **SIMULACIÓN:** 33.3% [30.4–36.3%] resueltas solas y seguras; 0 acciones inseguras | [`reports/replay.md`](reports/replay.md) |
+| Capacidad (una réplica, sin LLM) | ~61 turnos/s, p95 233 ms por turno, costo de modelo $0 | [`reports/capacity.md`](reports/capacity.md) |
+| Evaluación humana de handoffs | kit listo (4 evaluadores, 35 paquetes); **calificaciones pendientes** | [`reports/human_eval.md`](reports/human_eval.md) |
+
+> **Cómo leer el test.** Es la **segunda** medición sobre el mismo test congelado (la primera: `embeddings` 106/115,
+> `rules` 102/115); las correcciones entre ambas se guiaron solo por dev, la demo y frases propias. En #54 hubo además
+> una fuga leve **declarada**: arreglos genéricos después de ver números agregados de test
+> ([`evals/cases/README.md`](evals/cases/README.md)). No es un test ciego para estas versiones; un test v3 escrito
+> por otra persona lo sería.
 
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
 - En PQR, **"Cargo no reconocido" + "Cobro indebido" = 36%** de los casos; el 20% incumple SLA y la mediana de resolución es de 16 días.
+- Detalle: [`reports/EDA_findings.md`](reports/EDA_findings.md) · decisión: [ADR 0001](docs/adr/0001-flujo-disputas.md).
+
+## Qué entiende el agente (y qué no)
+La intención la decide el router aprendido; montos, fechas, país, opción elegida y el "sí" de cada acción los extrae
+`RuleRouter` con reglas. Cuando no alcanza, **pregunta en vez de adivinar** y, tras tres aclaraciones, pasa a un humano.
+
+| Funciona bien | Qué hace |
+|---|---|
+| «Hola, me llegó un cargo de 151 dólares que no reconozco» | busca por monto ±10%, pide confirmar disputa y bloqueo por separado |
+| «me aparece un cobro de 242.000 pesos que yo no hice» · «la 1» | varias candidatas: muestra la lista y espera la elección |
+| «Oi, não reconheço uma cobrança de 496 dólares no Brasil» | portugués, «no Brasil» como filtro de país |
+| «sí, ambas» · «solo la disputa» · «sí, pero no bloquees la tarjeta» | consentimiento por acción |
+| «quiero hablar con un asesor» · «me hackearon la cuenta» · «¿en qué va mi disputa?» | humano · seguridad con prioridad · estado de la disputa |
+
+| Límites conocidos | Qué pasa |
+|---|---|
+| Sin monto, fecha, comercio ni país («no reconozco un cargo») | pide un dato antes de listar |
+| Respuestas con condiciones o dudas («sí, al ratito», «creo que sí») | no actúa: re-pregunta una vez y luego pasa a un asesor |
+| Sarcasmo hecho solo de palabras de sí («sí, claro») | se toma como sí (riesgo residual 1 de [`reports/redteam.md`](reports/redteam.md); en producción: step-up/MFA antes de actuar) |
+| Errores de tipeo fuertes (`hise`, `reconosco`) y otros temas bancarios (préstamos, saldos) | aclaración o handoff `out_of_scope` |
+
+Las sesiones de demo duran 15 minutos y viven en memoria: un reinicio del servidor las borra.
+
+## Pitch
+- Deck (6 slides con notas del orador): [`docs/pitch/deck.pdf`](docs/pitch/deck.pdf) · [`deck.pptx`](docs/pitch/deck.pptx) · fuente revisable [`docs/pitch/deck.md`](docs/pitch/deck.md)
+- Guion del video (3:50, es + pt) con lista de tomas y checklist de grabación: [`docs/pitch/video_script.md`](docs/pitch/video_script.md)
+- Gráficos: [`docs/pitch/charts/`](docs/pitch/charts/) · métricas del deck, cada una con su fuente: [`docs/pitch/metrics.yaml`](docs/pitch/metrics.yaml)
+
+```bash
+pip install -e ".[pitch]"
+PYTHONPATH=src python scripts/make_charts.py            # agregados desde data/bank.duckdb (o --from-cache sin datos; --diagrams para los Mermaid)
+PYTHONPATH=src python scripts/make_deck.py              # deck.pptx + deck.md (cuenta los tests con pytest --collect-only)
+python scripts/make_deck_pdf.py --shots                 # deck.html + deck.pdf + captura por slide (Chrome/Edge headless)
+python scripts/check_docs.py                            # enlaces y referencias a tests de la documentación (CI)
+```
 
 ## Replay de quejas históricas (simulación)
 Quejas reales de "Cargo no reconocido" / "Cobro indebido" convertidas en conversaciones con un cliente simulado y
@@ -27,49 +89,44 @@ de la política con el desenlace histórico. Resultados, supuestos y limitacione
 python -m bankagent.evals.replay --db data/serving_full.duckdb --history-db data/bank.duckdb --n 1000 --seed 7
 ```
 
-## Pitch
-- Presentación (6 slides, con notas del orador): [`docs/pitch/deck.pptx`](docs/pitch/deck.pptx) · versión para revisar: [`docs/pitch/deck.md`](docs/pitch/deck.md)
-- Guion del video (3:50, es + pt) con lista de tomas y checklist de grabación: [`docs/pitch/video_script.md`](docs/pitch/video_script.md)
-- Gráficos: [`docs/pitch/charts/`](docs/pitch/charts/)
-
-```bash
-pip install -e ".[pitch]"
-PYTHONPATH=src python scripts/make_charts.py            # agregados desde data/bank.duckdb (o --from-cache sin datos; --diagrams para los Mermaid)
-PYTHONPATH=src python scripts/make_deck.py              # deck.pptx + deck.md; lista las métricas [[PENDIENTE]] de docs/pitch/metrics.yaml
-```
-
 ## Estructura
 ```
-config/contracts.yaml   contratos de datos (tipos, dominios, FKs, advertencias)
-config/policy.yaml      política SINTÉTICA de disputas (reglas con ID, versionada)
+config/contracts.yaml      contratos de datos (tipos, dominios, FKs, advertencias)
+config/policy.yaml         política SINTÉTICA de disputas (reglas con ID, versionada)
+config/demo_scenarios.json escenarios de la demo sobre el fixture (sin datos del organizador)
 src/bankagent/
-  pipeline.py           raw -> serving: contrato, cuarentena, upsert incremental, linaje
-  identity.py           sesiones simuladas con expiración (el IdP del banco)
-  tools.py              herramientas bancarias: permisos por sesión, acciones verificadas
-  policy.py             motor de reglas (expresiones restringidas, sin eval libre)
-  guard.py              detección de inyección (interfaz: regex / clasificador ONNX) + enmascarado de PII
-  audit.py              log de auditoría JSONL con cadena de hashes (`python -m bankagent.audit verify`)
-  evals/                evaluación de inyección: detección (datasets públicos) y daño (agente real)
-  understanding.py      interfaz Router + RuleRouter (línea base es/pt)
-  responses.py          redacción por plantillas es/pt (línea base)
-  llm.py                cliente LLM agnóstico de proveedor (Anthropic + Fake para tests)
-  llm_router.py         LLMRouter: salida estructurada validada, cae a reglas ante cualquier falla
-  llm_writer.py         LLMWriter + verify_reply: tono/dialecto sin agregar datos, cae a plantillas
-  factory.py            build_agent(db, router="rules|llm", writer="templates|llm")
-  graph.py              grafo LangGraph con transiciones declaradas y traza
-  graph_check.py        verificación estática de EDGES: caminos, alcanzabilidad, predecesores de `act`
-  chat.py               chat de consola
-  api/                  API FastAPI de la demo web: sesión por cookie, escenarios, turnos con traza, SPA
-  evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
-  evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
-  evals/replay.py       replay de quejas históricas por el agente + modo sombra (SIMULACIÓN) -> reports/replay.md
-evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
-evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
-evals/fixtures/         fixtures del equipo: portugués traducido y mensajes bancarios (con procedencia)
-tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
-scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo / export_openapi)
-web/                    SPA React 19 + TypeScript + Vite (ver web/README.md)
-Dockerfile              imagen única: build de web/ + runtime Python con la API
+  pipeline.py              raw -> serving: contrato, cuarentena, upsert incremental, linaje
+  identity.py              sesiones simuladas con expiración (el IdP del banco)
+  tools.py                 herramientas bancarias: permisos por sesión, acciones verificadas
+  policy.py                motor de reglas (expresiones restringidas, sin eval libre)
+  guard.py                 normalización, detección de inyección (regex / clasificador ONNX) y enmascarado de PII
+  audit.py                 log de auditoría JSONL con cadena de hashes (`python -m bankagent.audit verify`)
+  understanding.py         interfaz Router + RuleRouter (línea base es/pt: slots, idioma, consentimiento)
+  intent_model.py          clasificador de intención: n-gramas de caracteres + regresión logística calibrada + abstención
+  embedding_router.py      HybridRouter: intención aprendida + slots de RuleRouter (ADR 0009)
+  responses.py             redacción por plantillas es/pt (línea base)
+  llm.py · llm_router.py · llm_writer.py   cliente LLM, router y writer con fallback y verificador (apagados)
+  factory.py               build_agent(db, router="rules|embeddings|embeddings_full|llm", writer="templates|llm")
+  graph.py                 grafo LangGraph con transiciones declaradas (EDGES) y traza
+  graph_check.py           verificación estática de EDGES -> docs/graph-paths.md
+  handoff.py               paquete de handoff versionado (handoff/v1)
+  observability.py         log estructurado de la traza (una línea JSON por nodo)
+  chat.py                  chat de consola (/trace, /handoff, /expire)
+  api/                     API FastAPI de la demo web: sesión por cookie, escenarios, turnos con traza, SPA
+  evals/                   casos reservados, runner, métricas, inyección, red team, replay, kit humano
+models/intent_router_lite/ artefactos del router que se despliega (0.2 MB) · intent_router_full/ solo offline
+corpus/intent/             corpus de intención del equipo (train / test por autor / test de estilo) + guía de etiquetado
+evals/cases/               casos dev/test en JSONL + manifiesto (test congelado por hash, ver su README)
+evals/redteam/             corpus del red team adaptativo (3 rondas, 308 ataques)
+evals/human/               tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
+evals/fixtures/            portugués traducido y mensajes bancarios del equipo (con procedencia)
+tests/                     pytest: flujos, seguridad, propiedades, API, evaluación, red team (sin datos ni API keys)
+scripts/                   S3, EDA, demo, entrenamiento del router, deck, ci_guard.py, check_docs.py
+web/                       SPA React 19 + TypeScript + Vite (ver web/README.md)
+Dockerfile · docker/       imagen única: build de web/ + runtime Python con la API (base de demo opcional)
+.github/workflows/         ci.yml (tests, guardia, web, e2e, imagen) · deploy.yml (GHCR -> Render) · keepalive.yml
+docs/                      arquitectura, ADRs, modelo de amenazas, operación, guion de demo, pitch
+reports/                   reportes generados (evaluación, inyección, red team, replay, capacidad, EDA)
 ```
 
 ## Setup reproducible
@@ -103,7 +160,7 @@ BANKAGENT_INJECTION_DETECTOR=combined python -m bankagent.chat --customer CLI-XX
 ## Demo web
 Tres paneles: **escenarios** (login simulado y guion de un clic por turno), **chat** y **"Por qué respondió así"**
 (qué entendió el router, traza del grafo con herramientas e intentos, reglas de la política con su versión, hechos
-verificados) + **consola del asesor humano**, que se abre sola con cada handoff. Siempre en modo reglas + plantillas
+verificados) + **consola del asesor humano**, que se abre sola con cada handoff. Router aprendido + plantillas por defecto
 (sin LLM, sin costo). En pantallas angostas los paneles pasan a pestañas. Detalle del frontend: [`web/README.md`](web/README.md).
 
 ```bash
@@ -193,16 +250,17 @@ Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-rou
 | `evals/cases/*.jsonl` | Casos y etiquetas generados por el equipo por construcción; no son tráfico real |
 
 ## Estado
-- [x] EDA y elección del flujo
-- [x] Pipeline con contratos, cuarentena, upsert incremental y linaje
-- [x] Herramientas con permisos por sesión, política, guard, grafo, línea base es/pt
-- [x] Tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos, métricas de evaluación, equidad por dialecto y evaluación de humo sobre el fixture
-- [x] Router y writer con LLM (salida estructurada, reintentos acotados, fallback a la línea base) y verificador determinista de respuestas
-- [x] Evaluación: casos reservados (dev/test por cliente y por redacción), runner con métricas de la rúbrica, equidad por dialecto
-- [x] Inyección con datasets públicos: detección (regex vs. clasificador) y daño de punta a punta ([reporte](reports/injection_eval.md), [ADR 0005](docs/adr/0005-deteccion-inyeccion.md))
-- [x] Componente aprendido en el camino crítico: router de intención local. Se evaluó contra RuleRouter a nivel intención y de punta a punta ([ADR 0009](docs/adr/0009-router-aprendido.md))
-- [x] La demo usa el router aprendido por defecto (fallback visible a reglas si el modelo no carga), tras corregir con dev y conversaciones propias los paquetes de handoff incompletos y el desacuerdo por dialecto ([ADR 0009 · Decisión de demo](docs/adr/0009-router-aprendido.md#decisión-de-demo))
-- [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos (LLM apagado: sin API paga)
-- [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
-- [x] Interfaz web (FastAPI + React) en un contenedor, construido y probado en CI
-- [ ] Deploy público y video
+- [x] EDA y elección del flujo; pipeline con contratos, cuarentena, upsert incremental y linaje
+- [x] Herramientas con permisos por sesión, política versionada, guard, grafo con transiciones declaradas, línea base es/pt
+- [x] Consentimiento por acción, conversación libre (pedir humano, toma de cuenta, estado de la disputa) y handoff versionado
+- [x] Componente aprendido en el camino crítico: router de intención local, evaluado contra RuleRouter a nivel intención y de punta a punta; la demo lo usa por defecto con fallback visible a reglas ([ADR 0009](docs/adr/0009-router-aprendido.md))
+- [x] Evaluación offline: test congelado, líneas base B0/B1, métricas de la rúbrica, equidad por dialecto, variabilidad entre corridas
+- [x] Inyección con datasets públicos (detección y daño) y red team adaptativo de 3 rondas con cada ataque como regresión
+- [x] Propiedades I1–I8 con Hypothesis y verificación estática de todos los caminos del grafo
+- [x] Replay de quejas históricas (simulación), prueba de capacidad, log de auditoría con cadena de hashes, modelo de amenazas
+- [x] Router y writer con LLM implementados (salida estructurada, fallback, verificador determinista); **apagados** en la demo y sin evaluar contra la línea base: no hay API paga
+- [x] Interfaz web (FastAPI + React) en un contenedor, construida y probada en CI; pipeline de deploy (GitHub Actions → GHCR privado → Render)
+- [x] 681 tests (`pytest --collect-only -q`, 2026-09-29) en CI (`pytest -q`, sin datos reales ni API keys) + `scripts/ci_guard.py` + `scripts/check_docs.py`
+- [ ] Link público de la demo (deploy en Render)
+- [ ] Video del pitch
+- [ ] Calificaciones humanas de los handoffs (kit listo, [`reports/human_eval.md`](reports/human_eval.md))
