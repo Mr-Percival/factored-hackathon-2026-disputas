@@ -473,8 +473,10 @@ class ConversationMachine(RuleBasedStateMachine):
         if was_locked:
             STATS["checked:I6_locked_turn"] += 1
             assert not calls, f"I6: herramientas llamadas en un hilo bloqueado: {calls}"
-            assert out["outcome"] == "handoff" and (out.get("handoff") or {}).get("reason") == "security_lockout", \
-                f"I6: hilo bloqueado respondió {out['outcome']}"
+            # Salidas seguras en un hilo bloqueado: el handoff de seguridad (dueño con sesión válida) o auth_error
+            # (sesión vencida o ajena: la identidad se valida antes que el bloqueo para no filtrar el paquete).
+            locked_ok = out["outcome"] == "handoff" and (out.get("handoff") or {}).get("reason") == "security_lockout"
+            assert locked_ok or out["outcome"] == "auth_error", f"I6: hilo bloqueado respondió {out['outcome']}"
             assert not new_d and not new_b, "I6: acción en un hilo bloqueado"
 
         # ---- I5: sesión vencida/ausente => solo identidad, auth_error (o lockout)
@@ -600,7 +602,7 @@ class ConversationMachine(RuleBasedStateMachine):
         # ---- actualizar el modelo (lockout: 3 intentos bloqueados o prohibidos)
         if not was_locked:
             # inyección detectada (outcome "blocked", o "handoff" si es la que dispara el bloqueo) o acceso prohibido
-            strike = any(str(e.get("detail") or "").startswith("injection_pattern") or e.get("detail") == "forbidden"
+            strike = any(str(e.get("detail") or "").startswith("injection") or e.get("detail") == "forbidden"
                          for e in entries)
             th.strikes += int(strike)
             if strike:

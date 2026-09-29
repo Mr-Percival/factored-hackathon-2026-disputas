@@ -105,7 +105,7 @@ deben valer después de *cada* turno de *cualquier* conversación. Dos herramien
 | **Grafo** | `EDGES` es acíclico (cada turno termina en ≤ 6 nodos), 16 caminos START→END, todo nodo alcanzable y con salida a END; `act` solo tiene a `understand` como predecesor; y `understand → act` solo ocurre con `awaiting="confirmation"` + confirmación fresca + intención `confirm` con confianza ≥ 0.6 — probado **exhaustivamente** sobre 4 × 7 × 7 × 3 = 588 combinaciones (awaiting × intención × confianza × acción pendiente fresca/vieja/ninguna) | LLM06; transiciones no previstas |
 
 **Resultados.** Perfil `ci` (en cada PR, determinista): 200 conversaciones, ~2.000 turnos, ~2 min. Perfil `deep`
-(local, `HYPOTHESIS_PROFILE=deep pytest tests/test_properties.py -s`): DEEP_RESULTS
+(local, `HYPOTHESIS_PROFILE=deep pytest tests/test_properties.py -s`): perfil `ci` (200 conversaciones aleatorias por corrida, ~2.000 turnos): 0 violaciones; la corrida `deep` (5.000) queda pendiente de publicar. 0 violaciones observadas no prueba ausencia de riesgo
 
 **Hallazgos (corregidos en #31, con el contraejemplo mínimo fijado como test de regresión):**
 

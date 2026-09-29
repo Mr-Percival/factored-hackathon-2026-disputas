@@ -171,14 +171,16 @@ class Agent:
         text = s["user_text"]
         msg = {"role": "user", "turn": s["turn"], "text": redact(text)}
         strikes = s.get("strikes", 0)
-        if strikes >= self.max_strikes:  # conversación bloqueada: nada más se procesa, pasa a un humano
-            return {"next": "handoff", "handoff_reason": "security_lockout", "conversation": [msg],
-                    "detail": f"locked strikes={strikes}"}
+        # Identidad y dueño del hilo ANTES que el bloqueo: si no, un intruso que bloquea el hilo ajeno recibiría el
+        # handoff de seguridad con el paquete (mensajes y hechos del dueño). Detectado por la invariante I2.
         session = self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
         # El hilo queda atado al cliente de su primer turno autenticado: la sesión válida de OTRO cliente no puede
         # continuarlo (vería candidatos/confirmaciones ajenos guardados en el estado). Cuenta como acceso prohibido.
         if s.get("owner") and s["owner"] != session.customer_id:
             raise AuthError("forbidden")
+        if strikes >= self.max_strikes:  # conversación bloqueada: nada más se procesa, pasa a un humano
+            return {"next": "handoff", "handoff_reason": "security_lockout", "conversation": [msg],
+                    "detail": f"locked strikes={strikes}"}
         reason = self.detector.detect(text)
         if reason:
             strikes += 1
