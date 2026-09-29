@@ -85,15 +85,15 @@ flowchart TD
     guard -->|sesión inválida / ataque| respond
     guard -->|3 intentos bloqueados| handoff
     guard --> understand
-    understand -->|"sí" a acción pendiente (por acción)| act
+    understand -->|"«sí» a acción pendiente (por acción)"| act
     understand -->|confirmación ambigua 2 veces| handoff
-    understand -->|"no"| cancel
+    understand -->|"«no»"| cancel
     understand -->|elige opción| select_option
     understand -->|disputa| find_transaction
     understand -->|bloqueo| find_card
     understand -->|fuera de alcance · pide humano · toma de cuenta · cancelar disputa| handoff
-    understand -->|"¿en qué va mi disputa?"| check_dispute
-    understand -->|poca confianza · "gracias" · "ninguna de esas"| respond
+    understand -->|"«¿en qué va mi disputa?»"| check_dispute
+    understand -->|"poca confianza · «gracias» · «ninguna de esas»"| respond
     understand -->|3 aclaraciones seguidas| handoff
     find_transaction -->|1 candidata| decide
     find_transaction -->|0 o varias: pregunta| respond
