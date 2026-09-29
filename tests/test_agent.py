@@ -101,3 +101,23 @@ def test_persistent_tool_failure_hands_off(env, monkeypatch):
     assert r["outcome"] == "handoff" and r["handoff"]["reason"] == "tool_failure"
     attempts = [c for e in r["trace"] for c in e["tools"] if c["tool"] == "search_transactions"]
     assert len(attempts) == 3  # 1 + 2 reintentos, acotado
+
+
+def test_new_request_starting_with_no_does_not_cancel_as_deny(env):
+    """#23: con una confirmación pendiente, 'no reconozco otro cargo…' inicia un flujo nuevo, no es un 'no'."""
+    tok, th = env.login("CLI-ANA"), env.thread()
+    say(env, th, tok, "No reconozco un cargo de 77 dólares")
+    r = say(env, th, tok, "no reconozco otro cargo de 1200 del 10/06/2026")
+    assert r["outcome"] == "handoff" and r["handoff"]["reason"] == "H02_high_amount"
+    tok, th = env.login("CLI-ANA"), env.thread()
+    say(env, th, tok, "Não reconheço uma cobrança de 77")
+    r = say(env, th, tok, "não, não reconheço outra cobrança no Brasil")
+    assert r["outcome"] == "handoff" and r["handoff"]["reason"] == "H03_fraud_signal"
+
+
+def test_short_no_still_cancels(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    say(env, th, tok, "No reconozco un cargo de 77 dólares")
+    r = say(env, th, tok, "mejor no, gracias")
+    assert r["outcome"] == "cancelled"
+    assert not env.tools._ops.execute("SELECT count(*) FROM disputes").fetchone()[0]
