@@ -46,6 +46,15 @@ class IdentityService:
             raise AuthError("session_expired")
         return s
 
+    def seconds_left(self, token: str) -> float:
+        """Vida restante del token (0 si no existe o venció). No lanza: sirve para mostrar el estado."""
+        s = self._sessions.get(token)
+        return max(0.0, s.expires_at - self.clock()) if s else 0.0
+
+    def revoke(self, token: str) -> None:
+        """Cierra la sesión (logout): el token deja de existir."""
+        self._sessions.pop(token, None)
+
     def expire(self, token: str) -> None:
         """Solo para pruebas: fuerza la expiración de una sesión."""
         s = self._sessions[token]
