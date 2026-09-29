@@ -67,7 +67,8 @@ Qué mostrar en el **panel de handoff**:
 - `reason = H02_high_amount` y `policy.rules_fired` con el ID de la regla y su versión.
 - `verified_facts.transaction`: 2,154,962.73 ARS, transferencia del 17/06/2026 en La Plata. Son hechos leídos de las
   herramientas, no del texto del cliente.
-- `request` (lo que dijo el cliente, con la PII enmascarada) y `unresolved_questions` (lo que le queda por decidir al asesor).
+- `request` (lo que dijo el cliente, con la PII enmascarada) y `unresolved_questions` (lo que le queda por decidir al asesor, propias de H02).
+- Paquete versionado (`handoff/v1`, [esquema](handoff.schema.json)): `handoff_id` (el cliente lo recibe: "Tu número de caso es HND-…"), cola `disputas`, prioridad `alta`, SLA 8 h, `customer_claim` (2.155.000 declarado) y `match` (diferencia de monto con el movimiento verificado, `single_candidate`).
 - `summary`: una línea para el asesor con el motivo, la transacción, el estado del cliente y las acciones hechas. Se arma
   de forma determinista con los campos del paquete, sin modelo.
 - La decisión la toma `policy.yaml` (ARS ≥ 1.000.000), no el modelo.

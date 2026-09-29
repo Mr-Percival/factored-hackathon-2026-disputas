@@ -28,7 +28,8 @@ from .guard import InjectionDetector, detector_from_env, redact
 from .identity import AuthError
 from .observability import emit as emit_trace
 from .policy import PolicyEngine
-from .responses import TemplateWriter, fmt_option, fmt_txn, handoff_summary
+from .handoff import build_packet, queue_label
+from .responses import TemplateWriter, fmt_option, fmt_txn
 from .tools import BankTools, ToolError
 from .understanding import Router, RuleRouter, detect_language, match_merchant, session_language
 
@@ -67,6 +68,8 @@ class State(TypedDict, total=False):
     action_result: dict | None
     clarify_hit: bool              # este turno terminó en una aclaración (suma a clarify_streak)
     dispute_found: dict | None     # disputa verificada que respondió "¿en qué va mi disputa?"
+    claim: dict | None             # lo que el cliente dijo del cargo (monto, fechas, país, comercio, cantidad)
+    match_method: str | None       # cómo se llegó al movimiento: single_candidate | customer_choice
 
 
 # Destinos permitidos por nodo (documentación ejecutable del flujo)
@@ -111,7 +114,9 @@ class Agent:
         if self.audit:  # persiste la traza del turno (sin texto del cliente); el último registro lleva el resultado
             entries = [e for e in out.get("trace", []) if e["turn"] == turn]
             for i, e in enumerate(entries):
-                self.audit.append(thread_id, e, out.get("outcome") if i == len(entries) - 1 else None)
+                rec = self.audit.append(thread_id, e, out.get("outcome") if i == len(entries) - 1 else None)
+                if e["node"] == "handoff" and out.get("handoff"):  # el paquete apunta a su registro de auditoría
+                    out["handoff"]["audit"] = {"thread": rec["thread"], "seq": rec["seq"], "hash": rec["hash"]}
         return out
 
     def mermaid(self) -> str:
@@ -295,9 +300,12 @@ class Agent:
         found = rank_candidates(found, amt, self.policy.as_of, self.policy.window_days)[:5]
         if not found:
             return {**self._clarify(s, "no_match", awaiting="details"), "detail": "0 candidates"}
+        claim = {"amount": amt, "date_from": sl.get("date_from"), "date_to": sl.get("date_to"),
+                 "country": sl.get("country"), "merchant": merchants, "count": sl.get("count")}
         if len(found) == 1:
-            return {"next": "decide", "txn": found[0], "candidates": [], "detail": "1 candidate"}
-        return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "candidates": found,
+            return {"next": "decide", "txn": found[0], "candidates": [], "detail": "1 candidate", "claim": claim,
+                    "match_method": "single_candidate"}
+        return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "candidates": found, "claim": claim,
                 "awaiting": "option", "detail": f"{len(found)} candidates"}
 
     def select_option(self, s: State, calls) -> dict:
@@ -313,7 +321,8 @@ class Agent:
                     "awaiting": "confirmation", "detail": f"card option={opt}", "consent_retries": 0,
                     "pending_action": {"type": "block_card", "block_card": chosen["product_id"],
                                        "card_label": chosen["product_number"], "asked_turn": s["turn"]}}
-        return {"next": "decide", "txn": cands[opt - 1], "candidates": [], "awaiting": None, "detail": f"option={opt}"}
+        return {"next": "decide", "txn": cands[opt - 1], "candidates": [], "awaiting": None, "detail": f"option={opt}",
+                "match_method": "customer_choice"}
 
     def decide(self, s: State, calls) -> dict:
         txn = self._call(calls, "get_transaction", s["token"], s["txn"]["transaction_id"])  # hecho verificado
@@ -386,32 +395,11 @@ class Agent:
 
     def handoff(self, s: State, calls) -> dict:
         reason = s.get("handoff_reason") or "unspecified"
-        txn = s.get("txn")
-        decision = s.get("decision") or {}
-        actions = [c for e in s.get("trace", []) for c in e["tools"]
-                   if c["tool"] in ("open_dispute", "block_card") and c["ok"]]
-        unresolved = {
-            "out_of_scope": ["Atender la solicitud fuera del alcance del canal automático."],
-            "tool_failure": ["Reintentar la consulta de movimientos; el sistema no pudo verificar datos."],
-            "action_not_verified": ["Confirmar en core si la disputa/bloqueo quedaron registrados."],
-            "security_lockout": ["Revisar los intentos bloqueados en el log de auditoría.",
-                                 "Validar la identidad del cliente por un canal seguro antes de reabrir la conversación."],
-        }.get(reason, ["Validar con el cliente si reconoce al comercio.", "Decidir apertura de disputa y abono provisional."])
-        packet = {
-            "reason": reason,
-            "created_at": dt.datetime.now().isoformat(timespec="seconds"),
-            "language": s.get("lang", "es"),
-            "request": [m["text"] for m in s.get("conversation", [])][-5:],
-            "verified_facts": {"transaction": _jsonable(txn) if txn else None, **(decision.get("facts") or {})},
-            "policy": {"version": decision.get("policy_version"), "rules_fired": decision.get("rules", [])},
-            "actions_taken": actions,
-            "evidence": [{"turn": e["turn"], "node": e["node"], "tools": [c["tool"] for c in e["tools"]]}
-                         for e in s.get("trace", []) if e["tools"]],
-            "unresolved_questions": unresolved,
-        }
-        packet["summary"] = handoff_summary(packet)  # una línea determinista para el asesor (#32)
+        packet = build_packet(s, self.policy, reason)  # esquema versionado: src/bankagent/handoff.py (#44)
+        # el id del caso queda en la traza -> en el log de auditoría encadenado (liga paquete y registro)
         out = {"next": "respond", "outcome": "handoff", "handoff": packet, "awaiting": None, "pending_action": None,
-               "candidates": [], "reply_key": reason if reason in HANDOFF_REPLIES else "handoff", "detail": reason}
+               "candidates": [], "reply_key": reason if reason in HANDOFF_REPLIES else "handoff",
+               "detail": f"{reason} {packet['handoff_id']} queue={packet['queue']} priority={packet['priority']}"}
         if reason == "account_takeover":  # mientras seguridad toma el caso, se OFRECE (no se hace) el bloqueo
             out.update(self._offer_card_block(s, calls))
         return out
@@ -458,6 +446,11 @@ class Agent:
             facts.setdefault("txn", "-")
         # el país (dialecto) se consulta solo si el writer lo necesita para esta respuesta
         reply, llm = self.writer.compose(key, lang, facts, country=lambda: self._customer_country(s, calls))
+        packet = s.get("handoff")
+        if s.get("outcome") == "handoff" and packet:  # referencia del caso, texto fijo (no pasa por el modelo)
+            ref = self.writer.write("handoff_ref", lang, handoff_id=packet["handoff_id"], sla=packet["sla_hours"],
+                                    queue=queue_label(self.policy, packet["queue"], lang))
+            reply = f"{reply}\n{ref}"
         if s.get("reply_prefix"):  # texto fijo (no pasa por el modelo): dice por qué se vuelve a preguntar
             reply = f"{self.writer.write(s['reply_prefix'], lang)}\n{reply}"
         return {"next": END, "reply": reply, "outcome": s.get("outcome") or "clarify", "llm": llm,
@@ -512,7 +505,3 @@ def _apply_denials(pending: dict | None, denials: list[str]) -> dict | None:
     declined = set(pending.get("declined", [])) | ({"block_card"} if pending.get("block_card") else set())
     return {**pending, "block_card": None, "declined": sorted(declined)}
 
-
-def _jsonable(d: dict) -> dict:
-    return {k: (v.isoformat() if hasattr(v, "isoformat") else float(v) if hasattr(v, "as_tuple") else v)
-            for k, v in d.items()}

@@ -578,10 +578,13 @@ class ConversationMachine(RuleBasedStateMachine):
         internal = [str(e.get("detail") or "") for e in entries]
         packet = out.get("handoff")
         if packet:
-            internal.append(json.dumps({k: v for k, v in packet.items() if k != "request"}, ensure_ascii=False,
-                                       default=str))
+            # `request` y `transcript` (#44) citan textos del propio hilo: se verifican aparte, abajo
+            internal.append(json.dumps({k: v for k, v in packet.items() if k not in ("request", "transcript")},
+                                       ensure_ascii=False, default=str))
             known = set(th.user_texts) | set(th.replies)
             assert all(r in known for r in packet["request"]), "I2: el handoff cita texto que no es de este hilo"
+            assert all(m["text"] in known for m in packet.get("transcript", [])), \
+                "I2: la transcripción del handoff cita texto que no es de este hilo"
         internal += [m["text"] for m in out["conversation"] if m["role"] == "assistant"]
         leaks = [m for m in markers_outside(allowed_internal) if any(m in x for x in internal)]
         assert not leaks, f"I2: artefactos internos contienen datos de otro cliente: {leaks}"

@@ -2,7 +2,7 @@
   "_comment": "Generado por scripts/select_demo_customers.py. Clientes REALES del dataset sintético del organizador; sin PII (solo IDs, montos, fechas, comercios, países). Regenerar si cambia dataset_fingerprint.",
   "generated_at": "2026-09-28T21:51:06",
   "policy": {
-    "version": "2026-09-29.2",
+    "version": "2026-09-29.3",
     "as_of": "2026-06-17",
     "fraud_threshold": 30.0,
     "high_amount": {
