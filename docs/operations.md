@@ -188,3 +188,20 @@ se cargan documento, email, dirección, fecha de nacimiento, ingreso ni score (`
 10. Accesibilidad de la UI (WCAG 2.1 AA) y canal alternativo para quien no puede usar el chat.
 11. Dependencias fijadas con hashes y acciones de CI por SHA (#17); escaneo de imagen.
 12. Monitoreo de deriva: distribución de intenciones, tasa de handoff por segmento y equidad por dialecto (#13).
+
+## Deploy de la demo (Render)
+```mermaid
+flowchart LR
+    M[push a main] --> A[GitHub Actions · deploy.yml]
+    S3[(S3 organizador)] -->|secretos del repo| A
+    A -->|pipeline + verify_demo| DB[(base de demo · runner efímero)]
+    DB --> I[imagen Docker]
+    I -->|GHCR privado| R[Render · servicio de imagen]
+    K[keepalive.yml · cada 10 min] -->|/healthz| R
+```
+- **Los datos del organizador nunca pasan por el repo.** Se bajan con secretos en un runner efímero, la base se hornea
+  en la imagen y la imagen vive en GHCR como paquete **privado**; Render la toma con una credencial de solo lectura.
+- Cada deploy usa la imagen exacta del commit (`:sha`) y pasa por `verify_demo.py` (13 escenarios) y un smoke test
+  (`/readyz`, `/api/scenarios`) antes de avisar a Render.
+- Plan gratis de Render: 512 MB, 0.1 CPU, se duerme a los 15 min; `keepalive.yml` lo mantiene despierto hasta la final.
+  Memoria medida en local: ~200 MB tras 39 sesiones de demo.
