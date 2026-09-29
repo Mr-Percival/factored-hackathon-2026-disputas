@@ -1,0 +1,3 @@
+{"id": "B-0174", "final": "dispute_charge", "reason": "movimiento extraño sin señal de acceso a la cuenta: la guía lo pone en disputa, no en account_takeover"}
+{"id": "B-0214", "final": "DROP", "reason": "'chévere' aislado: cierre o saludo según el contexto; ambiguo aun con la guía"}
+{"id": "D-0020", "final": "DROP", "reason": "'no fui yo' sin mencionar cargo: disputa implícita o vago según el contexto; ambiguo aun con la guía"}
