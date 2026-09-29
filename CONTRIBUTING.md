@@ -39,3 +39,16 @@ Equipo de 4 · entrega el **5 de octubre de 2026**. Objetivo: cambios pequeños,
 
 ## Setup
 Ver `README.md` → *Setup reproducible*. Los tests corren **sin datos reales ni API keys**.
+
+## Demo web (`web/` + `src/bankagent/api/`)
+```bash
+pip install -e ".[dev,api]"          # FastAPI, uvicorn, httpx (TestClient)
+cd web && npm ci                     # Node 22+; se commitea package-lock.json, nunca node_modules/ ni dist/
+npm run lint && npm run format:check && npm run typecheck && npm run test && npm run build   # lo mismo que la CI
+```
+- **Cambió un contrato de la API** (`src/bankagent/api/schemas.py`): `python scripts/export_openapi.py` y
+  `cd web && npm run gen:api`, y commitear `web/src/api/openapi.json` + `schema.d.ts`. Un test lo exige.
+- La respuesta del agente se pinta como **texto plano**: no usar `dangerouslySetInnerHTML` ni Markdown activo.
+- Nada de scripts ni estilos inline en `index.html` (la CSP es `script-src 'self'`).
+- Componentes accesibles primero: Radix/shadcn para widgets, consultas por rol en los tests (Testing Library).
+- La API no loguea texto del cliente ni devuelve el token del agente; los errores son genéricos.
