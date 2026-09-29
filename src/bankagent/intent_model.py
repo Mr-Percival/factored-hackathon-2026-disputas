@@ -4,7 +4,7 @@ Solo inferencia y numpy: el entrenamiento (scikit-learn) vive en `scripts/train_
 artefactos en `models/intent_router/` (ver ADR 0007). Encoders disponibles:
 - `char`   : TF-IDF de n-gramas de caracteres, aprendido del corpus (pesa KB, sin dependencias extra).
 - `m2v`    : embeddings estáticos model2vec (`pip install -e ".[ml]"`).
-- `onnx`   : transformer ONNX vía fastembed (solo para comparar en el entrenamiento).
+- `onnx`   : sentence transformer en ONNX con onnxruntime + tokenizers (`pip install -e ".[ml]"`).
 - `concat` : concatenación de dos encoders (cada bloque ya normalizado L2).
 Los encoders pesados se importan y cargan de forma perezosa: importar este módulo no requiere nada más que numpy.
 """
@@ -116,32 +116,51 @@ class Model2VecEncoder:
 
 
 class OnnxEncoder:
-    """Transformer ONNX vía fastembed (comparación en el entrenamiento; no se usa en el agente)."""
+    """Sentence transformer exportado a ONNX: onnxruntime + tokenizers, promedio con máscara + L2.
 
-    def __init__(self, model_id: str, prefix: str = "", custom: dict | None = None):
-        self.model_id, self.prefix, self.custom = model_id, prefix, custom
+    Sin torch ni sentence-transformers: ~60 MB de dependencias + el modelo. 1 hilo (latencia reproducible y
+    sin competir con el resto del proceso)."""
+
+    def __init__(self, model_id: str, revision: str | None = None, model_file: str = "model.onnx",
+                 prefix: str = "", max_len: int = 128, threads: int = 1):
+        self.model_id, self.revision, self.model_file = model_id, revision, model_file
+        self.prefix, self.max_len, self.threads = prefix, max_len, threads
         self.name = f"onnx:{model_id.split('/')[-1]}"
-        self._model = None
+        self._sess = self._tok = None
 
     def load(self):
-        if self._model is None:
-            from fastembed import TextEmbedding
-            if self.custom:
-                from fastembed.common.model_description import ModelSource, PoolingType
-                known = {m["model"] for m in TextEmbedding.list_supported_models()}
-                if self.model_id not in known:
-                    TextEmbedding.add_custom_model(model=self.model_id, pooling=PoolingType.MEAN, normalization=True,
-                                                   sources=ModelSource(hf=self.custom["hf"]), dim=self.custom["dim"],
-                                                   model_file=self.custom["model_file"])
-            self._model = TextEmbedding(self.model_id, threads=1)
-        return self._model
+        if self._sess is None:
+            import onnxruntime as ort  # dependencia opcional (grupo `ml`)
+            from tokenizers import Tokenizer
+            path = Path(_snapshot(self.model_id, self.revision, [self.model_file, "tokenizer.json", "config.json"]))
+            tok = Tokenizer.from_file(str(path / "tokenizer.json"))
+            tok.enable_truncation(self.max_len)
+            tok.enable_padding(pad_id=tok.token_to_id("<pad>") or 0, pad_token="<pad>")
+            so = ort.SessionOptions()
+            so.intra_op_num_threads = so.inter_op_num_threads = self.threads
+            self._sess = ort.InferenceSession(str(path / self.model_file), so, providers=["CPUExecutionProvider"])
+            self._inputs = {i.name for i in self._sess.get_inputs()}
+            self._tok = tok
+        return self._sess
 
     def encode(self, texts: list[str]) -> np.ndarray:
-        vecs = list(self.load().embed([self.prefix + t for t in texts], batch_size=64))
-        return _l2(np.asarray(vecs, dtype=np.float32))
+        sess = self.load()
+        out = []
+        for i in range(0, len(texts), 32):
+            enc = self._tok.encode_batch([self.prefix + t for t in texts[i:i + 32]])
+            ids = np.array([e.ids for e in enc], dtype=np.int64)
+            mask = np.array([e.attention_mask for e in enc], dtype=np.int64)
+            feed = {"input_ids": ids, "attention_mask": mask}
+            if "token_type_ids" in self._inputs:
+                feed["token_type_ids"] = np.zeros_like(ids)
+            h = sess.run(None, feed)[0]
+            m = mask[..., None].astype(np.float32)
+            out.append((h * m).sum(axis=1) / np.clip(m.sum(axis=1), 1e-9, None))
+        return _l2(np.vstack(out).astype(np.float32))
 
     def spec(self) -> dict:
-        return {"type": "onnx", "model_id": self.model_id, "prefix": self.prefix}
+        return {"type": "onnx", "model_id": self.model_id, "revision": self.revision, "model_file": self.model_file,
+                "prefix": self.prefix, "max_len": self.max_len}
 
 
 class ConcatEncoder:
@@ -244,7 +263,8 @@ def build_encoder(spec: dict, char: CharNgramEncoder | None = None):
     if kind == "m2v":
         return Model2VecEncoder(spec["model_id"], spec.get("revision"))
     if kind == "onnx":
-        return OnnxEncoder(spec["model_id"], spec.get("prefix", ""))
+        return OnnxEncoder(spec["model_id"], spec.get("revision"), spec.get("model_file", "model.onnx"),
+                           spec.get("prefix", ""), spec.get("max_len", 128))
     if kind == "concat":
         return ConcatEncoder([build_encoder(p, char) for p in spec["parts"]])
     raise ValueError(f"encoder desconocido: {kind}")

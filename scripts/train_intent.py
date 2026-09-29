@@ -57,8 +57,10 @@ TARGET_WRONG_ACTION = 0.01  # objetivo preregistrado (#42): ≤ 1% de mensajes d
 C_GRID = (0.3, 1.0, 3.0, 10.0, 30.0)
 SEEDS = (0, 1, 2, 3, 4)
 M2V = ("minishlab/potion-multilingual-128M", "73908c3438cf03b6a01bcb9611d62b23d0726f08")
-MINILM = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-E5 = ("intfloat/multilingual-e5-small", "onnx/model_qint8_avx512_vnni.onnx")
+# paraphrase-multilingual-MiniLM-L12-v2 exportado a ONNX y cuantizado (int8) por Qdrant; e5-small int8 oficial
+MINILM = ("qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q", "faf4aa4225822f3bc6376869cb1164e8e3feedd0",
+          "model_optimized.onnx")
+E5 = ("intfloat/multilingual-e5-small", "614241f622f53c4eeff9890bdc4f31cfecc418b3", "onnx/model_qint8_avx512_vnni.onnx")
 CANDIDATES = ("char", "m2v", "minilm", "e5", "char+m2v", "char+minilm")
 SCRATCH = ROOT / ".cache" / "intent_emb"  # caché de embeddings (gitignored)
 
@@ -181,9 +183,9 @@ def make_pretrained(name: str):
     if name == "m2v":
         return Model2VecEncoder(*M2V)
     if name == "minilm":
-        return OnnxEncoder(MINILM)
+        return OnnxEncoder(*MINILM)
     if name == "e5":
-        return OnnxEncoder(E5[0], prefix="query: ", custom={"hf": E5[0], "dim": 384, "model_file": E5[1]})
+        return OnnxEncoder(*E5, prefix="query: ")
     raise ValueError(name)
 
 
@@ -379,17 +381,12 @@ def dir_size_mb(paths: list[Path]) -> float:
 
 
 def pretrained_size_mb(name: str) -> float:
-    from huggingface_hub import scan_cache_dir
-    repo = {"m2v": M2V[0], "minilm": "qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q", "e5": E5[0]}[name]
-    patterns = {"m2v": ("model.safetensors", "tokenizer.json", "config.json"),
-                "minilm": ("model_optimized.onnx", "tokenizer.json", "config.json", "special_tokens_map.json", "tokenizer_config.json"),
-                "e5": (E5[1], "tokenizer.json", "config.json", "special_tokens_map.json", "tokenizer_config.json")}[name]
-    for r in scan_cache_dir().repos:
-        if r.repo_id == repo:
-            rev = max(r.revisions, key=lambda v: v.last_modified)
-            return round(sum(f.size_on_disk for f in rev.files if str(f.file_name) in [Path(p).name for p in patterns]
-                             and any(str(f.file_path).replace("\\", "/").endswith(p) for p in patterns)) / 1e6, 1)
-    return float("nan")
+    """Bytes que hay que llevar a la imagen: pesos + tokenizer + config (lo que carga el encoder)."""
+    from bankagent.intent_model import _snapshot
+    repo, rev, weights = {"m2v": (*M2V, "model.safetensors"), "minilm": MINILM, "e5": E5}[name]
+    files = [weights, "tokenizer.json", "config.json"]
+    base = Path(_snapshot(repo, rev, files))
+    return round(sum((base / f).stat().st_size for f in files if (base / f).exists()) / 1e6, 1)
 
 
 def latency(fn, texts: list[str]) -> dict:
@@ -540,8 +537,8 @@ def main() -> None:
     encs = [char if p == "char" else cache.enc[p] for p in parts]
     encoder = encs[0] if len(encs) == 1 else ConcatEncoder(encs)
     corpus_hash = hashlib.sha256(b"".join(sha256(p).encode() for p in sorted((CORPUS / "train").glob("*.jsonl")))).hexdigest()
-    model_id = {"char": "char2-5-tfidf", "m2v": f"{M2V[0]}@{M2V[1][:8]}", "minilm": MINILM,
-                "e5": f"{E5[0]}:{E5[1]}"}
+    model_id = {"char": "char2-5-tfidf", "m2v": f"{M2V[0]}@{M2V[1][:8]}", "minilm": f"{MINILM[0]}@{MINILM[1][:8]}",
+                "e5": f"{E5[0]}@{E5[1][:8]}"}
     meta = {"version": "intent-v1", "model_id": "+".join(model_id[p] for p in parts), "candidate": chosen,
             "C": cs["C"], "corpus_sha256": corpus_hash, "train_authors": sorted({r["author"] for r in train}),
             "n_train": len(train), "trained_by": "scripts/train_intent.py", "target_wrong_action": TARGET_WRONG_ACTION,
