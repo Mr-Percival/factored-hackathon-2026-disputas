@@ -60,7 +60,7 @@ Diagrama: guard → entender (LLM) → buscar → decidir (policy.yaml) → actu
 | Inyección: daño | **[[PENDIENTE: reports/injection_eval.md]]** | medido aparte de la detección | Aunque el guard falle, el cliente sale del token y toda acción se confirma |
 | Equidad por dialecto | **[[PENDIENTE: reports/eval.md]]** | misma decisión MX · CO · AR · pt-BR | No enrutamos por acento: el EDA no muestra efecto (FCR 76.7% vs 76.6%) |
 
-<sub>25 tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, acceso ajeno, inyección directa e indirecta, cliente señuelo</sub>
+<sub>80 tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, acceso ajeno, inyección directa e indirecta, cliente señuelo</sub>
 
 **Notas del orador:** No entrenamos sobre las transcripciones del dataset: solo hay 42 textos de cliente distintos, así que cualquier métrica sería inválida. Evaluamos donde hay etiquetas válidas. Uno: el agente contra la línea base de reglas en casos reservados, generados por el equipo y declarados como tales. Dos: la detección de inyección con datasets públicos, y por separado el daño, porque aunque el detector falle el ataque no tiene con qué dañar. Tres: equidad; el mismo caso escrito en dialectos distintos debe dar la misma decisión.
 
@@ -105,7 +105,7 @@ Respaldo: _Los datos tienen límites reales; cada uno cambió una decisión de d
 - Lockfile con hashes y acciones fijadas por SHA (#17)
 - Verificador de cifras e IDs para el writer con LLM (#7)
 - Recalibrar el umbral con datos reales y medir fraude entre cargos disputados
-- Capacidad: [[PENDIENTE: reports/capacity.md]]
+- Capacidad: p95 233 ms por turno · ~61 turnos/s por réplica (sin LLM, costo $0)
 
 <sub>github.com/Mr-Percival/factored-hackathon-2026-disputas · docs/threat-model.md · docs/adr/</sub>
 
@@ -123,7 +123,6 @@ Respaldo: _Los datos tienen límites reales; cada uno cambió una decisión de d
 - [[PENDIENTE: falsos positivos sobre mensajes legítimos — reports/injection_eval.md (#8/#9)]]
 - [[PENDIENTE: daño: fugas del señuelo / acciones no confirmadas — reports/injection_eval.md (#8)]]
 - [[PENDIENTE: misma decisión entre variantes MX/CO/AR/pt-BR — reports/eval.md (#13)]]
-- [[PENDIENTE: latencia p95 y costo por conversación — reports/capacity.md (#19)]]
 - [[PENDIENTE: captura escena 1 — docs/pitch/screens/escena1.png (UI #14)]]
 - [[PENDIENTE: captura escena 2 — docs/pitch/screens/escena2.png (UI #14)]]
 - [[PENDIENTE: captura escena 3 — docs/pitch/screens/escena3.png (UI #14)]]

@@ -24,11 +24,11 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
 from .audit import AuditLog
-from .guard import detect_injection, redact
+from .guard import InjectionDetector, detector_from_env, redact
 from .identity import AuthError
 from .observability import emit as emit_trace
 from .policy import PolicyEngine
-from .responses import TemplateWriter, fmt_option, fmt_txn
+from .responses import TemplateWriter, fmt_option, fmt_txn, handoff_summary
 from .tools import BankTools, ToolError
 from .understanding import Router, RuleRouter, detect_language
 
@@ -82,11 +82,13 @@ EDGES: dict[str, list[str]] = {
 class Agent:
     def __init__(self, tools: BankTools, policy: PolicyEngine, router: Router | None = None,
                  writer: TemplateWriter | None = None, min_confidence: float = 0.6, max_retries: int = 2,
-                 audit: AuditLog | None = None, max_strikes: int = 3):
+                 audit: AuditLog | None = None, max_strikes: int = 3,
+                 detector: InjectionDetector | None = None):
         self.tools, self.policy = tools, policy
         self.audit, self.max_strikes = audit, max_strikes
         self.router = router or RuleRouter()
         self.writer = writer or TemplateWriter()
+        self.detector = detector or detector_from_env()  # regex salvo que se pida otro (ADR 0005)
         self.min_confidence, self.max_retries = min_confidence, max_retries
         self.graph = self._build().compile(checkpointer=InMemorySaver())
 
@@ -177,12 +179,12 @@ class Agent:
         # continuarlo (vería candidatos/confirmaciones ajenos guardados en el estado). Cuenta como acceso prohibido.
         if s.get("owner") and s["owner"] != session.customer_id:
             raise AuthError("forbidden")
-        pattern = detect_injection(text)
-        if pattern:
+        reason = self.detector.detect(text)
+        if reason:
             strikes += 1
             out = {"next": "respond", "outcome": "blocked", "reply_key": "blocked_input", "strikes": strikes,
                    "lang": detect_language(text), "conversation": [msg], "owner": session.customer_id,
-                   "detail": f"injection_pattern={pattern} strikes={strikes}"}
+                   "detail": f"injection {self.detector.name}: {reason} strikes={strikes}"}
             if strikes >= self.max_strikes:
                 out.update(next="handoff", handoff_reason="security_lockout")
             return out
@@ -324,6 +326,7 @@ class Agent:
                          for e in s.get("trace", []) if e["tools"]],
             "unresolved_questions": unresolved,
         }
+        packet["summary"] = handoff_summary(packet)  # una línea determinista para el asesor (#32)
         return {"next": "respond", "outcome": "handoff", "handoff": packet, "awaiting": None, "pending_action": None,
                 "reply_key": reason if reason in ("tool_failure", "out_of_scope", "security_lockout") else "handoff",
                 "detail": reason}
