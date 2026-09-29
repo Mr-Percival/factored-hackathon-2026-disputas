@@ -337,8 +337,19 @@ def rules_predict(texts: list[str], min_conf: float = 0.6) -> tuple[list[str], l
 
 
 # ============================================================================== selección (solo train)
+BASE_AUTHORS = ("A", "B", "E")  # escribieron las 7 intenciones de la v1
+
+
+def cv_groups(train: list[dict]) -> list[str]:
+    """Fold de cada enunciado: su autor (A, B, E). El autor F solo escribió las intenciones v2: si fuera un fold
+    propio, ese fold entrenaría sin ningún ejemplo de ellas. Sus FAMILIAS se reparten entre los tres folds
+    (una familia entera va a un solo fold), así ninguna paráfrasis queda de los dos lados."""
+    fams = sorted({r["family"] for r in train if r["author"] not in BASE_AUTHORS})
+    fold = {f: BASE_AUTHORS[i % len(BASE_AUTHORS)] for i, f in enumerate(fams)}
+    return [r["author"] if r["author"] in BASE_AUTHORS else fold[r["family"]] for r in train]
 def cv_select(train: list[dict], cache: EmbCache, candidates=CANDIDATES) -> dict:
-    authors = sorted({r["author"] for r in train})
+    groups = cv_groups(train)
+    authors = sorted(set(groups))
     texts, y = [r["text"] for r in train], [r["intent"] for r in train]
     y_idx = np.array([LABELS.index(v) for v in y])
     results = {}
@@ -346,8 +357,8 @@ def cv_select(train: list[dict], cache: EmbCache, candidates=CANDIDATES) -> dict
         for C in C_GRID:
             logits = np.zeros((len(train), len(LABELS)), dtype=np.float32)
             for a in authors:
-                tr = [i for i, r in enumerate(train) if r["author"] != a]
-                va = [i for i, r in enumerate(train) if r["author"] == a]
+                tr = [i for i, g in enumerate(groups) if g != a]
+                va = [i for i, g in enumerate(groups) if g == a]
                 Xtr, char = features(cand, [texts[i] for i in tr], [texts[i] for i in tr], cache)
                 Xva, _ = features(cand, [texts[i] for i in tr], [texts[i] for i in va], cache)
                 W, b = fit_lr(Xtr, [y[i] for i in tr], C)
@@ -467,10 +478,20 @@ def main() -> None:
     ap.add_argument("--freeze", action="store_true", help="congela los hashes del test (una sola vez)")
     ap.add_argument("--stage", choices=["dev", "all"], default="all")
     ap.add_argument("--candidates", default=",".join(CANDIDATES))
+    ap.add_argument("--report-only", action="store_true", help="regenera el .md desde reports/intent_router.json")
     a = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     if a.freeze:
         freeze()
+        return
+    if a.report_only:
+        from intent_report import write_report  # noqa: E402 (mismo directorio)
+        check_frozen()
+        data = load_corpus()
+        res = json.loads(RESULTS.read_text(encoding="utf-8"))
+        tests = {s: [r for r in data[s] if r["id"] not in set(res["leak_excluded"][s])] for s in ("test", "test_style")}
+        REPORT.write_text(write_report(res, data, tests), encoding="utf-8")
+        print(f"-> {REPORT}")
         return
     if a.stage == "dev" and not MANIFEST.exists():  # la selección no toca el test: se puede correr antes de congelar
         man = {}

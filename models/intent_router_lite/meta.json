@@ -1,0 +1,38 @@
+{
+  "version": "intent-v2-lite",
+  "model_id": "char2-5-tfidf",
+  "candidate": "char",
+  "C": 30.0,
+  "corpus_sha256": "8d3421c48e00014f62167d118f06066d53e613f4c95017f4ab0e57f98237d267",
+  "train_authors": [
+    "A",
+    "B",
+    "E",
+    "F"
+  ],
+  "n_train": 800,
+  "trained_by": "scripts/train_intent.py",
+  "target_wrong_action": 0.01,
+  "threshold_rule": "máxima cobertura con acción equivocada ≤ 1% en validación",
+  "sklearn": "1.9.1",
+  "numpy": "2.5.3",
+  "labels": [
+    "dispute_charge",
+    "block_card",
+    "account_takeover",
+    "human_request",
+    "dispute_status",
+    "cancel_dispute",
+    "out_of_scope",
+    "closing",
+    "unknown"
+  ],
+  "temperature": 0.6150799653536699,
+  "threshold": 0.68,
+  "encoder": {
+    "type": "char",
+    "n_min": 2,
+    "n_max": 5,
+    "dim": 6741
+  }
+}

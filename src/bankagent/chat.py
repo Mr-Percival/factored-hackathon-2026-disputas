@@ -12,7 +12,7 @@ import os
 import uuid
 
 from .audit import AuditLog
-from .factory import build_agent
+from .factory import ROUTERS, build_agent
 from .identity import IdentityService
 from .pipeline import ROOT
 
@@ -22,7 +22,7 @@ def main():
     ap.add_argument("--customer", required=True, help="cliente con el que se simula el login en la app")
     ap.add_argument("--db", default=os.path.join(ROOT, "data", "serving.duckdb"))
     ap.add_argument("--audit", default=None, help="log de auditoría JSONL con cadena de hashes (opcional)")
-    ap.add_argument("--router", choices=["rules", "llm"], default="rules")
+    ap.add_argument("--router", choices=list(ROUTERS), default="rules")
     ap.add_argument("--writer", choices=["templates", "llm"], default="templates")
     a = ap.parse_args()
     identity = IdentityService()
