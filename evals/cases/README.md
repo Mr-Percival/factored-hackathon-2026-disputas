@@ -5,13 +5,22 @@
 
 | Archivo | Contenido |
 |---|---|
-| `test.jsonl` | Conjunto reservado: 116 casos principales + 44 variantes de equidad (11 grupos × 4 dialectos). **Es el único que se reporta.** |
-| `dev.jsonl` | Conjunto de desarrollo: 56 principales + 20 de equidad. Se usa para ajustar la línea base. |
+| `test.jsonl` | Conjunto reservado **congelado**: 115 casos principales + 44 variantes de equidad (11 grupos × 4 dialectos). **Es el único que se reporta.** |
+| `dev.jsonl` | Conjunto de desarrollo: 61 principales + 20 de equidad. Es el único que se usa para ajustar routers. |
 | `manifest.json` | Semilla, versión de política, conteos pedidos y obtenidos, verificación cruzada con la política, sha256 de cada archivo. |
 
-Regenerar (determinista, misma semilla → mismos archivos):
+## Test congelado
+- `test.jsonl` sha256 **`424d0f78dc21efdf2e659db03876f1717fa9419dacff9c1acd2cf09d1a89040b`**, congelado en el commit
+  `220ee5e` (política `2026-09-29.1`).
+- **No se ajusta ningún router mirando test** (ni el RuleRouter, ni #38–#42, ni el de embeddings). Se ajusta con dev y
+  con frases propias. Test existe para medir antes y después sin fuga.
+- El generador es determinista (misma semilla → mismos archivos) y **se niega a reescribir `test.jsonl`** si el
+  contenido cambiaría. Solo lo hace con `--force`, que invalida la comparación con reportes previos y debe quedar
+  documentado aquí. El runner verifica el hash y lo imprime en `reports/eval.md`.
+
 ```bash
-python -m bankagent.evals.cases --db data/serving.duckdb --out evals/cases
+python -m bankagent.evals.cases --db data/serving.duckdb --out evals/cases   # verifica/regenera (test no cambia)
+python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 --system rules --repeats 3
 ```
 
 ## Cómo se construye un caso
@@ -46,7 +55,8 @@ python -m bankagent.evals.cases --db data/serving.duckdb --out evals/cases
 `handoff_high_amount`, `handoff_fraud`, `handoff_repeat`, `handoff_inactive`, `out_of_scope`, `unknown`,
 `adversarial_access` (pide datos o acciones sobre otro cliente real, con marcadores de la víctima para detectar fugas),
 `expired_session` (sesión vencida a mitad o inexistente), `tool_failure` (falla persistente, transitoria o acción no
-verificada, inyectadas por el runner), `missing_data` (mensaje vago, con o sin detalles después).
+verificada, inyectadas por el runner), `missing_data` (mensaje vago, con o sin detalles después),
+`security_lockout` (insiste 3 veces en pedir datos ajenos: la política de strikes debe transferir a un humano).
 
 ## Esquema (una línea por caso)
 ```jsonc
@@ -73,10 +83,12 @@ sobreajustar.
 
 | Conjunto | Router | Correctos | Resolución automática segura | Acuerdo entre dialectos |
 |---|---|---|---|---|
-| dev (v1) | `origin/main` | 32/56 | 12/22 | 1/5 grupos |
-| dev (v1) | ajustado | 55/56 | 21/22 | 5/5 grupos |
-| **test (v2, reservado)** | `origin/main` | 69/116 | 33/60 | 3/11 grupos |
-| **test (v2, reservado)** | ajustado | **101/116** | **53/60** | **5/11 grupos** |
+| dev (v1) | `origin/main` (`50f040d`) | 41/61 | 15/25 | 1/5 grupos |
+| dev (v1) | ajustado | 58/61 | 24/25 | 5/5 grupos |
+| **test (v2, congelado)** | `origin/main` (`50f040d`) | 67/115 | 28/57 | 2/11 grupos |
+| **test (v2, congelado)** | ajustado | **93/115** | **46/57** | **6/11 grupos** |
+
+En los dos casos es la misma política (`2026-09-29.1`) y el mismo grafo; solo cambia `understanding.py`.
 
 El reporte completo (con variabilidad, desgloses y fallas) está en [`reports/eval.md`](../../reports/eval.md).
 

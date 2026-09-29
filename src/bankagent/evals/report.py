@@ -266,7 +266,8 @@ def render(ctx: dict) -> str:
     w("")
     for s in names:
         f = fair[s]
-        w(f"**`{s}`**: acuerdo en **{_frac(f['agree'], f['groups'])}** grupos (n pequeño ⚠).")
+        w(f"**`{s}`**: acuerdo en **{_frac(f['agree'], f['groups'])}** grupos (n pequeño ⚠). El acuerdo solo no basta: "
+          "un sistema que transfiere todo acuerda siempre; hay que leerlo junto con las variantes correctas.")
         w("")
         w("| Dialecto | Variantes con decisión correcta |")
         w("|---|---|")

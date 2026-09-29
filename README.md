@@ -71,8 +71,8 @@ python scripts/verify_demo.py --db data/demo/demo.duckdb                      # 
 python -m bankagent.chat --customer CLI-XXXXXXXX
 
 # Evaluación offline sobre el conjunto reservado -> reports/eval.md
-python -m bankagent.evals.cases --db data/serving.duckdb        # (re)genera evals/cases (determinista)
-python -m bankagent.evals.run --db data/serving.duckdb --system rules --repeats 3
+python -m bankagent.evals.cases --db data/serving.duckdb        # verifica evals/cases (test congelado, determinista)
+python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 --system rules --repeats 3
 ```
 
 ## Cómo activar el LLM
