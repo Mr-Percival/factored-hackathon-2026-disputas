@@ -436,7 +436,11 @@ def read_sheets(paths: list[str]) -> tuple[list[dict], list[str]]:
     rows, warns = [], []
     for path in paths:
         with open(path, encoding="utf-8-sig", newline="") as f:
-            for i, r in enumerate(csv.DictReader(f), 2):
+            head = f.readline()
+            f.seek(0)
+            # Excel en español guarda los CSV con ';'
+            delim = ";" if head.count(";") > head.count(",") else ","
+            for i, r in enumerate(csv.DictReader(f, delimiter=delim), 2):
                 rec = {"rater": (r.get("rater") or "").strip(), "packet_id": (r.get("packet_id") or "").strip(),
                        "e_que_falta": (r.get("e_que_falta") or "").strip()}
                 filled = False

@@ -159,6 +159,10 @@ def test_read_sheets_flags_bad_values(tmp_path):
     rows, warns = hk.read_sheets([str(p)])
     assert len(rows) == 1 and rows[0]["a_pedido"] is None and rows[0]["b_hechos"] == 3
     assert len(warns) == 2
+    q = tmp_path / "rater_Y.csv"  # guardado por Excel en español: ';' y BOM
+    q.write_text(";".join(hk.SHEET_COLUMNS) + "\nY;1;P01;4;5;3;2;sí;falta la prioridad\n", encoding="utf-8-sig")
+    rows, warns = hk.read_sheets([str(q)])
+    assert rows[0]["rater"] == "Y" and rows[0]["d_preguntas"] == 2 and rows[0]["e_falta_critico"] is True and not warns
 
 
 # ------------------------------------------------------------------ completitud y resumen

@@ -37,7 +37,7 @@ def render_card(pid: str, p: dict, heading: str = "##") -> str:
     if p.get("summary"):
         L += [f"**Resumen:** {p['summary']}", ""]
 
-    L += [f"{sub} Lo que escribió el cliente (PII enmascarada)", ""]
+    L += [f"{sub} Mensajes de la conversación (campo `request`, PII enmascarada)", ""]
     req = p.get("request") or []
     L += [f"> {i}. {_cell(m)}" + ("  " if i < len(req) else "") for i, m in enumerate(req, 1)] or ["_(sin mensajes)_"]
 
