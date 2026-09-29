@@ -27,14 +27,18 @@ WORKDIR /app
 
 RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin app
 
-# Instalación editable: policy.py y la API resuelven config/ y web/dist relativos a /app.
+# Dependencias exactas y verificadas por hash (#17): regenerar con `bash scripts/lock.sh`. Capa aparte para caché.
+COPY requirements/api.lock requirements/api.lock
+RUN pip install --require-hashes -r requirements/api.lock
+
+# Instalación editable sin resolver dependencias: policy.py y la API resuelven config/ y web/dist relativos a /app.
 COPY pyproject.toml ./
 COPY src/ src/
 COPY config/ config/
 COPY docs/demo/demo_customers.json docs/demo/demo_customers.json
 # Router aprendido lite (ADR 0009): 0.2 MB + numpy. Se activa con BANKAGENT_ROUTER=embeddings; el full no entra.
 COPY models/intent_router_lite/ models/intent_router_lite/
-RUN pip install -e ".[api,ml]"
+RUN pip install --no-deps -e .
 
 COPY docker/ docker/
 COPY --from=web /web/dist web/dist
