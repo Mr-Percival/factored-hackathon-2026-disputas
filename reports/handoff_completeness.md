@@ -2,11 +2,12 @@
 
 Generado por `python -m bankagent.evals.human_kit check`. Es la contraparte automática de la evaluación humana (`evals/human/RUBRIC.md`): mide si el paquete trae lo necesario y si es **consistente con la política** (re-evaluando `config/policy.yaml` con los hechos del paquete), no si es útil para el asesor.
 
-Política: `2026-09-29.1`.
+Política: `2026-09-29.3`.
 
 | Origen | Paquetes | Completos | % |
 |---|---|---|---|
-| escenarios de demo (docs/demo/demo_customers.json) | 5 | 5 | 100.0% |
+| escenarios de demo (docs/demo/demo_customers.json) · router rules | 5 | 5 | 100.0% |
+| escenarios de demo (docs/demo/demo_customers.json) · router embeddings | 5 | 5 | 100.0% |
 | kit humano: paquetes reales | 30 | 30 | 100.0% |
 | kit humano: controles degradados (se esperan incompletos) | 5 | 0 | 0.0% |
 

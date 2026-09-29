@@ -519,13 +519,35 @@ def test_jsonable_converts_duckdb_types():
         {"a": 1.5, "d": "2026-06-01", "l": ["2026-06-01T12:00:00"]}
 
 
-def test_unknown_message_shows_router_abstains(client):
+def test_unknown_message_shows_router_abstains(client, monkeypatch):
+    monkeypatch.setenv("BANKAGENT_ROUTER", "rules")
     login(client)
     r = say(client, conversation(client), "hola")
     assert r["outcome"] == "clarify" and r["understanding"]["intent"] == "unknown"
     assert r["understanding"]["router"] == "rules" and r["understanding"]["confidence"] < 0.6
     r = say(client, conversation(client), "No reconozco un cargo de 77 dólares")
     assert r["understanding"]["intent"] == "dispute_charge" and r["understanding"]["slots"]["amount"] == 77
+
+
+def test_demo_defaults_to_the_learned_router_and_says_which_one_answered(client, monkeypatch):
+    """ADR 0009, "Decisión de demo": sin BANKAGENT_ROUTER la API usa el router aprendido local; la respuesta dice qué
+    router entendió el turno (la UI lo muestra en la cabecera)."""
+    pytest.importorskip("numpy")
+    monkeypatch.delenv("BANKAGENT_ROUTER", raising=False)
+    login(client)
+    r = say(client, conversation(client), "No reconozco un cargo de 77 dólares")
+    assert r["understanding"]["router"].startswith("embed:") and r["understanding"]["intent"] == "dispute_charge"
+
+
+def test_learned_router_that_cannot_load_falls_back_to_rules_visibly(client, monkeypatch, tmp_path):
+    from bankagent import factory
+    monkeypatch.delenv("BANKAGENT_ROUTER", raising=False)
+    monkeypatch.setenv("BANKAGENT_INTENT_MODEL_DIR", str(tmp_path / "sin-artefacto"))
+    monkeypatch.setattr(factory, "_SHARED", {})  # instancia nueva que lee el directorio roto
+    login(client)
+    r = say(client, conversation(client), "No reconozco un cargo de 77 dólares")
+    assert r["understanding"]["router"] == "rules(fallback:model_unavailable)"
+    assert r["understanding"]["intent"] == "dispute_charge" and "Confirmas" in r["reply"]  # la demo sigue andando
 
 
 def test_serializer_is_open_to_new_outcomes_and_handoff_fields():

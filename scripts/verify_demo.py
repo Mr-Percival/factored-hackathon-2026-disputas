@@ -1,7 +1,7 @@
 """Verifica que cada escenario de la demo da el resultado esperado sobre una base dada.
 
     python scripts/verify_demo.py --db data/demo/demo.duckdb [--scenarios docs/demo/demo_customers.json]
-                                  [--policy config/policy.yaml] [--raw data/raw]
+                                  [--policy config/policy.yaml] [--raw data/raw] [--router rules|embeddings]
 
 Corre cada conversación con el agente real (sesión nueva, ops en memoria) y compara turno a turno.
 Sale con código 1 si algún escenario diverge: correrlo antes de cada demo / deploy.
@@ -25,6 +25,8 @@ def main() -> int:
     ap.add_argument("--scenarios", default=DEFAULT_SCENARIOS)
     ap.add_argument("--policy", default=POLICY)
     ap.add_argument("--raw", default=None, help="data/raw para comparar la huella de la entrega")
+    ap.add_argument("--router", default=os.environ.get("BANKAGENT_ROUTER", "embeddings"),
+                    choices=["rules", "embeddings"], help="router del agente (por defecto el de la demo)")
     a = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -41,7 +43,7 @@ def main() -> int:
     print(f"{'escenario':16s} {'cliente':18s} {'esperado':34s} {'obtenido':34s} ok")
     for sc in doc["scenarios"]:
         t0 = time.perf_counter()
-        ok, log = run_scenario(a.db, sc, a.policy)
+        ok, log = run_scenario(a.db, sc, a.policy, a.router)
         last = next((x for x in reversed(log) if "got" in x), None)
         got = last["got"] if last else {}
         exp = f"{sc['expected']['outcome']} {sc['expected']['rule'] or ''}".strip()
@@ -52,7 +54,7 @@ def main() -> int:
             failures += 1
             bad = next(x for x in log if not x["ok"])
             print(f"    turno {bad['turn']} {bad.get('say')!r}: {'; '.join(bad['problems'])}")
-    print(f"\n{len(doc['scenarios']) - failures}/{len(doc['scenarios'])} escenarios OK sobre {a.db}")
+    print(f"\n{len(doc['scenarios']) - failures}/{len(doc['scenarios'])} escenarios OK sobre {a.db} (router={a.router})")
     return 1 if failures else 0
 
 

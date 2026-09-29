@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery, useTheme } from "@/lib/hooks";
+import { routerBadge } from "@/lib/utils";
 import { useDemo, useScenarios } from "@/state/useDemo";
 
 const DEFAULT_DISCLAIMER = "Sandbox con datos sintéticos · política sintética · no mueve dinero";
@@ -16,6 +17,7 @@ export function App() {
   const scenarios = useScenarios();
   const [theme, toggleTheme] = useTheme();
   const wide = useMediaQuery("(min-width: 1024px)");
+  const badge = routerBadge(demo.last?.understanding?.router);
 
   const picker = scenarios.isPending ? (
     <p className="text-sm text-muted-foreground" role="status">
@@ -58,12 +60,9 @@ export function App() {
               Atiende cargos no reconocidos, cobros indebidos y bloqueo de tarjeta · español y portugués
             </p>
           </div>
-          <Badge
-            tone="info"
-            title="Router por reglas y respuestas por plantillas: sin llamadas a un modelo de lenguaje"
-          >
+          <Badge tone="info" title={badge.title}>
             <Cpu aria-hidden="true" />
-            Modo reglas (sin LLM)
+            {badge.label}
           </Badge>
           <Button
             variant="ghost"
