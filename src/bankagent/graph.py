@@ -139,6 +139,9 @@ class Agent:
                 raise RuntimeError(f"Transición no declarada {name} -> {out['next']}")
             entry = {"turn": state.get("turn"), "node": name, "ms": round((time.perf_counter() - t0) * 1000, 2),
                      "next": out.get("next"), "detail": out.pop("detail", None), "tools": calls}
+            if out.get("llm"):  # telemetría del modelo (router/writer): versión, tokens, costo, fallback
+                entry["llm"] = out["llm"]
+            out.pop("llm", None)
             return {**out, "trace": [entry]}
         return wrapper
 
@@ -183,7 +186,8 @@ class Agent:
         u = self.router.understand(redact(s["user_text"]), today, s.get("awaiting"))
         out: dict[str, Any] = {"understanding": {"intent": u.intent, "confidence": u.confidence, "language": u.language,
                                                  "router": u.router, "slots": vars(u.slots)},
-                               "lang": u.language, "detail": f"{u.intent}@{u.confidence:.2f}"}
+                               "lang": u.language, "detail": f"{u.intent}@{u.confidence:.2f} router={u.router}",
+                               "llm": u.llm}
         awaiting = s.get("awaiting")
         if awaiting == "confirmation" and u.intent == "confirm":
             return {**out, "next": "act"}
@@ -330,9 +334,20 @@ class Agent:
             hit = (s.get("decision") or {}).get("rules", [{}])[0] if s.get("decision") else {}
             facts["explain"] = self.writer.rule_text(hit.get("id", ""), hit.get("explain", ""), lang) if hit else ""
             facts.setdefault("txn", "-")
-        reply = self.writer.write(key, lang, **facts)
-        return {"next": END, "reply": reply, "outcome": s.get("outcome") or "clarify",
+        # el país (dialecto) se consulta solo si el writer lo necesita para esta respuesta
+        reply, llm = self.writer.compose(key, lang, facts, country=lambda: self._customer_country(s, calls))
+        return {"next": END, "reply": reply, "outcome": s.get("outcome") or "clarify", "llm": llm,
+                "detail": f"writer_fallback={llm['fallback']}" if llm and llm["fallback"] else None,
                 "conversation": [{"role": "assistant", "turn": s.get("turn"), "text": reply}]}
+
+    def _customer_country(self, s: State, calls) -> str | None:
+        """País del perfil (dato verificado) para el dialecto del writer. Si no hay sesión válida, None."""
+        if s.get("outcome") == "auth_error":
+            return None
+        try:
+            return self._call(calls, "get_profile", s["token"]).get("country")
+        except (AuthError, ToolError):
+            return None
 
 
 def _jsonable(d: dict) -> dict:
