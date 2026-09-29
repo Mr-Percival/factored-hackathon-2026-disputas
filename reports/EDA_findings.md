@@ -31,6 +31,9 @@ Scripts: `scripts/eda.py` → `reports/eda_output.txt`, `scripts/eda_checks.py` 
 10. **Acento:** que el agente use el mismo acento que el cliente no cambia los resultados (FCR 76.68% contra 76.59%; CSAT 2.766 contra 2.762). No hay base para rutear por acento.
 11. Todo el texto está en español; **no hay portugués**.
 
+12. **El bucket trae dos generaciones distintas del dataset.** `data_backup_20260831/` no es una versión anterior de `data/`: los IDs de clientes, productos y transacciones casi no se solapan, y las 67.095 quejas conservan su ID pero **todas** apuntan a otro cliente. Además, el backup tiene transacciones solo hasta 2024-09 (453 particiones). No sirve como entrega incremental real; la actualización se demuestra con el fixture de prueba. Detalle: [`snapshot_diff.md`](snapshot_diff.md).
+    → Como el organizador ya regeneró los datos una vez, el manifiesto registra una **huella de la entrega** por tabla. Si cambia, los artefactos que referencian IDs (casos de evaluación, guion de demo) se regeneran desde la base.
+
 ## 3. Implicaciones de diseño
 - **Flujo:** intake de cargo no reconocido / cobro indebido; es el mayor volumen de PQR y el peor FCR.
 - **Componente aprendido:** *ranking de transacciones* (descripción del cliente → transacción disputada). Las etiquetas son válidas por construcción: las consultas se generan a partir de transacciones reales retenidas, en es y pt, con paráfrasis. Se compara contra una línea base de reglas (la más reciente o el monto exacto). No se usa un clasificador sobre transcripciones por la limitación 1.
