@@ -357,6 +357,14 @@ class ConversationMachine(RuleBasedStateMachine):
             self._login(th)
         self._turn(th, th.token, th.owner, *msg)
 
+    @rule(tid=threads, attacks=st.lists(injection_msg, min_size=3, max_size=4))
+    def persistent_attack(self, tid, attacks):
+        """El dueño del hilo insiste con inyecciones seguidas. Desde el red team #33 los turnos de OTRO cliente ya no
+        suman al bloqueo del hilo ajeno, así que el bloqueo (I6) se ejercita con el propio atacante."""
+        th = self.model[tid]
+        for a in attacks:
+            self._turn(th, th.token, th.owner, "injection", a, None)
+
     @rule(tid=threads, idx=st.integers(0, 20), lang=st.sampled_from(["es", "pt"]))
     def dispute_own_txn(self, tid, idx, lang):
         """Sesgo hacia `decide`: describe (monto + fecha) un movimiento REAL del cliente dueño del hilo."""
