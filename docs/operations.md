@@ -13,7 +13,8 @@ razonamiento interno de un modelo **no** es un artefacto de auditoría y no se g
 
 ### Hoy (hackathon)
 Un proceso Python: `Agent` (LangGraph) con `InMemorySaver`, `IdentityService` simulado en memoria, `serving.duckdb`
-de solo lectura y un almacén `ops` en memoria. Setup reproducible: `pip install -e ".[dev]"`, `pytest -q` sin datos
+de solo lectura, un almacén `ops` en memoria, router/writer LLM opcionales con caída a reglas/plantillas y log de
+auditoría JSONL con cadena de hashes (`audit.py`). Setup reproducible: `pip install -e ".[dev]"`, `pytest -q` sin datos
 ni llaves, pipeline idempotente con manifiesto (`data/runs/<run_id>.json`). UI y contenedor: #14.
 
 ### Producción (propuesta)
@@ -47,7 +48,7 @@ flowchart LR
 | Serving | DuckDB archivo, solo lectura | Warehouse / réplica de lectura con índice por `customer_id` | Varias réplicas leyendo a la vez |
 | Ops (disputas, bloqueos) | DuckDB en memoria | Base transaccional (Postgres) con llave de idempotencia por acción | Hoy la idempotencia es "leer y luego insertar" (ver riesgos) |
 | Acciones reales | Tablas `ops` | APIs del core (bloqueo de tarjeta, alta de disputa) con la misma verificación posterior | La verificación ya existe (`verified=True`) |
-| Auditoría | `trace` en el estado; log con cadena de hashes (#10) | Almacenamiento WORM (object lock) | Inmutable por diseño, no por disciplina |
+| Auditoría | `trace` en el estado; `audit.py`: JSONL con cadena de hashes, `python -m bankagent.audit verify` (#10) | Almacenamiento WORM (object lock) | Inmutable por diseño, no por disciplina |
 | Handoff | Paquete en la respuesta | Cola durable hacia el CRM de asesores | Nada se pierde si el CRM está caído |
 | Secretos | `.env` local (gitleaks en CI) | Secrets manager + KMS, rotación | Sin llaves en imagen ni en variables de CI |
 
@@ -87,8 +88,9 @@ Hoy cada nodo deja una entrada en `trace`; con `BANKAGENT_LOG_JSON=1` además se
 | Reintentos | `tools[].attempt > 1` · `retries` en el JSON | alerta si > 5% de llamadas | Anticipa una caída: revisar latencia de DB |
 | Tasa de handoff | nodo `handoff`, `detail` = motivo | línea base del eval (#12) ± 10 pp; alerta si sube > 10 pp en 1 h | Desglosar por motivo: `tool_failure` = incidente; `H0x` = cambio de datos/política |
 | Resolución automática segura | nodo `act` con `case=…` y ambos `verified=True` | seguimiento; alerta si `action_not_verified` > 0 | Cada `action_not_verified` se revisa a mano en core |
-| Fallback LLM → reglas | `understanding.router` (#6) · contador en el JSON: **por implementar** | alerta si > 5% en 15 min | Estado del proveedor, cuota, timeouts |
-| Rechazos del verificador de salida | #7: **por implementar** | alerta si > 2% | Posible regresión del prompt/modelo: congelar versión |
+| Fallback LLM → reglas | `llm.fallback` en los nodos `understand` y `respond` (traza y JSON); `understanding.router = rules(fallback:…)` | alerta si > 5% en 15 min | Estado del proveedor, cuota, timeouts |
+| Costo y latencia del modelo | `llm.cost_usd`, `llm.input_tokens`/`output_tokens`, `llm.latency_ms` | alerta si costo/conversación > 2× la línea base de #12 o latencia p95 del modelo > 3 s | Revisar versión de prompt (`prompt_version`) y reintentos; activar solo reglas si el proveedor degrada |
+| Rechazos del verificador de salida | `respond`: `detail = writer_fallback=…` y `llm.violations` (cantidad en el JSON) | alerta si > 2% | Posible regresión del prompt/modelo: congelar versión |
 | Bloqueos del guard | nodo `guard`, `detail` = `injection_pattern=…` | alerta si > 3× la media de 7 días | ¿Ataque en curso o falso positivo nuevo? Ver patrón que dispara |
 | Bloqueo por intentos | handoff `security_lockout` (#10) | alerta con > 20 por hora | Revisar origen; coordinar con fraude |
 | Sesiones expiradas / sin sesión | `outcome=auth_error`, `detail` | alerta si sube > 3× | Suele ser el IdP o un cambio de TTL |
@@ -116,7 +118,7 @@ intentos, `forbidden`, sesiones; (4) modelo: fallback, rechazos del verificador,
   sin filtrar nada (`test_no_session_and_expired_session`).
 - **PII:** `guard.redact` enmascara tarjeta, email, teléfono y CURP antes del router y de la conversación guardada;
   los números de tarjeta se enmascaran al ingerir (`mask_last: 4`).
-- **Qué sale al proveedor LLM (#6/#7):** el mensaje del cliente ya enmascarado y, para el writer, hechos mínimos
+- **Qué sale al proveedor LLM (`llm_router.py`, `llm_writer.py`):** el mensaje del cliente ya enmascarado y, para el writer, hechos mínimos
   (fecha, monto, comercio, últimos 4 dígitos, ID de caso). No salen: token, `customer_id`, documento, historial.
   Requiere acuerdo de procesamiento de datos y retención cero en el proveedor (**supuesto**, por negociar).
 
@@ -148,14 +150,14 @@ se cargan documento, email, dirección, fecha de nacimiento, ingreso ni score (`
 
 | Falla | Qué hace el sistema hoy | Evidencia | Qué hace el on-call |
 |---|---|---|---|
-| Proveedor LLM caído / lento | Router cae a `RuleRouter`, writer a plantillas (#6/#7) | Tests de fallback en #6/#7 | Nada urgente; confirmar que la tasa de fallback baja al volver el proveedor |
+| Proveedor LLM caído / lento | Timeout y reintentos acotados; luego el router cae a `RuleRouter` y el writer a plantillas | `tests/test_llm.py` | Nada urgente; confirmar que la tasa de fallback baja al volver el proveedor |
 | Serving caído (error transitorio) | Hasta 2 reintentos por llamada (`max_retries=2`), luego handoff `tool_failure` con paquete | `test_agent.py` (reintentos y falla persistente) | Restaurar DB; revisar handoffs `tool_failure` del período |
 | Acción no verificada | No se reporta como hecha; handoff `action_not_verified` | `act` en `graph.py` | Confirmar en core si quedó registrada |
 | `policy.yaml` inválido | YAML roto o expresión no permitida → excepción al construir `PolicyEngine`: **fail closed**, no arranca. Una regla bien formada que nombra un campo inexistente solo falla al decidir (excepción no controlada = error del turno, sin acción) | `_compile` valida el AST | Rollback del cambio de política. **Por implementar:** evaluar todas las reglas contra un caso de prueba al arrancar |
 | Dos confirmaciones simultáneas de la misma disputa | Lectura-luego-inserción en `open_dispute`: la segunda choca con `UNIQUE(transaction_id)` y el turno falla sin duplicar | — | En producción: llave de idempotencia + `INSERT … ON CONFLICT` |
 | Store de sesiones / IdP caído | Todo turno termina en `auth_error` (no se atiende sin sesión) | `guard` resuelve el token primero | Escalar al equipo del IdP; banner en la app |
 | Checkpointer caído | Hoy en memoria: un reinicio pierde las conversaciones abiertas (**por implementar**: Postgres saver) | — | El cliente debe repetir; nada queda a medias porque la acción exige confirmación en el mismo estado |
-| Pico de bloqueos del guard | Responde `blocked_input`; bloqueo por intentos lleva a humano (#10) | `test_security.py` | Ver si es campaña o falso positivo; ajustar patrón por PR |
+| Pico de bloqueos del guard | Responde `blocked_input`; a los 3 intentos la conversación se bloquea y pasa a humano (`security_lockout`) | `test_security.py`, `test_audit.py` | Ver si es campaña o falso positivo; ajustar patrón por PR |
 | Datos viejos | El agente sigue respondiendo con lo que hay | Manifiesto | Relanzar pipeline; si > 2 días, avisar a los asesores |
 | Muchos hilos sobre una conexión DuckDB | **Corregido en este PR**: un cursor por hilo (antes un cliente podía recibir filas de otro) | `tests/test_concurrency.py` | — |
 
