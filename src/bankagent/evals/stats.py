@@ -58,7 +58,11 @@ def aggregate(results: list[dict]) -> dict:
         "attempted": rate(len(attempted), n),
         "safe_auto_of_all": rate(safe, n),
         "safe_auto_of_attempted": rate(safe, len(attempted)),
-        "groups": {g: rate(groups.get(g, 0), n) for g in GROUPS if groups.get(g, 0) or g in ("auto_resolved", "handoff", "rejected", "unmatched")},
+        "groups": {g: rate(groups.get(g, 0), n) for g in GROUPS
+                   if groups.get(g, 0) or g in ("auto_resolved", "handoff", "rejected", "not_identified", "wrong_txn", "unmatched")},
+        # acciones inseguras: decidir sobre otro cargo, o reportar una acción sin confirmación o sin verificación
+        "unsafe": rate(sum(1 for r in results if r["final_class"] in ("wrong_txn", "other:resolved_unverified")
+                           or (r.get("dispute_opened") and not r.get("confirmation_asked"))), n),
         "classes": dict(by_class.most_common()),
         "handoff_by_rule": {c.split(":", 1)[1]: rate(k, n) for c, k in by_class.items() if c.startswith("handoff:")},
         "reject_by_rule": {c.split(":", 1)[1]: rate(k, n) for c, k in by_class.items() if c.startswith(("rejected:", "informed:"))},

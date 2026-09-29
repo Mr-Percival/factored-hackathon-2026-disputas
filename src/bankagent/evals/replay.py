@@ -38,7 +38,7 @@ from ..identity import IdentityService
 from ..policy import POLICY, PolicyEngine, _compile
 from ..tools import BankTools
 from . import stats
-from .matching import AMOUNT_TOL, RULES, WINDOW_DAYS, match_complaint, pool_class
+from .matching import AMOUNT_TOL, RULES, WINDOW_DAYS, candidate_pool, match_complaint, pool_class
 from .messages import CONFIRM, DENY_WRONG, DIALECTS, lang_of, render_detail, render_opening, render_option
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -46,6 +46,7 @@ SUBCATEGORIES = ("Cargo no reconocido", "Cobro indebido")
 STRATA = ("country", "segment", "case_type")
 TERMINAL = {"resolved", "rejected", "informed", "handoff", "blocked", "auth_error"}
 MAX_TURNS = 6
+CLAIM_CONTROL_K = 20
 WINDOWS = (7, 15, 30, 60)
 HIST_GROUP = {"Resolved": "resuelta", "Closed": "resuelta", "Rejected": "rechazada", "Escalated": "escalada",
               "Open": "abierta", "In Process": "abierta"}
@@ -193,10 +194,15 @@ def simulate(agent, token: str, thread: str, case: dict, dialect: str, rng: rand
     msg, meta = render_opening(case, dialect, rng)
     detail_sent, turn_ms, clarify, asked_confirmation, stop = False, [], 0, False, None
     last: dict = {}
+    transcript: list[dict] = []  # solo va al detalle por caso (data/), nunca al reporte
     for _ in range(MAX_TURNS):
         t0 = time.perf_counter()
         last = agent.chat(thread, token, msg)
         turn_ms.append((time.perf_counter() - t0) * 1000)
+        u = last.get("understanding") or {}
+        transcript.append({"user": msg, "outcome": last.get("outcome"), "awaiting": last.get("awaiting"),
+                           "intent": u.get("intent"), "confidence": u.get("confidence"),
+                           "n_candidates": len(last.get("candidates") or []), "reply": last.get("reply")})
         if last.get("outcome") in TERMINAL:
             break
         awaiting = last.get("awaiting")
@@ -224,8 +230,18 @@ def simulate(agent, token: str, thread: str, case: dict, dialect: str, rng: rand
     rule = rules[0]["id"] if rules else None
     ar = last.get("action_result") or {}
     verified = bool(ar.get("dispute") and ar["dispute"]["verified"] and (ar.get("block") is None or ar["block"]["verified"]))
+    fail = None
     if stop:
         final = "not_identified"
+        t = transcript[-1]
+        if t["intent"] == "unknown" or (t["confidence"] or 0) < agent.min_confidence:
+            fail = "router_sin_confianza"  # el router no reconoció el pedido (el agente respondió "¿qué cargo?")
+        elif t["outcome"] == "cancelled":
+            fail = "propuso_otro_cargo"
+        elif t["awaiting"] == "option":
+            fail = "no_esta_entre_opciones"
+        else:
+            fail = "busqueda_sin_resultados"
     elif outcome in ("resolved", "rejected", "informed", "handoff") and txn_id and txn_id != target:
         final = "wrong_txn"
     elif outcome == "resolved":
@@ -238,7 +254,8 @@ def simulate(agent, token: str, thread: str, case: dict, dialect: str, rng: rand
         final = f"other:{outcome}"
     return {"final_class": final, "turns": len(turn_ms), "clarify_turns": clarify, "turn_ms": turn_ms,
             "confirmation_asked": asked_confirmation, "verified": verified, "agent_rule": rule,
-            "dispute_opened": bool(ar.get("dispute")), "card_blocked": bool(ar.get("block")), **meta}
+            "dispute_opened": bool(ar.get("dispute")), "card_blocked": bool(ar.get("block")), "transcript": transcript,
+            "fail_reason": fail, **meta}
 
 
 # ---------------------------------------------------------------- variantes de política (sensibilidad)
@@ -275,7 +292,9 @@ def run(db: str, n: int, seed: int, history_db: str | None = None, pt_share: flo
     sens = {(thr, sc): policy_variant(thr, sc) for thr in (20, 30, 40, 50) for sc in (0.5, 1.0, 2.0)}
 
     results, pt_results, claim_pairs = [], [], []
-    for i, c in enumerate(sample):
+    claims = sorted((h for h in hist.values() if h.get("claimed_amount") is not None), key=lambda h: h["complaint_id"])
+    claim_rng = random.Random(seed + 1)
+    for c in sample:
         h = hist.get(c["complaint_id"], {})
         complaint = {**c, "claimed_amount": h.get("claimed_amount"), "currency": h.get("currency")}
         created = c["creation_date"]
@@ -290,12 +309,12 @@ def run(db: str, n: int, seed: int, history_db: str | None = None, pt_share: flo
                     "priority", "hist_status", "sla_breached", "resolution_days", "compensation_granted",
                     "first_response_h", "claimed_amount", "currency", "reception_channel")}}
         base["hist_group"] = HIST_GROUP.get(h.get("hist_status")) if h else None
-        # ¿el monto reclamado informa? mismo match R1 con el monto de OTRA queja de la muestra (control)
+        # ¿el monto reclamado informa? R1 con su monto vs con montos de OTRAS quejas al azar (control, K sorteos)
         if complaint["claimed_amount"] is not None:
-            other = hist.get(sample[(i * 7919 + 13) % len(sample)]["complaint_id"], {})
-            ctrl = match_complaint({**complaint, "claimed_amount": other.get("claimed_amount"),
-                                    "currency": other.get("currency")}, txns, window_days)
-            claim_pairs.append((m.rule == "R1_amount", ctrl.rule == "R1_amount"))
+            ctrl = sum(match_complaint({**complaint, "claimed_amount": o["claimed_amount"], "currency": o["currency"]},
+                                       txns, window_days).rule == "R1_amount"
+                       for o in claim_rng.sample(claims, min(CLAIM_CONTROL_K, len(claims))))
+            claim_pairs.append((m.rule == "R1_amount", ctrl / min(CLAIM_CONTROL_K, len(claims))))
         if m.txn is None:
             results.append({**base, "lang": "es", "dialect": DIALECTS[c["country"]], "final_class": "unmatched",
                             "final_group": "unmatched", "turns": 0, "clarify_turns": 0, "turn_ms": [], "safe": False})
@@ -308,6 +327,11 @@ def run(db: str, n: int, seed: int, history_db: str | None = None, pt_share: flo
         d = direct_decision(base_policy, created, m.txn, customer, hist_pit)
         tools.as_of = None
         h04_prod = BankTools.dispute_history(tools, tools.identity.login(c["customer_id"]))["is_repeat_complainer"]
+        # sensibilidad de la regla: "la más reciente de cualquier estado" (sin preferir Approved)
+        alt = candidate_pool(complaint, txns, window_days)[0]
+        d_alt = direct_decision(base_policy, created, alt, customer, hist_pit)
+        base.update({"direct_outcome_alt": d_alt.outcome, "direct_rule_alt": d_alt.deciding_rule.id if d_alt.deciding_rule else None,
+                     "alt_same_txn": alt["transaction_id"] == m.txn["transaction_id"]})
         base.update({"direct_outcome": d.outcome, "direct_rule": d.deciding_rule.id if d.deciding_rule else None,
                      "direct_hits": [x.id for x in d.hits], "h04_pit": hist_pit["is_repeat_complainer"], "h04_prod": h04_prod,
                      "txn_status": m.txn["transaction_status"], "txn_type": m.txn["transaction_type"],
@@ -365,9 +389,16 @@ def analyze(results: list[dict], pt_results: list[dict], fstats: dict, aht: dict
                       "txn_status": dict(Counter(r["txn_status"] for r in matched)),
                       "h04_diff": sum(1 for r in matched if r["h04_pit"] != r["h04_prod"]),
                       "h04_prod_only": sum(1 for r in matched if r["h04_prod"] and not r["h04_pit"]),
-                      "age_max": max((r["txn_age_days"] for r in matched), default=None)},
+                      "age_max": max((r["txn_age_days"] for r in matched), default=None),
+                      "alt_rules": dict(Counter(r["direct_rule_alt"] or "ninguna (automatizable)" for r in matched)),
+                      "alt_outcomes": dict(Counter(r["direct_outcome_alt"] for r in matched)),
+                      "alt_same_txn": sum(1 for r in matched if r["alt_same_txn"])},
            "sensitivity": _sensitivity(matched),
-           "claim": {"n": len(claim_pairs), "own": sum(a for a, _ in claim_pairs), "control": sum(b for _, b in claim_pairs)}}
+           "not_identified_reasons": dict(Counter(r["fail_reason"] for r in results + pt_results if r.get("fail_reason"))),
+           "not_identified_reasons_by_lang": {lang: dict(Counter(r["fail_reason"] for r in rs if r.get("fail_reason")))
+                                              for lang, rs in (("es", results), ("pt", pt_results))},
+           "claim": {"n": len(claim_pairs), "own": sum(a for a, _ in claim_pairs), "control": sum(b for _, b in claim_pairs),
+                     "control_k": CLAIM_CONTROL_K}}
     hist = [r for r in results if r.get("hist_status")]
     if hist:
         out["historical"] = _historical(results)
