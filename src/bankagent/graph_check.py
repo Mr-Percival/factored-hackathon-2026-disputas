@@ -120,7 +120,8 @@ def report(edges: dict[str, list[str]] | None = None) -> str:
         f"- Predecesores de `act`: {', '.join(sorted(predecessors(edges, 'act')))}",
         f"- Nodos inalcanzables desde START: {', '.join(unreachable) or 'ninguno'}",
         f"- Nodos que no llegan a END: {', '.join(dead) or 'ninguno'}",
-        f"- Caminos que pasan por `act`: {len(via_act)} (todos con `understand` inmediatamente antes)",
+        f"- Caminos que pasan por `act`: {len(via_act)} · nodo inmediatamente anterior: "
+        f"{', '.join(sorted({p[p.index('act') - 1] for p in via_act})) or '-'}",
         "",
         "| # | Camino |",
         "|---|---|",

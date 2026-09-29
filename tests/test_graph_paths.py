@@ -86,7 +86,7 @@ def stub_agent(serving_db):
 
 def _expected(awaiting, intent, conf, pending):
     confirmable = awaiting == "confirmation" and pending == "fresh"
-    if confirmable and intent == "confirm":
+    if confirmable and intent == "confirm" and conf >= 0.6:  # un "sí" dudoso no ejecuta acciones
         return "act"
     if confirmable and intent == "deny":
         return "cancel"
@@ -118,12 +118,27 @@ def test_understand_routes_to_act_only_on_fresh_confirmation(stub_agent):
         assert calls == [], "understand no llama herramientas"
         assert out["next"] in EDGES["understand"]
         assert out["next"] == _expected(awaiting, intent, conf, pending), (awaiting, intent, conf, pending, out["next"])
-        if out["next"] != "act" and awaiting == "confirmation" and out["next"] not in ("cancel",):
-            # una confirmación que no se usó en este turno no sobrevive al siguiente
-            assert out.get("awaiting") is None or pending != "fresh" or out["next"] == "select_option"
+        if awaiting == "confirmation" and out["next"] not in ("act", "cancel"):
+            # una confirmación que no se usó en su turno se descarta: no puede reusarse más adelante
+            assert out.get("awaiting") is None and out.get("pending_action") is None
+        if awaiting == "confirmation" and pending != "fresh":
+            assert router.seen[-1][1] is None, "a una confirmación vieja el router no la ve como pendiente"
         table.append((awaiting, intent, conf, pending, out["next"]))
     acts = [r for r in table if r[-1] == "act"]
-    assert acts and all(r[0] == "confirmation" and r[1] == "confirm" and r[3] == "fresh" for r in acts)
+    assert acts and all(r[0] == "confirmation" and r[1] == "confirm" and r[3] == "fresh" and r[2] >= 0.6
+                        for r in acts)
     assert len(table) == len(AWAITING) * len(INTENTS) * len(CONFIDENCES) * len(PENDING)
     # el router recibe el texto ya enmascarado
     assert all("4111111111111111" not in t for t, _ in router.seen)
+
+
+def test_regression_low_confidence_confirm_does_not_act(stub_agent):
+    """Hallazgo de la tabla exhaustiva: antes, un "confirm" con confianza 0.0 (p. ej. de un router LLM dudoso)
+    ejecutaba la acción; `min_confidence` solo se aplicaba a los pedidos nuevos."""
+    agent, router = stub_agent
+    router.u = Understanding("confirm", 0.1, "es", Slots())
+    state = {"user_text": "mmm", "turn": 3, "awaiting": "confirmation", "token": "t",
+             "pending_action": {"type": "block_card", "block_card": "PRD-ANA-CC", "card_label": "****1111",
+                                "asked_turn": 2}}
+    out = agent.understand(state, [])
+    assert out["next"] == "respond" and out["pending_action"] is None

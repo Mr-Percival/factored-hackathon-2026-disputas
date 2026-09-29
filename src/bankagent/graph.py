@@ -49,6 +49,7 @@ class State(TypedDict, total=False):
     pending_action: dict | None
     conversation: Annotated[list[dict], operator.add]  # mensajes ya enmascarados
     strikes: int                   # intentos bloqueados + accesos prohibidos en esta conversación
+    owner: str | None              # cliente del primer turno autenticado; el hilo no se comparte entre clientes
     # salida del turno
     understanding: dict | None
     decision: dict | None
@@ -171,30 +172,42 @@ class Agent:
         if strikes >= self.max_strikes:  # conversación bloqueada: nada más se procesa, pasa a un humano
             return {"next": "handoff", "handoff_reason": "security_lockout", "conversation": [msg],
                     "detail": f"locked strikes={strikes}"}
-        self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
+        session = self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
+        # El hilo queda atado al cliente de su primer turno autenticado: la sesión válida de OTRO cliente no puede
+        # continuarlo (vería candidatos/confirmaciones ajenos guardados en el estado). Cuenta como acceso prohibido.
+        if s.get("owner") and s["owner"] != session.customer_id:
+            raise AuthError("forbidden")
         pattern = detect_injection(text)
         if pattern:
             strikes += 1
             out = {"next": "respond", "outcome": "blocked", "reply_key": "blocked_input", "strikes": strikes,
-                   "lang": detect_language(text), "conversation": [msg],
+                   "lang": detect_language(text), "conversation": [msg], "owner": session.customer_id,
                    "detail": f"injection_pattern={pattern} strikes={strikes}"}
             if strikes >= self.max_strikes:
                 out.update(next="handoff", handoff_reason="security_lockout")
             return out
-        return {"next": "understand", "conversation": [msg]}
+        return {"next": "understand", "conversation": [msg], "owner": session.customer_id}
 
     def understand(self, s: State, calls) -> dict:
         today = self.policy.as_of
-        u = self.router.understand(redact(s["user_text"]), today, s.get("awaiting"))
+        awaiting = s.get("awaiting")
+        pending = s.get("pending_action") or {}
+        # Una confirmación solo vale en el turno INMEDIATAMENTE posterior a la pregunta. Si en medio hubo otro turno
+        # (mensaje no entendido, inyección bloqueada, sesión vencida...), el "sí" ya no responde a esa pregunta.
+        fresh = awaiting == "confirmation" and pending.get("asked_turn") == s["turn"] - 1
+        if awaiting == "confirmation" and not fresh:
+            awaiting = None
+        u = self.router.understand(redact(s["user_text"]), today, awaiting)
         out: dict[str, Any] = {"understanding": {"intent": u.intent, "confidence": u.confidence, "language": u.language,
                                                  "router": u.router, "slots": vars(u.slots)},
                                "lang": u.language, "detail": f"{u.intent}@{u.confidence:.2f} router={u.router}",
                                "llm": u.llm}
-        awaiting = s.get("awaiting")
-        if awaiting == "confirmation" and u.intent == "confirm":
+        if awaiting == "confirmation" and u.intent == "confirm" and u.confidence >= self.min_confidence:
             return {**out, "next": "act"}
         if awaiting == "confirmation" and u.intent == "deny":
             return {**out, "next": "cancel"}
+        if s.get("awaiting") == "confirmation":  # pregunta no respondida en su turno: se descarta, nunca se reusa
+            out.update(awaiting=None, pending_action=None)
         if awaiting == "option" and u.intent == "select_option":
             return {**out, "next": "select_option"}
         if u.confidence < self.min_confidence or u.intent == "unknown":
@@ -229,7 +242,7 @@ class Agent:
             return {"next": "respond", "outcome": "clarify", "reply_key": "block_confirm", "candidates": [],
                     "awaiting": "confirmation", "detail": f"card option={opt}",
                     "pending_action": {"type": "block_card", "block_card": chosen["product_id"],
-                                       "card_label": chosen["product_number"]}}
+                                       "card_label": chosen["product_number"], "asked_turn": s["turn"]}}
         return {"next": "decide", "txn": cands[opt - 1], "candidates": [], "awaiting": None, "detail": f"option={opt}"}
 
     def decide(self, s: State, calls) -> dict:
@@ -250,7 +263,7 @@ class Agent:
         card = next((c for c in cards if c["product_id"] == txn["product_id"] and c["product_status"] == "Active"), None)
         action = {"type": "open_dispute", "transaction_id": txn["transaction_id"],
                   "block_card": card["product_id"] if card else None,
-                  "card_label": card["product_number"] if card else None}
+                  "card_label": card["product_number"] if card else None, "asked_turn": s["turn"]}
         return {**base, "next": "respond", "outcome": "clarify", "reply_key": "confirm_dispute",
                 "pending_action": action, "awaiting": "confirmation"}
 
@@ -261,7 +274,8 @@ class Agent:
         if len(cards) == 1:
             c = cards[0]
             return {"next": "respond", "outcome": "clarify", "reply_key": "block_confirm", "awaiting": "confirmation",
-                    "pending_action": {"type": "block_card", "block_card": c["product_id"], "card_label": c["product_number"]}}
+                    "pending_action": {"type": "block_card", "block_card": c["product_id"], "card_label": c["product_number"],
+                                       "asked_turn": s["turn"]}}
         cands = [{"kind": "card", **c} for c in cards[:5]]
         return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "candidates": cands, "awaiting": "option",
                 "detail": f"{len(cands)} cards"}
