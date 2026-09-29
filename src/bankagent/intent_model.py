@@ -22,18 +22,47 @@ from typing import Protocol
 import numpy as np
 
 # Etiquetas que aprende el modelo. Las que el grafo todavía no conoce se traducen con COMPAT.
-LABELS: tuple[str, ...] = ("dispute_charge", "block_card", "account_takeover", "human_request",
-                           "out_of_scope", "closing", "unknown")
-# Traducción al contrato actual del grafo (`understanding.INTENTS`): lo que cambia es la ruta, no la etiqueta.
-# human_request y account_takeover -> handoff (vía out_of_scope); closing -> clarify (vía unknown).
-COMPAT: dict[str, str] = {"human_request": "out_of_scope", "account_takeover": "out_of_scope", "closing": "unknown"}
-# Ruta que toma el grafo para cada intención: es el espacio donde se miden los costos de error.
-ROUTE: dict[str, str] = {"dispute_charge": "dispute", "block_card": "block", "account_takeover": "handoff",
-                         "human_request": "handoff", "out_of_scope": "handoff", "closing": "clarify",
-                         "unknown": "clarify"}
-ACTION_ROUTES = ("dispute", "block")  # rutas que consultan herramientas y proponen una acción al cliente
+# Intenciones de USUARIO (primer mensaje, sin contexto). confirm/deny/unclear/select_option/none_of_these
+# dependen de la pregunta pendiente y las resuelve RuleRouter.
+LABELS: tuple[str, ...] = ("dispute_charge", "block_card", "account_takeover", "human_request", "dispute_status",
+                           "cancel_dispute", "out_of_scope", "closing", "unknown")
+# Si un grafo más viejo no conoce una etiqueta, se traduce a una que lleve a la misma ruta (handoff / aclarar).
+COMPAT: dict[str, str] = {"human_request": "out_of_scope", "account_takeover": "out_of_scope",
+                          "cancel_dispute": "out_of_scope", "dispute_status": "unknown", "closing": "unknown"}
+# Ruta que toma el grafo (graph.understand) para cada intención.
+ROUTE: dict[str, str] = {"dispute_charge": "dispute", "block_card": "block", "dispute_status": "status",
+                         "account_takeover": "handoff", "human_request": "handoff", "cancel_dispute": "handoff",
+                         "out_of_scope": "handoff", "closing": "close", "unknown": "clarify"}
+ROUTES: tuple[str, ...] = ("dispute", "block", "status", "handoff", "close", "clarify")
+ACTION_ROUTES = ("dispute", "block")  # rutas que consultan movimientos/tarjetas y proponen una acción
 
-DEFAULT_DIR = Path(__file__).resolve().parents[2] / "models" / "intent_router"
+
+def error_cost(true: str, pred: str) -> float:
+    """Costo de confundir `true` con `pred` (etiquetas). Toda acción pide confirmación: el máximo es acotado.
+
+    - Aclarar cuesta un turno (0.5). Mandar a un humano sin necesidad cuesta tiempo de asesor (1).
+    - Proponer disputa/bloqueo cuando no correspondía: 2; si el cliente pedía un humano, reportaba robo de
+      cuenta o quería retirar un reclamo (ruta handoff): 3, porque se ignora el pedido y se demora a seguridad.
+    - Consultar el estado de un caso sin que lo pidiera: 1 (solo lectura). Cerrar la conversación con un pedido
+      abierto: 1.5.
+    - Handoff a la cola equivocada (p. ej. toma de cuenta como fuera de alcance): 0.5; 1 si era toma de cuenta.
+    """
+    if true == pred:
+        return 0.0
+    rt, rp = ROUTE[true], ROUTE[pred]
+    if rp == "clarify":
+        return 0.5
+    if rp in ACTION_ROUTES:
+        return 3.0 if rt == "handoff" else 0.0 if rt == rp else 2.0
+    if rp == "handoff":
+        return (1.0 if true == "account_takeover" else 0.5) if rt == "handoff" else 1.0
+    if rp == "status":
+        return 1.0
+    return 1.5  # close
+
+MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
+DEFAULT_DIR = MODELS_DIR / "intent_router_lite"   # char n-gramas: pocos MB, solo numpy (deploy de 512 MB)
+FULL_DIR = MODELS_DIR / "intent_router_full"      # char + MiniLM ONNX: solo evaluación offline
 
 
 # ---------------------------------------------------------------------------------------------- texto

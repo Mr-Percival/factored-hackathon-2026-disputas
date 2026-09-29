@@ -33,26 +33,19 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from bankagent.intent_model import (ACTION_ROUTES, LABELS, ROUTE, CharNgramEncoder, IntentModel,  # noqa: E402
-                                    Model2VecEncoder, OnnxEncoder, char_ngrams, ece)
+from bankagent.intent_model import (ACTION_ROUTES, FULL_DIR, LABELS, ROUTE, ROUTES,  # noqa: E402
+                                    CharNgramEncoder, IntentModel, Model2VecEncoder, OnnxEncoder, char_ngrams, ece,
+                                    error_cost)
+from bankagent.intent_model import DEFAULT_DIR as LITE_DIR  # noqa: E402
 from bankagent.understanding import RuleRouter  # noqa: E402
 
 CORPUS = ROOT / "corpus" / "intent"
 MANIFEST = CORPUS / "MANIFEST.json"
-MODEL_DIR = ROOT / "models" / "intent_router"
 REPORT = ROOT / "reports" / "intent_router.md"
 RESULTS = ROOT / "reports" / "intent_router.json"
 FIG_DIR = ROOT / "reports" / "figures"
 TODAY = dt.date(2026, 6, 30)
 DIALECTS = ("es-MX", "es-CO", "es-AR", "pt-BR", "mix")
-ROUTES = ("dispute", "block", "handoff", "clarify")
-# Costo de un error por ruta (fila = verdad, columna = predicción). Toda acción pide confirmación, por eso
-# el máximo es acotado; el peor caso es arrancar una disputa cuando el cliente pidió un humano o reporta
-# robo de cuenta (se ignora el pedido y se demora al equipo de seguridad). Pedir aclaración cuesta un turno.
-COST = {"dispute": {"dispute": 0, "block": 2, "handoff": 1, "clarify": 0.5},
-        "block": {"dispute": 2, "block": 0, "handoff": 1, "clarify": 0.5},
-        "handoff": {"dispute": 3, "block": 2, "handoff": 0, "clarify": 0.5},
-        "clarify": {"dispute": 2, "block": 2, "handoff": 1, "clarify": 0}}
 TARGET_WRONG_ACTION = 0.01  # objetivo preregistrado (#42): ≤ 1% de mensajes disparan una acción equivocada
 C_GRID = (0.3, 1.0, 3.0, 10.0, 30.0)
 SEEDS = (0, 1, 2, 3, 4)
@@ -121,7 +114,8 @@ def agreement() -> dict:
                     first[f"{a}-{i + 1:04d}"] = (split, json.loads(line)["intent"])
     adj = adjudication()
     out = {}
-    for who in ("second", "third"):  # 2.ª: todo el test + muestra de train; 3.ª: submuestra de 160 del test
+    # 2.ª: test C/D completo + 150 de train; 3.ª: 160 del test C/D; 4.ª: test G completo + 40 de F (intenciones v2)
+    for who in ("second", "third", "fourth"):
         other = {r["id"]: r["intent"] for r in read_jsonl(CORPUS / "review" / f"{who}_annotator.jsonl")}
         for split in ("train", "test", "test_style"):
             ids = [k for k in other if first[k][0] == split]
@@ -268,7 +262,7 @@ def route_metrics(y_lab: list[str], p_lab: list[str]) -> dict:
     wrong_action = sum(b in ACTION_ROUTES and a != b for a, b in zip(yr, pr))
     return {"n": n, "route_macro_f1": macro_f1(yr, pr, ROUTES), "route_accuracy": float(np.mean([a == b for a, b in zip(yr, pr)])),
             "wrong_action_rate": wrong_action / n, "wrong_action": wrong_action,
-            "cost_per_msg": float(np.mean([COST[a][b] for a, b in zip(yr, pr)])),
+            "cost_per_msg": float(np.mean([error_cost(a, b) for a, b in zip(y_lab, p_lab)])),
             "clarify_rate": float(np.mean([b == "clarify" for b in pr])),
             "handoff_to_dispute": sum(a == "handoff" and b == "dispute" for a, b in zip(yr, pr))}
 
@@ -317,14 +311,15 @@ def bootstrap(rows: list[dict], preds: dict[str, list[str]], reps: int = 2000, s
         y = [rows[i]["intent"] for i in idx]
         vals = {}
         for name, p in preds.items():
-            rm = route_metrics(y, [p[i] for i in idx])
+            pp = [p[i] for i in idx]
+            rm = {**route_metrics(y, pp), "macro_f1": macro_f1(y, pp, LABELS)}
             vals[name] = rm
-            stats[f"{name}.route_macro_f1"].append(rm["route_macro_f1"])
-            stats[f"{name}.wrong_action_rate"].append(rm["wrong_action_rate"])
-            stats[f"{name}.cost_per_msg"].append(rm["cost_per_msg"])
-        if "learned" in vals and "rules" in vals:
-            stats["diff.route_macro_f1"].append(vals["learned"]["route_macro_f1"] - vals["rules"]["route_macro_f1"])
-            stats["diff.cost_per_msg"].append(vals["learned"]["cost_per_msg"] - vals["rules"]["cost_per_msg"])
+            for k in ("macro_f1", "route_macro_f1", "wrong_action_rate", "cost_per_msg"):
+                stats[f"{name}.{k}"].append(rm[k])
+        for name in vals:
+            if name != "rules" and "rules" in vals:
+                for k in ("macro_f1", "cost_per_msg"):
+                    stats[f"diff_{name}.{k}"].append(vals[name][k] - vals["rules"][k])
     return {k: [float(np.percentile(v, 2.5)), float(np.percentile(v, 97.5))] for k, v in stats.items()}
 
 
@@ -400,47 +395,51 @@ def latency(fn, texts: list[str]) -> dict:
 
 
 # ============================================================================== figuras
-def figures(curves: dict, rel: dict, rules_point: dict, tau: float) -> list[str]:
+def figures(curves: dict, rel: dict, rules_point: dict, taus: dict) -> list[str]:
+    """curves/rel: {"dev"|"test": {sistema: ...}}; taus: {sistema: τ}. PNG estáticos (el reporte es Markdown)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    blue, orange, ink, muted = "#2a78d6", "#eb6834", "#0b0b0b", "#52514e"
+    # paleta categórica validada (skill dataviz): azul = lite (se despliega), aqua = full, naranja = reglas
+    color = {"lite": "#2a78d6", "full": "#1baf7a"}
+    orange, ink, muted = "#eb6834", "#0b0b0b", "#52514e"
+    label = {"lite": "lite (char)", "full": "full (char+MiniLM)"}
     plt.rcParams.update({"font.size": 10, "axes.edgecolor": muted, "axes.labelcolor": ink, "xtick.color": muted,
                          "ytick.color": muted, "axes.spines.top": False, "axes.spines.right": False})
     out = []
-    fig, ax = plt.subplots(figsize=(6.4, 4))
+    fig, ax = plt.subplots(figsize=(6.6, 4.2))
     for split, style in (("dev", "--"), ("test", "-")):
-        c = curves[split]
-        ax.plot([x["coverage"] for x in c], [x["wrong_action_rate"] * 100 for x in c], style, color=blue, lw=2,
-                label=f"aprendido ({'validación cruzada' if split == 'dev' else 'test'})")
-    for split in ("dev", "test"):
-        pt = next(x for x in curves[split] if abs(x["tau"] - tau) < 1e-9)
-        ax.plot(pt["coverage"], pt["wrong_action_rate"] * 100, "o", ms=8, color=blue, mec="white", mew=2)
+        for n, c in curves[split].items():
+            ax.plot([x["coverage"] for x in c], [x["wrong_action_rate"] * 100 for x in c], style, color=color[n], lw=2,
+                    label=f"{label[n]} · {'validación cruzada' if split == 'dev' else 'test'}")
+            pt = next(x for x in c if abs(x["tau"] - taus[n]) < 1e-9)
+            ax.plot(pt["coverage"], pt["wrong_action_rate"] * 100, "o", ms=8, color=color[n], mec="white", mew=2)
     ax.plot(rules_point["coverage"], rules_point["wrong_action_rate"] * 100, "s", ms=9, color=orange, mec="white",
-            mew=2, label="RuleRouter (test)")
+            mew=2, label="RuleRouter · test")
     ax.axhline(TARGET_WRONG_ACTION * 100, color=muted, lw=1, ls=":")
-    ax.text(0.02, TARGET_WRONG_ACTION * 100 + 0.2, f"objetivo {TARGET_WRONG_ACTION:.0%}", color=muted, fontsize=9)
+    ax.text(0.02, TARGET_WRONG_ACTION * 100 + 0.15, f"objetivo {TARGET_WRONG_ACTION:.0%}", color=muted, fontsize=9)
     ax.set_xlabel("Cobertura (mensajes sin abstención)")
     ax.set_ylabel("Mensajes con acción equivocada (%)")
-    ax.set_title(f"Cobertura vs. acción equivocada (umbral τ={tau:.2f} marcado)", color=ink, fontsize=11)
-    ax.legend(frameon=False, fontsize=9)
+    ax.set_title("Cobertura vs. acción equivocada (● = umbral τ elegido en validación)", color=ink, fontsize=11)
+    ax.legend(frameon=False, fontsize=8)
     ax.grid(alpha=0.25)
     fig.tight_layout()
     p = FIG_DIR / "intent_coverage.png"
     fig.savefig(p, dpi=150)
     plt.close(fig)
     out.append(p)
-    fig, ax = plt.subplots(figsize=(5, 4.2))
+    fig, ax = plt.subplots(figsize=(5.2, 4.4))
     ax.plot([0, 1], [0, 1], ":", color=muted, lw=1)
     for split, style in (("dev", "--"), ("test", "-")):
-        b = [x for x in rel[split] if x["n"] > 0]
-        ax.plot([x["conf"] for x in b], [x["acc"] for x in b], style, marker="o", ms=5, color=blue, lw=2,
-                label=f"aprendido ({'validación' if split == 'dev' else 'test'})")
+        for n, bins in rel[split].items():
+            b = [x for x in bins if x["n"] > 0]
+            ax.plot([x["conf"] for x in b], [x["acc"] for x in b], style, marker="o", ms=5, color=color[n], lw=2,
+                    label=f"{label[n]} · {'validación' if split == 'dev' else 'test'}")
     ax.set_xlabel("Confianza calibrada (máx. p)")
     ax.set_ylabel("Exactitud observada")
     ax.set_title("Diagrama de confiabilidad", color=ink, fontsize=11)
-    ax.legend(frameon=False, fontsize=9)
+    ax.legend(frameon=False, fontsize=8)
     ax.grid(alpha=0.25)
     fig.tight_layout()
     p = FIG_DIR / "intent_reliability.png"
@@ -528,96 +527,106 @@ def main() -> None:
     if a.stage == "dev":
         return
 
-    # ------------------------------------------------------------------ modelo final + test (una sola vez)
-    tr_texts = [r["text"] for r in train]
-    Xtr, char = features(chosen, tr_texts, tr_texts, cache)
-    W, b = fit_lr(Xtr, y_train, cs["C"])
-    parts = chosen.split("+")
-    from bankagent.intent_model import ConcatEncoder
-    encs = [char if p == "char" else cache.enc[p] for p in parts]
-    encoder = encs[0] if len(encs) == 1 else ConcatEncoder(encs)
+    # ------------------------------------------------------------------ modelos finales + test (una sola vez)
+    # Dos artefactos: `full` = el candidato elegido por la regla (evaluación offline) y `lite` = solo n-gramas de
+    # caracteres (el que se despliega: el deploy gratuito tiene 512 MB de RAM y 0.1 CPU, ver ADR 0009).
+    by_name = dict(table)
+    systems = {"full": (chosen, by_name[chosen], FULL_DIR)}
+    if "char" in by_name:
+        systems["lite"] = ("char", by_name["char"], LITE_DIR)
     corpus_hash = hashlib.sha256(b"".join(sha256(p).encode() for p in sorted((CORPUS / "train").glob("*.jsonl")))).hexdigest()
     model_id = {"char": "char2-5-tfidf", "m2v": f"{M2V[0]}@{M2V[1][:8]}", "minilm": f"{MINILM[0]}@{MINILM[1][:8]}",
                 "e5": f"{E5[0]}@{E5[1][:8]}"}
-    meta = {"version": "intent-v1", "model_id": "+".join(model_id[p] for p in parts), "candidate": chosen,
-            "C": cs["C"], "corpus_sha256": corpus_hash, "train_authors": sorted({r["author"] for r in train}),
-            "n_train": len(train), "trained_by": "scripts/train_intent.py", "target_wrong_action": TARGET_WRONG_ACTION,
-            "threshold_rule": cs["why"], "sklearn": __import__("sklearn").__version__, "numpy": np.__version__}
-    model = IntentModel(encoder, W, b, LABELS, cs["T"], cs["tau"], meta)
-    # reproducibilidad del artefacto: lo que se guarda (W en float16) debe predecir igual que lo entrenado
-    model.save(MODEL_DIR)
-    from bankagent.intent_model import load_intent_model
-    reloaded = load_intent_model(MODEL_DIR)
-    res: dict = {"meta": meta, "manifest": man, "agreement": agreement(), "leak_excluded": {k: sorted(v) for k, v in leak.items()},
+    from bankagent.intent_model import ConcatEncoder, load_intent_model
+    tr_texts = [r["text"] for r in train]
+    models, metas = {}, {}
+    for sname, (cand, s, out_dir) in systems.items():
+        Xtr, char = features(cand, tr_texts, tr_texts, cache)
+        W, b = fit_lr(Xtr, y_train, s["C"])
+        encs = [char if p == "char" else cache.enc[p] for p in cand.split("+")]
+        encoder = encs[0] if len(encs) == 1 else ConcatEncoder(encs)
+        meta = {"version": f"intent-v2-{sname}", "model_id": "+".join(model_id[p] for p in cand.split("+")),
+                "candidate": cand, "C": s["C"], "corpus_sha256": corpus_hash,
+                "train_authors": sorted({r["author"] for r in train}), "n_train": len(train),
+                "trained_by": "scripts/train_intent.py", "target_wrong_action": TARGET_WRONG_ACTION,
+                "threshold_rule": s["why"], "sklearn": __import__("sklearn").__version__, "numpy": np.__version__}
+        model = IntentModel(encoder, W, b, LABELS, s["T"], s["tau"], meta)
+        model.save(out_dir)
+        reloaded = load_intent_model(out_dir)  # lo que se evalúa es exactamente lo que se versiona
+        chk = [r["text"] for r in train[:50]]
+        assert np.allclose(reloaded.predict_proba(chk), model.predict_proba(chk), atol=2e-3), "artefacto != modelo"
+        models[sname], metas[sname] = reloaded, {**meta, "tau": s["tau"], "T": s["T"],
+                                                 "artifact_mb": dir_size_mb(list(out_dir.glob("*")))}
+    res: dict = {"meta": metas, "chosen": chosen, "manifest": man, "agreement": agreement(),
+                 "leak_excluded": {k: sorted(v) for k, v in leak.items()},
                  "selection": {c: {k: v for k, v in s.items() if k not in ("probs", "curve")} for c, s in table},
                  "latency": lat, "dev_rules": dev_rules_rm, "splits": {}}
-    curves = {"dev": cs["curve"]}
-    rel = {"dev": reliability(cs["probs"], y_idx_train)}
+    curves = {"dev": {n: by_name[c]["curve"] for n, (c, _, _) in systems.items()}}
+    rel = {"dev": {n: reliability(by_name[c]["probs"], y_idx_train) for n, (c, _, _) in systems.items()}}
     for split, rows in tests.items():
         texts, y = [r["text"] for r in rows], [r["intent"] for r in rows]
         y_idx = np.array([LABELS.index(v) for v in y])
-        probs = reloaded.predict_proba(texts)
-        assert np.allclose(probs, model.predict_proba(texts), atol=2e-3), "artefacto guardado != modelo entrenado"
-        learned = label_preds(probs, cs["tau"])
-        learned_noabs = label_preds(probs, 0.0)
         rules, rules_conf, _ = rules_predict(texts)
-        correct = probs.argmax(axis=1) == y_idx
-        seeds = []
-        for sd in SEEDS:  # variabilidad: re-entrenar con 85% de las familias de train
-            rng = np.random.default_rng(sd)
-            fams = sorted({r["family"] for r in train})
-            keep = set(rng.choice(fams, int(0.85 * len(fams)), replace=False))
-            sub = [r for r in train if r["family"] in keep]
-            Xs, _ = features(chosen, [r["text"] for r in sub], [r["text"] for r in sub], cache)
-            Xt, _ = features(chosen, [r["text"] for r in sub], texts, cache)
-            Ws, bs = fit_lr(Xs, [r["intent"] for r in sub], cs["C"], sd)
-            ps = label_preds(softmax(Xt @ Ws + bs, cs["T"]), cs["tau"])
-            seeds.append({"seed": sd, "macro_f1": macro_f1(y, ps, LABELS), **route_metrics(y, ps)})
+        preds, R = {"rules": rules}, {}
+        R["rules"] = {"macro_f1": macro_f1(y, rules, LABELS), "per_label": prf(y, rules, LABELS),
+                      "confusion": confusion(y, rules, LABELS), **route_metrics(y, rules),
+                      "coverage": float(np.mean([c >= 0.6 for c in rules_conf]))}
+        curves[split], rel[split], seeds = {}, {}, {}
+        for sname, (cand, s, _) in systems.items():
+            probs = models[sname].predict_proba(texts)
+            lab = label_preds(probs, s["tau"])
+            noabs = label_preds(probs, 0.0)
+            preds[sname] = lab
+            R[sname] = {"macro_f1": macro_f1(y, lab, LABELS), "per_label": prf(y, lab, LABELS),
+                        "confusion": confusion(y, lab, LABELS), **route_metrics(y, lab),
+                        "coverage": float((probs.max(axis=1) >= s["tau"]).mean()),
+                        "ece": ece(probs, probs.argmax(axis=1) == y_idx),
+                        "macro_f1_no_abstention": macro_f1(y, noabs, LABELS),
+                        "route_no_abstention": route_metrics(y, noabs), "p": probs.max(axis=1).round(3).tolist()}
+            curves[split][sname] = coverage_curve(probs, y)
+            rel[split][sname] = reliability(probs, y_idx)
+            seeds[sname] = []
+            for sd in SEEDS:  # variabilidad: re-entrenar con 85% de las familias de train
+                rng = np.random.default_rng(sd)
+                fams = sorted({r["family"] for r in train})
+                keep = set(rng.choice(fams, int(0.85 * len(fams)), replace=False))
+                sub = [r for r in train if r["family"] in keep]
+                Xs, _ = features(cand, [r["text"] for r in sub], [r["text"] for r in sub], cache)
+                Xt, _ = features(cand, [r["text"] for r in sub], texts, cache)
+                Ws, bs = fit_lr(Xs, [r["intent"] for r in sub], s["C"], sd)
+                ps = label_preds(softmax(Xt @ Ws + bs, s["T"]), s["tau"])
+                seeds[sname].append({"seed": sd, "macro_f1": macro_f1(y, ps, LABELS), **route_metrics(y, ps)})
         by = {}
-        for key in ("dialect", "style", "hard_negative"):
+        for key in ("author", "dialect", "style", "hard_negative"):
             groups = defaultdict(list)
             for i, r in enumerate(rows):
                 g = r.get(key)
                 g = str(g).split(",")[0].strip() if key == "style" else g
                 groups[str(g)].append(i)
-            by[key] = {g: {"n": len(ix),
-                           "learned_acc": float(np.mean([ROUTE[learned[i]] == ROUTE[y[i]] for i in ix])),
-                           "rules_acc": float(np.mean([ROUTE[rules[i]] == ROUTE[y[i]] for i in ix]))}
+            by[key] = {g: {"n": len(ix), **{n: float(np.mean([p[i] == y[i] for i in ix])) for n, p in preds.items()}}
                        for g, ix in sorted(groups.items())}
-        errors = [{"id": r["id"], "text": r["text"], "dialect": r["dialect"], "true": y[i], "learned": learned[i],
-                   "p": round(float(probs[i].max()), 3), "rules": rules[i]}
-                  for i, r in enumerate(rows) if ROUTE[learned[i]] != ROUTE[y[i]] or ROUTE[rules[i]] != ROUTE[y[i]]]
-        res["splits"][split] = {
-            "n": len(rows), "families": len({r["family"] for r in rows}),
-            "counts": dict(Counter(y)),
-            "learned": {"macro_f1": macro_f1(y, learned, LABELS), "per_label": prf(y, learned, LABELS),
-                        "confusion": confusion(y, learned, LABELS), **route_metrics(y, learned),
-                        "coverage": float((probs.max(axis=1) >= cs["tau"]).mean()),
-                        "ece": ece(probs, correct), "macro_f1_no_abstention": macro_f1(y, learned_noabs, LABELS),
-                        "route_no_abstention": route_metrics(y, learned_noabs)},
-            "rules": {"macro_f1": macro_f1(y, rules, LABELS), "per_label": prf(y, rules, LABELS),
-                      "confusion": confusion(y, rules, LABELS), **route_metrics(y, rules),
-                      "coverage": float(np.mean([c >= 0.6 for c in rules_conf]))},
-            "route_confusion": {"learned": confusion([ROUTE[v] for v in y], [ROUTE[v] for v in learned], ROUTES),
-                                "rules": confusion([ROUTE[v] for v in y], [ROUTE[v] for v in rules], ROUTES)},
-            "seeds": seeds, "ci95": bootstrap(rows, {"learned": learned, "rules": rules}),
-            "by": by, "errors": errors}
-        curves[split] = coverage_curve(probs, y)
-        rel[split] = reliability(probs, y_idx)
-        L, R = res["splits"][split]["learned"], res["splits"][split]["rules"]
-        print(f"== {split}: n={len(rows)} aprendido macroF1={L['macro_f1']:.3f} rutaF1={L['route_macro_f1']:.3f} "
-              f"acción_mal={L['wrong_action_rate']:.3f} costo={L['cost_per_msg']:.3f} | reglas rutaF1={R['route_macro_f1']:.3f} "
-              f"acción_mal={R['wrong_action_rate']:.3f} costo={R['cost_per_msg']:.3f}")
-    res["curves"] = {k: v for k, v in curves.items()}
-    res["reliability"] = rel
-    tR = res["splits"]["test"]["rules"]
-    res["figures"] = figures(curves, rel, {"coverage": tR["coverage"], "wrong_action_rate": tR["wrong_action_rate"]}, cs["tau"])
-    res["artifact_mb"] = dir_size_mb(list(MODEL_DIR.glob("*")))
+        errors = [{"id": r["id"], "text": r["text"], "dialect": r["dialect"], "true": y[i],
+                   **{n: p[i] for n, p in preds.items()}, **{f"p_{n}": R[n]["p"][i] for n in systems}}
+                  for i, r in enumerate(rows) if any(p[i] != y[i] for p in preds.values())]
+        for n in systems:
+            R[n].pop("p")
+        res["splits"][split] = {"n": len(rows), "families": len({r["family"] for r in rows}),
+                                "counts": dict(Counter(y)), "systems": R, "seeds": seeds,
+                                "route_confusion": {n: confusion([ROUTE[v] for v in y], [ROUTE[v] for v in p], ROUTES)
+                                                    for n, p in preds.items()},
+                                "ci95": bootstrap(rows, preds), "by": by, "errors": errors}
+        print(f"== {split}: n={len(rows)} " + " | ".join(
+            f"{n} F1={R[n]['macro_f1']:.3f} acción_mal={R[n]['wrong_action_rate']:.3f} costo={R[n]['cost_per_msg']:.3f}"
+            for n in R))
+    res["curves"], res["reliability"] = curves, rel
+    tR = res["splits"]["test"]["systems"]["rules"]
+    res["figures"] = figures(curves, rel, {"coverage": tR["coverage"], "wrong_action_rate": tR["wrong_action_rate"]},
+                             {n: s["tau"] for n, (_, s, _) in systems.items()})
     res["env"] = {"python": platform.python_version(), "machine": platform.machine(), "processor": platform.processor()}
     RESULTS.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float) + "\n", encoding="utf-8")
     from intent_report import write_report  # noqa: E402 (mismo directorio)
     REPORT.write_text(write_report(res, data, tests), encoding="utf-8")
-    print(f"-> {REPORT}\n-> {RESULTS}\n-> {MODEL_DIR} ({res['artifact_mb']} MB)")
+    print(f"-> {REPORT}\n-> {RESULTS}\n-> " + ", ".join(f"{d} ({metas[n]['artifact_mb']} MB)" for n, (_, _, d) in systems.items()))
 
 
 if __name__ == "__main__":

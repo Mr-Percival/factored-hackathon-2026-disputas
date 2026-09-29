@@ -1,0 +1,144 @@
+{"text": "¿en qué va mi reclamo DSP-4821?", "intent": "dispute_status", "dialect": "es-MX", "family": "F-001", "hard_negative": false, "style": "chat"}
+{"text": "Buenas, quisiera saber el estado del caso DSP-4821, por favor", "intent": "dispute_status", "dialect": "es-CO", "family": "F-001", "hard_negative": false, "style": "formal"}
+{"text": "¿me decís en qué quedó mi reclamo DSP-4821?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-001", "hard_negative": false, "style": "voz"}
+{"text": "hace una semana abrí un reclamo y nadie me dice nada", "intent": "dispute_status", "dialect": "es-MX", "family": "F-002", "hard_negative": false, "style": "chat"}
+{"text": "hace una semana hice un reclamo y no me contestaron nada, ¿qué pasó?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-002", "hard_negative": false, "style": "chat"}
+{"text": "abrí un reclamo hace 8 días y sigo sin respuesta", "intent": "dispute_status", "dialect": "es-CO", "family": "F-002", "hard_negative": false, "style": "terse"}
+{"text": "qual o andamento da minha contestação?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-003", "hard_negative": false, "style": "chat"}
+{"text": "Gostaria de saber o andamento da contestação do protocolo DSP-0932", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-003", "hard_negative": false, "style": "formal"}
+{"text": "abri uma contestação semana passada e ninguém me responde", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-003", "hard_negative": false, "style": "chat"}
+{"text": "ya pasaron 10 dias del reclamo q abri y nada, q paso con dsp 77a1", "intent": "dispute_status", "dialect": "es-CO", "family": "F-004", "hard_negative": false, "style": "typos"}
+{"text": "estatus de mi disputa dsp 77a1", "intent": "dispute_status", "dialect": "es-MX", "family": "F-004", "hard_negative": false, "style": "terse"}
+{"text": "novedades de mi reclamo dsp 77a1?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-004", "hard_negative": false, "style": "terse"}
+{"text": "Buen día. Presenté una aclaración por un cargo hace dos semanas y quisiera conocer su resolución.", "intent": "dispute_status", "dialect": "es-MX", "family": "F-005", "hard_negative": false, "style": "formal"}
+{"text": "Cordial saludo, solicito información sobre la respuesta a la disputa que radiqué hace dos semanas.", "intent": "dispute_status", "dialect": "es-CO", "family": "F-005", "hard_negative": false, "style": "formal"}
+{"text": "Buenas tardes, quisiera conocer el resultado de la disputa que inicié hace dos semanas.", "intent": "dispute_status", "dialect": "es-AR", "family": "F-005", "hard_negative": false, "style": "formal"}
+{"text": "ya llevo 15 días esperando la respuesta de mi reclamo, esto es una burla!!", "intent": "dispute_status", "dialect": "es-CO", "family": "F-006", "hard_negative": false, "style": "anger"}
+{"text": "ya van 15 días y nadie resuelve mi reclamo, qué poca madre", "intent": "dispute_status", "dialect": "es-MX", "family": "F-006", "hard_negative": false, "style": "anger"}
+{"text": "15 días que espero respuesta por mi reclamo, es un desastre, ¿qué pasó?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-006", "hard_negative": false, "style": "anger"}
+{"text": "já faz 15 dias que abri a contestação e nada, que absurdo", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-007", "hard_negative": false, "style": "anger"}
+{"text": "cadê a resposta da minha contestação?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-007", "hard_negative": false, "style": "terse"}
+{"text": "caso DSP-0932 ya lo resolvieron?", "intent": "dispute_status", "dialect": "es-MX", "family": "F-008", "hard_negative": false, "style": "chat"}
+{"text": "caso DSP-0932 ¿cómo va?", "intent": "dispute_status", "dialect": "es-CO", "family": "F-008", "hard_negative": false, "style": "terse"}
+{"text": "caso DSP-0932, ¿hay novedades?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-008", "hard_negative": false, "style": "terse"}
+{"text": "che, ¿me podés decir si ya me devolvieron la plata del reclamo que hice por la app?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-009", "hard_negative": false, "style": "voz"}
+{"text": "oye ya me devolvieron el dinero del reclamo que hice en la app?", "intent": "dispute_status", "dialect": "es-MX", "family": "F-009", "hard_negative": false, "style": "chat"}
+{"text": "ya me devolvieron la plata del reclamo que hice por la app?", "intent": "dispute_status", "dialect": "es-CO", "family": "F-009", "hard_negative": false, "style": "chat"}
+{"text": "hice una contestação hace unos días, ¿ya tem alguna resposta?", "intent": "dispute_status", "dialect": "mix", "family": "F-010", "hard_negative": false, "style": "portuñol"}
+{"text": "abri um reclamo semana pasada, ¿me dicen o andamento?", "intent": "dispute_status", "dialect": "mix", "family": "F-010", "hard_negative": false, "style": "portuñol"}
+{"text": "protocolo DSP-2210, tem alguma atualização?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-011", "hard_negative": false, "style": "chat"}
+{"text": "Poderiam me informar a situação do protocolo DSP-2210?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-011", "hard_negative": false, "style": "formal"}
+{"text": "folio DSP-2210, hay alguna actualización?", "intent": "dispute_status", "dialect": "es-MX", "family": "F-011", "hard_negative": false, "style": "chat"}
+{"text": "ola, kiero saber como va mi reclamo, lo abri x el chat ayer", "intent": "dispute_status", "dialect": "es-CO", "family": "F-012", "hard_negative": false, "style": "typos"}
+{"text": "hola, kiero saber como va mi reclamo, lo abri x whatsapp ayer", "intent": "dispute_status", "dialect": "es-MX", "family": "F-012", "hard_negative": false, "style": "typos"}
+{"text": "hola quiero saber como va el reclamo q abri x whatsapp ayer", "intent": "dispute_status", "dialect": "es-AR", "family": "F-012", "hard_negative": false, "style": "typos"}
+{"text": "Hola, el mes pasado me cobraron un monto que no reconocía y abrí una disputa desde la web. Ya pasó más de lo que me dijeron y no recibí ningún mail ni nada. ¿En qué estado está?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-013", "hard_negative": false, "style": "largo"}
+{"text": "Hola, hace unos días levanté una disputa por un cargo raro desde la app y me dijeron que en 5 días hábiles tendría respuesta. Ya pasaron y nada. ¿Cómo va?", "intent": "dispute_status", "dialect": "es-MX", "family": "F-013", "hard_negative": false, "style": "largo"}
+{"text": "Oi, semana passada contestei uma compra que eu não fiz pelo app, disseram que em 5 dias úteis teria retorno. Já passou e nada. Como está?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-014", "hard_negative": false, "style": "largo"}
+{"text": "Hola, el lunes puse un reclamo por una compra que no hice y me dijeron que me respondían en 5 días hábiles. Ya pasó ese plazo, ¿en qué va?", "intent": "dispute_status", "dialect": "es-CO", "family": "F-014", "hard_negative": false, "style": "largo"}
+{"text": "¿ya resolvieron mi disputa? 😡 llevo días esperando", "intent": "dispute_status", "dialect": "es-MX", "family": "F-015", "hard_negative": false, "style": "emoji"}
+{"text": "¿ya resolvieron mi disputa? 😤 hace días que espero", "intent": "dispute_status", "dialect": "es-AR", "family": "F-015", "hard_negative": false, "style": "emoji"}
+{"text": "já resolveram minha contestação? 😡 faz dias que espero", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-015", "hard_negative": false, "style": "emoji"}
+{"text": "me llegó un correo diciendo que mi reclamo está en revisión, ¿cuánto falta?", "intent": "dispute_status", "dialect": "es-CO", "family": "F-016", "hard_negative": false, "style": "chat"}
+{"text": "recebi um aviso que minha contestação está em análise, quanto falta?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-016", "hard_negative": false, "style": "chat"}
+{"text": "me llegó un mail que dice que mi reclamo está en análisis, ¿cuánto falta?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-016", "hard_negative": false, "style": "chat"}
+{"text": "¿aprobaron mi disputa o la rechazaron? DSP-5503", "intent": "dispute_status", "dialect": "es-MX", "family": "F-017", "hard_negative": false, "style": "chat"}
+{"text": "¿aprobaron mi disputa o me la rechazaron? DSP-5503", "intent": "dispute_status", "dialect": "es-AR", "family": "F-017", "hard_negative": false, "style": "chat"}
+{"text": "aprovaram ou negaram minha contestação DSP-5503?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-017", "hard_negative": false, "style": "chat"}
+{"text": "quero saber como está meu reclamo DSP-3184, llevo una semana esperando", "intent": "dispute_status", "dialect": "mix", "family": "F-018", "hard_negative": false, "style": "portuñol"}
+{"text": "quiero saber cómo está mi reclamo DSP-3184", "intent": "dispute_status", "dialect": "es-CO", "family": "F-018", "hard_negative": false, "style": "terse"}
+{"text": "quiero cancelar la disputa que abrí ayer", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-019", "hard_negative": false, "style": "chat"}
+{"text": "quiero cancelar el reclamo que puse ayer", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-019", "hard_negative": false, "style": "chat"}
+{"text": "quiero cancelar el reclamo que hice ayer", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-019", "hard_negative": false, "style": "voz"}
+{"text": "ya reconocí el cargo, era mío, retiren el reclamo", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-020", "hard_negative": false, "style": "chat"}
+{"text": "ya reconocí el cargo, era mío, retiren el reclamo por favor", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-020", "hard_negative": false, "style": "voz"}
+{"text": "ya me acordé, el cargo sí era mío, retiren el reclamo", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-020", "hard_negative": false, "style": "chat"}
+{"text": "pode cancelar a contestação, era minha", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-021", "hard_negative": false, "style": "chat"}
+{"text": "Gostaria de cancelar a contestação DSP-1177, a compra era minha mesmo.", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-021", "hard_negative": false, "style": "formal"}
+{"text": "cancela a contestação, lembrei que era minha compra", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-021", "hard_negative": false, "style": "terse"}
+{"text": "cancelen la disputa DSP-2290", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-022", "hard_negative": false, "style": "terse"}
+{"text": "cancelen el reclamo DSP-2290", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-022", "hard_negative": false, "style": "terse"}
+{"text": "cancelame el reclamo DSP-2290", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-022", "hard_negative": false, "style": "terse"}
+{"text": "me equivoqué, el cargo lo hizo mi señora. ¿me anulás el reclamo?", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-023", "hard_negative": false, "style": "voz"}
+{"text": "me equivoqué, el cargo lo hizo mi esposa. ¿me cancelan el reclamo?", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-023", "hard_negative": false, "style": "chat"}
+{"text": "me equivoqué, el cargo lo hizo mi esposa. ¿me anulan el reclamo?", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-023", "hard_negative": false, "style": "chat"}
+{"text": "Buenas tardes, deseo desistir de la disputa radicada con número DSP-4410.", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-024", "hard_negative": false, "style": "formal"}
+{"text": "Buenas tardes, deseo desistir de la disputa con folio DSP-4410.", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-024", "hard_negative": false, "style": "formal"}
+{"text": "Boa tarde, desejo desistir da contestação de protocolo DSP-4410.", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-024", "hard_negative": false, "style": "formal"}
+{"text": "ya no quiero seguir con el reclamo, retirenlo xfa, el cargo si era mio", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-025", "hard_negative": false, "style": "typos"}
+{"text": "retiren el reclamo xfa, ya vi q el cargo si era mio", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-025", "hard_negative": false, "style": "typos"}
+{"text": "retirá el reclamo x favor, el cargo si era mio", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-025", "hard_negative": false, "style": "typos"}
+{"text": "vc pode retirar minha disputa? o gasto era meu, esqueci", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-026", "hard_negative": false, "style": "typos"}
+{"text": "retira a contestação por favor, esqueci que a compra era minha", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-026", "hard_negative": false, "style": "chat"}
+{"text": "ya me devolvieron la plata, entonces dejen de investigar y cierren el reclamo", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-027", "hard_negative": false, "style": "anger"}
+{"text": "ya me regresaron el dinero, cierren el reclamo por favor", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-027", "hard_negative": false, "style": "chat"}
+{"text": "ya me devolvieron la guita, cierren el reclamo", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-027", "hard_negative": false, "style": "chat"}
+{"text": "Hola, la semana pasada denuncié un cargo de un comercio, pero revisando el resumen me di cuenta de que lo hice yo. Quiero retirar la disputa para que no bloqueen nada.", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-028", "hard_negative": false, "style": "largo"}
+{"text": "Hola, la semana pasada reclamé un cargo de una tienda pero revisando mi estado de cuenta vi que sí lo hice yo. Quiero retirar la disputa.", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-028", "hard_negative": false, "style": "largo"}
+{"text": "Oi, semana passada contestei uma cobrança, mas conferindo a fatura vi que foi eu mesmo que fiz. Quero retirar a contestação, por favor.", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-029", "hard_negative": false, "style": "largo"}
+{"text": "oi, quero cancelar o reclamo que hice, o cargo era mío sim", "intent": "cancel_dispute", "dialect": "mix", "family": "F-029", "hard_negative": false, "style": "portuñol"}
+{"text": "desisto del reclamo, ya hablé con el comercio y me solucionaron", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-030", "hard_negative": false, "style": "chat"}
+{"text": "desisto del reclamo, ya hablé con la tienda y me lo resolvieron", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-030", "hard_negative": false, "style": "chat"}
+{"text": "desisto da contestação, já falei com a loja e resolveram", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-030", "hard_negative": false, "style": "chat"}
+{"text": "ups 😅 el cargo sí era mío, ¿pueden cancelar mi reclamo?", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-031", "hard_negative": false, "style": "emoji"}
+{"text": "uy 😅 el cargo era mío, ¿pueden cancelar mi reclamo?", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-031", "hard_negative": false, "style": "emoji"}
+{"text": "ops 😅 a compra era minha, podem cancelar a contestação?", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-031", "hard_negative": false, "style": "emoji"}
+{"text": "dsp 77a1 cancelalo, no hace falta seguir", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-032", "hard_negative": false, "style": "chat"}
+{"text": "dsp 77a1 cancélelo, ya no es necesario", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-032", "hard_negative": false, "style": "chat"}
+{"text": "dsp 77a1 cancélenlo, ya no hace falta", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-032", "hard_negative": false, "style": "chat"}
+{"text": "ya no me interesa la disputa, quiero que la retiren", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-033", "hard_negative": false, "style": "chat"}
+{"text": "ya no me interesa la disputa, quiero retirarla", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-033", "hard_negative": false, "style": "chat"}
+{"text": "não tenho mais interesse na contestação, quero retirar", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "F-033", "hard_negative": false, "style": "chat"}
+{"text": "quiero cancelar a minha disputa DSP-8041, foi um engano meu", "intent": "cancel_dispute", "dialect": "mix", "family": "F-034", "hard_negative": false, "style": "portuñol"}
+{"text": "pode anular o reclamo que abrí, foi engano", "intent": "cancel_dispute", "dialect": "mix", "family": "F-034", "hard_negative": false, "style": "portuñol"}
+{"text": "no quería reclamar nada, se me cruzó el dedo en la app. Anulá eso ya", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-035", "hard_negative": false, "style": "anger"}
+{"text": "no quería reclamar nada, se me fue el dedo en la app. Cancélenlo", "intent": "cancel_dispute", "dialect": "es-MX", "family": "F-035", "hard_negative": false, "style": "chat"}
+{"text": "Solicito retirar formalmente la reclamación que presenté por el cargo de ayer, ya lo identifiqué como propio.", "intent": "cancel_dispute", "dialect": "es-CO", "family": "F-036", "hard_negative": false, "style": "formal"}
+{"text": "Solicito retirar formalmente el reclamo que presenté por el cargo de ayer, ya lo identifiqué como propio.", "intent": "cancel_dispute", "dialect": "es-AR", "family": "F-036", "hard_negative": false, "style": "formal"}
+{"text": "¿cuánto tarda una disputa en general?", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-037", "hard_negative": true, "style": "chat"}
+{"text": "¿cuánto se demora normalmente un reclamo?", "intent": "out_of_scope", "dialect": "es-CO", "family": "F-037", "hard_negative": true, "style": "chat"}
+{"text": "¿cuánto suele tardar una disputa?", "intent": "out_of_scope", "dialect": "es-AR", "family": "F-037", "hard_negative": true, "style": "chat"}
+{"text": "quanto tempo demora uma contestação normalmente?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "F-038", "hard_negative": true, "style": "chat"}
+{"text": "¿Cuál es el plazo máximo que tiene el banco para resolver una aclaración?", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-038", "hard_negative": true, "style": "formal"}
+{"text": "¿cómo funciona una disputa? ¿qué pasos tiene?", "intent": "out_of_scope", "dialect": "es-AR", "family": "F-039", "hard_negative": true, "style": "chat"}
+{"text": "¿cómo funciona un reclamo? ¿qué pasos tiene?", "intent": "out_of_scope", "dialect": "es-CO", "family": "F-039", "hard_negative": true, "style": "chat"}
+{"text": "como funciona uma contestação? quais as etapas?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "F-039", "hard_negative": true, "style": "chat"}
+{"text": "¿me explican qué documentos piden cuando uno hace una disputa?", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-040", "hard_negative": true, "style": "chat"}
+{"text": "¿qué papeles piden cuando uno hace un reclamo?", "intent": "out_of_scope", "dialect": "es-AR", "family": "F-040", "hard_negative": true, "style": "chat"}
+{"text": "quiero poner un reclamo por mala atención en la sucursal", "intent": "out_of_scope", "dialect": "es-CO", "family": "F-041", "hard_negative": true, "style": "chat"}
+{"text": "quiero presentar una queja por la mala atención en el banco", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-041", "hard_negative": true, "style": "chat"}
+{"text": "quero reclamar do mau atendimento na agência", "intent": "out_of_scope", "dialect": "pt-BR", "family": "F-041", "hard_negative": true, "style": "chat"}
+{"text": "quiero abrir un reclamo por un cargo de 890 en Mercado Libre que no hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "F-042", "hard_negative": true, "style": "chat"}
+{"text": "quiero abrir un reclamo por un cobro de 89.000 que no hice", "intent": "dispute_charge", "dialect": "es-CO", "family": "F-042", "hard_negative": true, "style": "chat"}
+{"text": "quiero hacer un reclamo por un cargo de 4500 que no reconozco", "intent": "dispute_charge", "dialect": "es-AR", "family": "F-042", "hard_negative": true, "style": "chat"}
+{"text": "quero abrir uma contestação de uma compra de 250 que eu não fiz", "intent": "dispute_charge", "dialect": "pt-BR", "family": "F-043", "hard_negative": true, "style": "chat"}
+{"text": "kiero abrir una disputa xq me cobraron dos veces la misma compra", "intent": "dispute_charge", "dialect": "es-MX", "family": "F-043", "hard_negative": true, "style": "typos"}
+{"text": "necesito iniciar una disputa, me cobraron dos veces el súper", "intent": "dispute_charge", "dialect": "es-AR", "family": "F-043", "hard_negative": true, "style": "chat"}
+{"text": "hice un reclamo ayer pero hay otro cargo nuevo que tampoco reconozco", "intent": "dispute_charge", "dialect": "es-CO", "family": "F-044", "hard_negative": true, "style": "chat"}
+{"text": "ya abrí un reclamo pero ahorita apareció otro cargo que no hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "F-044", "hard_negative": true, "style": "chat"}
+{"text": "ya hice un reclamo, pero apareció otro cargo que no hice", "intent": "dispute_charge", "dialect": "es-AR", "family": "F-044", "hard_negative": true, "style": "chat"}
+{"text": "quiero cancelar mi tarjeta", "intent": "block_card", "dialect": "es-MX", "family": "F-045", "hard_negative": true, "style": "chat"}
+{"text": "necesito cancelar mi tarjeta, la perdí", "intent": "block_card", "dialect": "es-CO", "family": "F-045", "hard_negative": true, "style": "chat"}
+{"text": "quiero cancelar mi tarjeta, la perdí en el bondi", "intent": "block_card", "dialect": "es-AR", "family": "F-045", "hard_negative": true, "style": "chat"}
+{"text": "quero cancelar meu cartão, perdi ontem", "intent": "block_card", "dialect": "pt-BR", "family": "F-046", "hard_negative": true, "style": "chat"}
+{"text": "cancelen mi tarjeta por favor, me la robaron", "intent": "block_card", "dialect": "es-MX", "family": "F-046", "hard_negative": true, "style": "chat"}
+{"text": "quero cancelar mi tarjeta, la perdi", "intent": "block_card", "dialect": "mix", "family": "F-046", "hard_negative": true, "style": "portuñol"}
+{"text": "gracias por la respuesta del reclamo, era todo", "intent": "closing", "dialect": "es-MX", "family": "F-047", "hard_negative": true, "style": "chat"}
+{"text": "gracias por la respuesta sobre mi reclamo, eso era todo", "intent": "closing", "dialect": "es-CO", "family": "F-047", "hard_negative": true, "style": "chat"}
+{"text": "gracias por la respuesta del reclamo, eso era todo, chau", "intent": "closing", "dialect": "es-AR", "family": "F-047", "hard_negative": true, "style": "chat"}
+{"text": "obrigado pela resposta da contestação, era só isso", "intent": "closing", "dialect": "pt-BR", "family": "F-048", "hard_negative": true, "style": "chat"}
+{"text": "gracias pela resposta do reclamo, tchau", "intent": "closing", "dialect": "mix", "family": "F-048", "hard_negative": true, "style": "portuñol"}
+{"text": "no quiero cancelar nada, solo quiero pagar mi compra en cuotas", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-049", "hard_negative": true, "style": "chat"}
+{"text": "reconozco el cargo pero quiero pagarlo en cuotas", "intent": "out_of_scope", "dialect": "es-AR", "family": "F-049", "hard_negative": true, "style": "chat"}
+{"text": "reconozco el cobro pero lo quiero diferir a cuotas", "intent": "out_of_scope", "dialect": "es-CO", "family": "F-049", "hard_negative": true, "style": "chat"}
+{"text": "cancelé la suscripción hace un mes y me siguen cobrando, quiero reclamar", "intent": "dispute_charge", "dialect": "es-AR", "family": "F-050", "hard_negative": true, "style": "chat"}
+{"text": "cancelei a assinatura mês passado e continuam cobrando, quero contestar", "intent": "dispute_charge", "dialect": "pt-BR", "family": "F-050", "hard_negative": true, "style": "chat"}
+{"text": "cancelé la suscripción hace un mes y me siguen cobrando, quiero un reclamo", "intent": "dispute_charge", "dialect": "es-CO", "family": "F-050", "hard_negative": true, "style": "chat"}
+{"text": "pásame con un asesor, quiero saber cómo va mi reclamo DSP-7315", "intent": "dispute_status", "dialect": "es-MX", "family": "F-051", "hard_negative": true, "style": "human"}
+{"text": "quiero hablar con una persona para saber cómo va mi reclamo DSP-7315", "intent": "dispute_status", "dialect": "es-CO", "family": "F-051", "hard_negative": true, "style": "human"}
+{"text": "quero falar com um atendente, cadê minha contestação DSP-1042?", "intent": "dispute_status", "dialect": "pt-BR", "family": "F-052", "hard_negative": true, "style": "human"}
+{"text": "quiero hablar con un humano, ¿qué pasó con mi reclamo DSP-1042?", "intent": "dispute_status", "dialect": "es-AR", "family": "F-052", "hard_negative": true, "style": "human"}
+{"text": "¿cuál es la comisión por cancelar una tarjeta?", "intent": "out_of_scope", "dialect": "es-AR", "family": "F-053", "hard_negative": true, "style": "chat"}
+{"text": "¿cuánto cobran por reponer una tarjeta?", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-053", "hard_negative": true, "style": "chat"}
+{"text": "quiero cambiar la fecha de pago, ya no quiero cancelar el crédito", "intent": "out_of_scope", "dialect": "es-MX", "family": "F-054", "hard_negative": true, "style": "chat"}
+{"text": "¿puedo cancelar mi crédito anticipadamente?", "intent": "out_of_scope", "dialect": "es-CO", "family": "F-054", "hard_negative": true, "style": "chat"}

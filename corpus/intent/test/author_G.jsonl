@@ -1,0 +1,110 @@
+{"text": "¿en qué va mi reclamo DSP-4827?", "intent": "dispute_status", "dialect": "es-MX", "family": "G-001", "hard_negative": false, "style": "terse"}
+{"text": "Hola, quisiera saber el estatus de mi aclaración con folio DSP-4827, por favor.", "intent": "dispute_status", "dialect": "es-MX", "family": "G-001", "hard_negative": false, "style": "formal"}
+{"text": "como va el DSP-4827?? ya van dias", "intent": "dispute_status", "dialect": "es-MX", "family": "G-001", "hard_negative": false, "style": "typos"}
+{"text": "che, hace dos semanas abrí un reclamo por un cobro raro y nadie me dice nada, ¿me contás cómo viene?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-002", "hard_negative": false, "style": "chat"}
+{"text": "abri una disputa hace como 15 dias y sigo sin novedades, sabés algo vos?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-002", "hard_negative": false, "style": "typos"}
+{"text": "qual o andamento da minha contestação?", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-003", "hard_negative": false, "style": "terse"}
+{"text": "oi, queria saber em que pé está a contestação que abri semana passada", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-003", "hard_negative": false, "style": "chat"}
+{"text": "ja faz 10 dias q abri a contestacao e ninguem me responde", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-003", "hard_negative": false, "style": "typos"}
+{"text": "Buenas tardes, quisiera consultar el estado de la disputa que radiqué el lunes por un cobro de Rappi.", "intent": "dispute_status", "dialect": "es-CO", "family": "G-004", "hard_negative": false, "style": "formal"}
+{"text": "q paso con el reclamo q puse el lunes x lo de rappi", "intent": "dispute_status", "dialect": "es-CO", "family": "G-004", "hard_negative": false, "style": "typos"}
+{"text": "oi, queria saber como va mi reclamo, o protocolo é DSP-1093", "intent": "dispute_status", "dialect": "mix", "family": "G-005", "hard_negative": false, "style": "chat"}
+{"text": "hola, cual o status da minha disputa DSP-1093?", "intent": "dispute_status", "dialect": "mix", "family": "G-005", "hard_negative": false, "style": "typos"}
+{"text": "ya me resolvieron lo del cargo que reclamé? no me ha llegado nada", "intent": "dispute_status", "dialect": "es-MX", "family": "G-006", "hard_negative": false, "style": "chat"}
+{"text": "Oigan, ¿ya hay respuesta de la aclaración que metí por el cargo de Liverpool?", "intent": "dispute_status", "dialect": "es-MX", "family": "G-006", "hard_negative": false, "style": "chat"}
+{"text": "o estorno da contestação já foi aprovado? protocolo DSP-5512", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-007", "hard_negative": false, "style": "chat"}
+{"text": "meu estorno sai quando? abri contestação faz 3 semanas", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-007", "hard_negative": false, "style": "chat"}
+{"text": "Buenas, quería saber si ya resolvieron mi disputa DSP-7730. Gracias.", "intent": "dispute_status", "dialect": "es-AR", "family": "G-008", "hard_negative": false, "style": "formal"}
+{"text": "dsp-7730 novedades?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-008", "hard_negative": false, "style": "terse"}
+{"text": "llevo un mes esperando la respuesta de mi reclamo y nada, que esta pasando??", "intent": "dispute_status", "dialect": "es-CO", "family": "G-009", "hard_negative": false, "style": "chat"}
+{"text": "Ya pasó un mes desde que abrí la reclamación por el cobro que no reconocí y no me han contestado. Necesito saber en qué va, porque me dijeron que eran 10 días hábiles.", "intent": "dispute_status", "dialect": "es-CO", "family": "G-009", "hard_negative": false, "style": "largo"}
+{"text": "me pueden decir si mi disputa sigue abierta o ya la cerraron?", "intent": "dispute_status", "dialect": "es-MX", "family": "G-010", "hard_negative": false, "style": "chat"}
+{"text": "sigue en proceso mi reclamo o ya se resolvio", "intent": "dispute_status", "dialect": "es-MX", "family": "G-010", "hard_negative": false, "style": "typos"}
+{"text": "a minha contestação foi aceita ou negada? recebi um aviso no app e não entendi nada", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-011", "hard_negative": false, "style": "chat"}
+{"text": "queria entender o resultado da minha contestação, foi negada?", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-011", "hard_negative": false, "style": "chat"}
+{"text": "abrí un reclamo ayer por el doble cobro del súper, ¿ya lo están viendo?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-012", "hard_negative": false, "style": "chat"}
+{"text": "¿Me confirmás que recibieron el reclamo que hice ayer por el cobro duplicado?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-012", "hard_negative": false, "style": "chat"}
+{"text": "cuando me devuelven la plata del reclamo que hice? me dijeron que estaba en revision hace rato", "intent": "dispute_status", "dialect": "es-CO", "family": "G-013", "hard_negative": false, "style": "typos"}
+{"text": "tengo uma contestação aberta desde el viernes, ¿hay alguna novedad?", "intent": "dispute_status", "dialect": "mix", "family": "G-014", "hard_negative": false, "style": "chat"}
+{"text": "Buen día. El pasado día 12 presenté una aclaración por un cargo no reconocido de $1,250 en una tienda en línea. ¿Podrían indicarme en qué etapa se encuentra y cuánto tiempo falta para que me den una respuesta? Quedo atento.", "intent": "dispute_status", "dialect": "es-MX", "family": "G-015", "hard_negative": false, "style": "largo"}
+{"text": "status do protocolo DSP-3301", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-016", "hard_negative": false, "style": "terse"}
+{"text": "preciso de uma atualização do protocolo DSP-3301, por favor", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-016", "hard_negative": false, "style": "formal"}
+{"text": "me llegó una notificación de que mi reclamo cambió de estado pero no dice a cuál, ¿me explicás?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-017", "hard_negative": false, "style": "chat"}
+{"text": "hola 😊 queria saber si ya abonaron lo de mi disputa", "intent": "dispute_status", "dialect": "es-CO", "family": "G-018", "hard_negative": false, "style": "emoji"}
+{"text": "ya me hicieron el abono provisional de la disputa? no lo veo en el extracto", "intent": "dispute_status", "dialect": "es-CO", "family": "G-018", "hard_negative": false, "style": "chat"}
+{"text": "abri un reclamo x el cobro doble de uber hace 8 dias y no se nada 😡", "intent": "dispute_status", "dialect": "es-MX", "family": "G-019", "hard_negative": false, "style": "emoji"}
+{"text": "abri uma reclamação do débito duplicado no mercado e até agora nada, como tá isso?", "intent": "dispute_status", "dialect": "pt-BR", "family": "G-020", "hard_negative": false, "style": "chat"}
+{"text": "¿Ya hay resolución de la disputa por el cargo de Mercado Libre? Pasaron 20 días.", "intent": "dispute_status", "dialect": "es-AR", "family": "G-021", "hard_negative": false, "style": "chat"}
+{"text": "20 dias esperando lo del reclamo de mercado libre, en que quedó?", "intent": "dispute_status", "dialect": "es-AR", "family": "G-021", "hard_negative": false, "style": "typos"}
+{"text": "necesito saber el estado del caso DSP-2208, me urge", "intent": "dispute_status", "dialect": "es-CO", "family": "G-022", "hard_negative": false, "style": "terse"}
+{"text": "quiero saber como va el caso de de ese pe dos dos cero ocho", "intent": "dispute_status", "dialect": "es-CO", "family": "G-022", "hard_negative": false, "style": "voz"}
+{"text": "quiero cancelar la disputa que abrí ayer", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-030", "hard_negative": false, "style": "terse"}
+{"text": "cancelen porfa la aclaración que levanté ayer, ya no la necesito", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-030", "hard_negative": false, "style": "chat"}
+{"text": "necesito retirar el reclamo que puse ayer", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-030", "hard_negative": false, "style": "chat"}
+{"text": "che, el cargo que reclamé era mío, lo había hecho mi viejo con mi tarjeta, bajá el reclamo", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-031", "hard_negative": false, "style": "chat"}
+{"text": "Perdón, ya me acordé de la compra, era mía. ¿Podés cancelar la disputa?", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-031", "hard_negative": false, "style": "chat"}
+{"text": "pode cancelar a contestação, era minha", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-032", "hard_negative": false, "style": "terse"}
+{"text": "descobri que a compra era minha mesmo, quero desistir da contestação", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-032", "hard_negative": false, "style": "chat"}
+{"text": "cancela a contestacao DSP-6120 pfv, reconheci o gasto", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-032", "hard_negative": false, "style": "typos"}
+{"text": "Buenos días, deseo desistir de la reclamación DSP-4410 porque ya identifiqué el cobro.", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-033", "hard_negative": false, "style": "formal"}
+{"text": "ya reconoci el cobro, retiren la reclamacion 4410", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-033", "hard_negative": false, "style": "typos"}
+{"text": "quiero cancelar a minha disputa, era una compra minha que no me acordaba", "intent": "cancel_dispute", "dialect": "mix", "family": "G-034", "hard_negative": false, "style": "chat"}
+{"text": "oi, pode retirar el reclamo? ya me acordé que fui yo", "intent": "cancel_dispute", "dialect": "mix", "family": "G-034", "hard_negative": false, "style": "chat"}
+{"text": "el cargo de Spotify que reporté sí era mío, lo contrató mi hija, ya no sigan con el reclamo", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-035", "hard_negative": false, "style": "chat"}
+{"text": "ya vi que lo de spotify lo pago mi hija, cancelen la aclaracion", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-035", "hard_negative": false, "style": "typos"}
+{"text": "¿Cómo hago para dar de baja la disputa que inicié? Me equivoqué.", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-036", "hard_negative": false, "style": "chat"}
+{"text": "me equivoqué al hacer el reclamo, quiero anularlo", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-036", "hard_negative": false, "style": "terse"}
+{"text": "o lojista já me devolveu o dinheiro, podem encerrar minha contestação", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-037", "hard_negative": false, "style": "chat"}
+{"text": "já resolvi direto com a loja, não precisa mais da contestação, pode cancelar", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-037", "hard_negative": false, "style": "chat"}
+{"text": "el comercio ya me reembolsó, entonces ya no necesito la disputa, la pueden cerrar?", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-038", "hard_negative": false, "style": "chat"}
+{"text": "ya me devolvieron la plata directamente, anulen el reclamo porfa", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-038", "hard_negative": false, "style": "chat"}
+{"text": "cancelar reclamo DSP-9088", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-039", "hard_negative": false, "style": "terse"}
+{"text": "Solicito la cancelación de la aclaración con folio DSP-9088.", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-039", "hard_negative": false, "style": "formal"}
+{"text": "ey, el cobro de Netflix que desconocí era de la cuenta que comparto con mi hermana, olvidate del reclamo", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-040", "hard_negative": false, "style": "chat"}
+{"text": "reconheço o débito, era meu, pode tirar a contestação", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-041", "hard_negative": false, "style": "chat"}
+{"text": "era eu mesmo que tinha feito essa compra kkkk cancela a contestação ai", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-041", "hard_negative": false, "style": "chat"}
+{"text": "abrí una disputa por error, quiero cancelarla", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-042", "hard_negative": false, "style": "terse"}
+{"text": "no quiero seguir con la disputa del cargo de gasolina, ya me acordé que sí cargué ese día", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-043", "hard_negative": false, "style": "chat"}
+{"text": "cancela la contestação por favor, ya reconocí el cargo", "intent": "cancel_dispute", "dialect": "mix", "family": "G-044", "hard_negative": false, "style": "chat"}
+{"text": "Hola! Quería retirar la disputa que abrí el martes, al final el cargo era de una suscripción que me olvidé 🙈", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-045", "hard_negative": false, "style": "emoji"}
+{"text": "quero cancelar o protocolo de contestação que abri ontem", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "G-046", "hard_negative": false, "style": "chat"}
+{"text": "se puede echar para atrás la reclamación? el cobro sí lo hice yo", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-047", "hard_negative": false, "style": "chat"}
+{"text": "cancelen la disputa, el cobro fue mío", "intent": "cancel_dispute", "dialect": "es-CO", "family": "G-047", "hard_negative": false, "style": "terse"}
+{"text": "Ya no quiero la aclaración, era un cargo que sí reconozco, ¿cómo la quito?", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-048", "hard_negative": false, "style": "chat"}
+{"text": "como quito el reclamo q hice? si era mio el cargo", "intent": "cancel_dispute", "dialect": "es-MX", "family": "G-048", "hard_negative": false, "style": "typos"}
+{"text": "quiero cancelar el reclamo que hice la semana pasada porque la compra si era mia", "intent": "cancel_dispute", "dialect": "es-AR", "family": "G-049", "hard_negative": false, "style": "voz"}
+{"text": "¿cuánto tarda normalmente una aclaración de cargo?", "intent": "out_of_scope", "dialect": "es-MX", "family": "G-060", "hard_negative": true, "style": "chat"}
+{"text": "en general cuantos dias se tardan en resolver un reclamo?", "intent": "out_of_scope", "dialect": "es-MX", "family": "G-060", "hard_negative": true, "style": "typos"}
+{"text": "quanto tempo demora uma contestação em geral?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "G-061", "hard_negative": true, "style": "chat"}
+{"text": "qual o prazo padrão de uma contestação de compra?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "G-061", "hard_negative": true, "style": "formal"}
+{"text": "¿Qué documentos piden para iniciar un reclamo? Pregunto por las dudas, no me pasó nada todavía", "intent": "out_of_scope", "dialect": "es-AR", "family": "G-062", "hard_negative": true, "style": "chat"}
+{"text": "reconozco el cobro pero quiero pasarlo a cuotas", "intent": "out_of_scope", "dialect": "es-CO", "family": "G-063", "hard_negative": true, "style": "terse"}
+{"text": "el cargo sí es mío pero quiero diferirlo a 12 cuotas, se puede?", "intent": "out_of_scope", "dialect": "es-CO", "family": "G-063", "hard_negative": true, "style": "chat"}
+{"text": "cómo funciona o processo de contestação de vocês?", "intent": "out_of_scope", "dialect": "mix", "family": "G-064", "hard_negative": true, "style": "chat"}
+{"text": "quiero poner una queja por la mala atención que me dieron en la sucursal", "intent": "out_of_scope", "dialect": "es-MX", "family": "G-065", "hard_negative": true, "style": "chat"}
+{"text": "quiero cancelar la transferencia que hice recién, me equivoqué de CBU", "intent": "out_of_scope", "dialect": "es-AR", "family": "G-066", "hard_negative": true, "style": "chat"}
+{"text": "quero cancelar o seguro do cartão", "intent": "out_of_scope", "dialect": "pt-BR", "family": "G-067", "hard_negative": true, "style": "terse"}
+{"text": "cuál es el procedimiento para hacer una reclamación en el banco? es para saber", "intent": "out_of_scope", "dialect": "es-CO", "family": "G-068", "hard_negative": true, "style": "chat"}
+{"text": "quiero abrir una disputa por un cargo de $890 que no hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "G-070", "hard_negative": true, "style": "terse"}
+{"text": "necesito levantar una aclaración, me cobraron dos veces en el Oxxo", "intent": "dispute_charge", "dialect": "es-MX", "family": "G-070", "hard_negative": true, "style": "chat"}
+{"text": "quero abrir uma contestação de uma compra que não fiz", "intent": "dispute_charge", "dialect": "pt-BR", "family": "G-071", "hard_negative": true, "style": "chat"}
+{"text": "tem um débito de R$ 230 que não reconheço, quero contestar", "intent": "dispute_charge", "dialect": "pt-BR", "family": "G-071", "hard_negative": true, "style": "chat"}
+{"text": "me siguen cobrando una suscripción que ya había cancelado, quiero reclamar", "intent": "dispute_charge", "dialect": "es-CO", "family": "G-072", "hard_negative": true, "style": "chat"}
+{"text": "el cajero no me dio la plata pero me la debitaron igual, ¿cómo inicio el reclamo?", "intent": "dispute_charge", "dialect": "es-AR", "family": "G-073", "hard_negative": true, "style": "chat"}
+{"text": "quiero abrir un reclamo, tem uma compra no cartão que não fui eu", "intent": "dispute_charge", "dialect": "mix", "family": "G-074", "hard_negative": true, "style": "chat"}
+{"text": "quiero cancelar mi tarjeta", "intent": "block_card", "dialect": "es-MX", "family": "G-080", "hard_negative": true, "style": "terse"}
+{"text": "cancelen mi tarjeta de credito ya, la perdi", "intent": "block_card", "dialect": "es-MX", "family": "G-080", "hard_negative": true, "style": "typos"}
+{"text": "quero cancelar meu cartão, perdi ele ontem", "intent": "block_card", "dialect": "pt-BR", "family": "G-081", "hard_negative": true, "style": "chat"}
+{"text": "cancelame la tarjeta que me la robaron en el bondi", "intent": "block_card", "dialect": "es-AR", "family": "G-082", "hard_negative": true, "style": "chat"}
+{"text": "necesito cancelar la tarjeta débito, se me quedó en un taxi", "intent": "block_card", "dialect": "es-CO", "family": "G-083", "hard_negative": true, "style": "chat"}
+{"text": "pode cancelar o cartão adicional da minha filha? ela perdeu", "intent": "block_card", "dialect": "pt-BR", "family": "G-084", "hard_negative": true, "style": "chat"}
+{"text": "ah ok, gracias por la info de mi reclamo, eso era todo", "intent": "closing", "dialect": "es-MX", "family": "G-090", "hard_negative": true, "style": "chat"}
+{"text": "beleza, obrigado pela atualização da contestação, valeu", "intent": "closing", "dialect": "pt-BR", "family": "G-091", "hard_negative": true, "style": "chat"}
+{"text": "Genial, gracias por avisarme lo del reclamo. Chau!", "intent": "closing", "dialect": "es-AR", "family": "G-092", "hard_negative": true, "style": "chat"}
+{"text": "listo, muchas gracias, quedo pendiente entonces 🙏", "intent": "closing", "dialect": "es-CO", "family": "G-093", "hard_negative": true, "style": "emoji"}
+{"text": "perfecto, obrigado, era só isso", "intent": "closing", "dialect": "mix", "family": "G-094", "hard_negative": true, "style": "terse"}
+{"text": "iba a preguntar por mi reclamo pero ahora alguien cambió mi contraseña y no puedo entrar a la app", "intent": "account_takeover", "dialect": "es-MX", "family": "G-100", "hard_negative": true, "style": "chat"}
+{"text": "abri uma contestação e depois alguém ligou dizendo ser do banco, passei o código do SMS 😰", "intent": "account_takeover", "dialect": "pt-BR", "family": "G-101", "hard_negative": true, "style": "emoji"}
+{"text": "quería ver en qué va mi disputa pero me cambiaron el mail de la cuenta y no fui yo", "intent": "account_takeover", "dialect": "es-AR", "family": "G-102", "hard_negative": true, "style": "chat"}
+{"text": "me llamaron diciendo que eran del banco para cancelar mi disputa y les di el código que me llegó", "intent": "account_takeover", "dialect": "es-CO", "family": "G-103", "hard_negative": true, "style": "chat"}
+{"text": "alguien entró na minha conta y abrió reclamos que yo no hice", "intent": "account_takeover", "dialect": "mix", "family": "G-104", "hard_negative": true, "style": "chat"}

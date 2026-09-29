@@ -1,17 +1,18 @@
-"""HybridRouter: intención con un modelo aprendido; slots y respuestas cortas con RuleRouter.
+"""HybridRouter: intención con un modelo aprendido; slots, idioma y respuestas por contexto con RuleRouter.
 
-    HybridRouter(intent_model=None, slot_extractor=RuleRouter())
+    HybridRouter()                                   # modelo "lite" (n-gramas de caracteres, solo numpy)
+    HybridRouter(model_dir=FULL_DIR)                 # char + MiniLM ONNX (evaluación offline)
 
-División del trabajo (ADR 0007):
-- Respuestas a una pregunta pendiente (`awaiting`: confirmación u opción) -> RuleRouter decide
-  confirm/deny/select_option: dependen del contexto, no del texto aislado, y el modelo no las aprende.
-- Todo lo demás -> el modelo clasifica la intención con probabilidad calibrada. Si la probabilidad no
-  llega al umbral elegido en validación, se abstiene: `unknown` y el grafo pide aclaración.
-- Slots (monto, fechas, país, opción…) e idioma -> siempre RuleRouter (deterministas y auditables).
-- Si el modelo no carga (sin artefactos, sin paquete, sin caché y sin red) -> responde RuleRouter y
-  `router` lo dice: `rules(fallback:model_unavailable)`.
-Etiquetas que el grafo todavía no conoce se traducen con `intent_model.COMPAT` (p. ej. human_request ->
-out_of_scope, que termina en handoff) salvo que ya estén en `understanding.INTENTS`.
+División del trabajo (ADR 0009):
+- Respuestas a una pregunta pendiente (confirm / deny / unclear / select_option / none_of_these) -> RuleRouter:
+  dependen de la pregunta, no del texto aislado, y el consentimiento tri-estado tiene que ser auditable.
+- Respuesta a "dime el monto, la fecha o el comercio" (`awaiting="details"`) con datos y sin pedido nuevo ->
+  RuleRouter (el grafo sigue el reclamo anterior).
+- Todo lo demás -> el modelo elige una de las intenciones de usuario (`intent_model.LABELS`) con probabilidad
+  calibrada. Si no llega al umbral elegido en validación, se abstiene: `unknown` y el grafo pide aclaración.
+- Slots (monto, fechas, país, comercio, caso, cantidad, opción) e idioma -> siempre RuleRouter.
+- Si el modelo no carga (sin artefactos, sin paquete, sin caché) -> responde RuleRouter y `router` lo dice:
+  `rules(fallback:model_unavailable)`; la traza guarda el error.
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ from pathlib import Path
 from .intent_model import COMPAT, DEFAULT_DIR, IntentModel, load_intent_model
 from .understanding import INTENTS, Router, RuleRouter, Understanding
 
-CONTEXT_INTENTS = ("confirm", "deny", "select_option")
+CONTEXT_INTENTS = ("confirm", "deny", "unclear", "select_option", "none_of_these")
 
 
 class HybridRouter:
@@ -38,7 +39,11 @@ class HybridRouter:
     @property
     def name(self) -> str:
         m = self._model
-        return f"embed:{m.model_id}" if m else "embed"
+        return f"embed:{m.meta.get('candidate', m.model_id)}" if m else "embed"
+
+    @property
+    def model_id(self) -> str | None:  # para la descripción del sistema en la evaluación
+        return self._model.model_id if self._model else None
 
     def model(self) -> IntentModel | None:
         """Carga perezosa (una vez, segura entre hilos). None si no se pudo: el error queda en la traza."""
@@ -57,6 +62,9 @@ class HybridRouter:
         base = self.slots.understand(text, today, awaiting)
         if awaiting and base.intent in CONTEXT_INTENTS:
             return replace(base, router=f"{self.name}(rules:context)")
+        s = base.slots
+        if awaiting == "details" and base.intent == "unknown" and (s.amount is not None or s.date_from or s.merchant):
+            return replace(base, router=f"{self.name}(rules:details)")
         model = self.model()
         if model is None:
             return replace(base, router="rules(fallback:model_unavailable)",
@@ -66,8 +74,8 @@ class HybridRouter:
         ms = (time.perf_counter() - t0) * 1000
         label = "unknown" if pred.abstained else pred.label
         intent = label if label in INTENTS else COMPAT.get(label, "unknown")
-        return Understanding(intent, pred.p, base.language, base.slots, router=self.name,
-                             llm=_telemetry(model, ms, label=pred.label, p=pred.p, abstained=pred.abstained))
+        return replace(base, intent=intent, confidence=pred.p, router=self.name,
+                       llm=_telemetry(model, ms, label=pred.label, p=round(pred.p, 4), abstained=pred.abstained))
 
 
 def _telemetry(model: IntentModel | None, ms: float, fallback: str | None = None, error: str | None = None,
