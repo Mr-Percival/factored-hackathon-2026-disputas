@@ -17,6 +17,14 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
 - En PQR, **"Cargo no reconocido" + "Cobro indebido" = 36%** de los casos; el 20% incumple SLA y la mediana de resolución es de 16 días.
 
+## Replay de quejas históricas (simulación)
+Quejas reales de "Cargo no reconocido" / "Cobro indebido" convertidas en conversaciones con un cliente simulado y
+pasadas por el agente (reglas + plantillas), cada una juzgada a su fecha de creación; el modo sombra compara la decisión
+de la política con el desenlace histórico. Resultados, supuestos y limitaciones: [`reports/replay.md`](reports/replay.md).
+```bash
+python -m bankagent.evals.replay --db data/serving_full.duckdb --history-db data/bank.duckdb --n 1000 --seed 7
+```
+
 ## Pitch
 - Presentación (6 slides, con notas del orador): [`docs/pitch/deck.pptx`](docs/pitch/deck.pptx) · versión para revisar: [`docs/pitch/deck.md`](docs/pitch/deck.md)
 - Guion del video (3:50, es + pt) con lista de tomas y checklist de grabación: [`docs/pitch/video_script.md`](docs/pitch/video_script.md)
@@ -49,6 +57,7 @@ src/bankagent/
   chat.py               chat de consola
   evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
   evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
+  evals/replay.py       replay de quejas históricas por el agente + modo sombra (SIMULACIÓN) -> reports/replay.md
 evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
 evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
