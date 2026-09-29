@@ -54,6 +54,11 @@ Los tests se corren con `pytest -q` (offline, sin datos reales ni API keys). ⏳
 | Setup reproducible | Tests sin datos ni keys; pipeline e informes con un comando cada uno | [`README.md`](../README.md) |
 | Capacidad, monitoreo, acceso, retención, trabajo restante | Prueba de carga, SLOs con alertas, runbook, retención, pendientes priorizados | [`docs/operations.md`](operations.md), [`reports/capacity.md`](../reports/capacity.md) |
 | Explicaciones desde reglas y registros, no desde razonamiento oculto | Decisión = IDs de reglas + hechos verificados; log de auditoría con cadena de hashes | `tests/test_audit.py::test_tampering_is_detected`, [`docs/threat-model.md`](threat-model.md) |
+| Solución desplegable con demo que muestre la ingeniería | API FastAPI + SPA React en un contenedor: escenarios con guion, chat, "Por qué respondió así" (qué entendió, traza, reglas, hechos) y consola del asesor | [ADR 0008](adr/0008-frontend-web.md), [`web/README.md`](../web/README.md), `Dockerfile` (job `image` de la CI lo construye y prueba), capturas en `docs/pitch/screens/escena{1,2,3}.png` |
+| Canal seguro | Token del agente solo en el servidor (cookie HttpOnly/SameSite=Strict con id opaco), CSP estricta, Origin, límites de tamaño y de ritmo, errores sin eco | `tests/test_api.py::test_cookie_is_httponly_strict_and_token_never_leaves_the_server`, `::test_security_headers_everywhere`, `::test_rate_limit_returns_429`, `::test_oversized_and_blank_text_are_rejected_without_echo` |
+| Guion de demo verificado de punta a punta por HTTP | Cada escenario del JSON se reproduce por la API y se compara con el resultado esperado | `tests/test_api.py::test_every_fixture_scenario_plays_as_scripted` |
+| Concurrencia en el canal | Clientes en paralelo por HTTP (incluido el señuelo) nunca ven datos ajenos | `tests/test_api.py::test_parallel_customers_only_see_their_own_data` |
+| Accesibilidad (WCAG 2.2 AA) | Resultado con ícono + texto, región viva para respuestas, teclado, foco visible, tema claro/oscuro, pestañas APG en móvil | `web/src/App.test.tsx`, ESLint `jsx-a11y` strict en la CI |
 
 ## Límites declarados (lo que no hacemos o no pudimos medir)
 - Todo el texto del dataset está en español; el portugués se prueba con mensajes y traducciones del equipo, declarados como tales.

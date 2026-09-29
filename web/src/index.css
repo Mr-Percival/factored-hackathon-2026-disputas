@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de diseño (convención de shadcn/ui: variables CSS + utilidades de Tailwind).
+ * Contraste verificado para WCAG 2.2 AA (texto normal >= 4.5:1) en claro y oscuro.
+ * El tema oscuro sigue a prefers-color-scheme salvo que el usuario elija uno (clase en <html>);
+ * así no hace falta un script inline (la CSP no lo permite).
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --border: #cbd5e1;
+  --input: #94a3b8;
+  --primary: #1d4ed8;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a;
+  --ring: #2563eb;
+  --user-bubble: #1d4ed8;
+  --user-bubble-foreground: #ffffff;
+
+  --ok-bg: #dcfce7;
+  --ok-fg: #14532d;
+  --info-bg: #dbeafe;
+  --info-fg: #1e3a8a;
+  --warn-bg: #fef3c7;
+  --warn-fg: #78350f;
+  --danger-bg: #fee2e2;
+  --danger-fg: #7f1d1d;
+  --handoff-bg: #ede9fe;
+  --handoff-fg: #4c1d95;
+  --neutral-bg: #e2e8f0;
+  --neutral-fg: #1e293b;
+  color-scheme: light;
+}
+
+/* Oscuro elegido explícitamente (el bloque @media de abajo repite los valores para "sistema"). */
+:root.dark {
+  --background: #0b1120;
+  --foreground: #e2e8f0;
+  --card: #111827;
+  --muted: #1e293b;
+  --muted-foreground: #a3b1c6;
+  --border: #334155;
+  --input: #64748b;
+  --primary: #93c5fd;
+  --primary-foreground: #0b1120;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --ring: #93c5fd;
+  --user-bubble: #1e40af;
+  --user-bubble-foreground: #ffffff;
+
+  --ok-bg: #052e16;
+  --ok-fg: #86efac;
+  --info-bg: #172554;
+  --info-fg: #bfdbfe;
+  --warn-bg: #451a03;
+  --warn-fg: #fcd34d;
+  --danger-bg: #450a0a;
+  --danger-fg: #fca5a5;
+  --handoff-bg: #2e1065;
+  --handoff-fg: #ddd6fe;
+  --neutral-bg: #1e293b;
+  --neutral-fg: #e2e8f0;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0b1120;
+    --foreground: #e2e8f0;
+    --card: #111827;
+    --muted: #1e293b;
+    --muted-foreground: #a3b1c6;
+    --border: #334155;
+    --input: #64748b;
+    --primary: #93c5fd;
+    --primary-foreground: #0b1120;
+    --secondary: #1e293b;
+    --secondary-foreground: #e2e8f0;
+    --ring: #93c5fd;
+    --user-bubble: #1e40af;
+    --user-bubble-foreground: #ffffff;
+
+    --ok-bg: #052e16;
+    --ok-fg: #86efac;
+    --info-bg: #172554;
+    --info-fg: #bfdbfe;
+    --warn-bg: #451a03;
+    --warn-fg: #fcd34d;
+    --danger-bg: #450a0a;
+    --danger-fg: #fca5a5;
+    --handoff-bg: #2e1065;
+    --handoff-fg: #ddd6fe;
+    --neutral-bg: #1e293b;
+    --neutral-fg: #e2e8f0;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-ring: var(--ring);
+  --color-user-bubble: var(--user-bubble);
+  --color-user-bubble-foreground: var(--user-bubble-foreground);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-fg: var(--ok-fg);
+  --color-info-bg: var(--info-bg);
+  --color-info-fg: var(--info-fg);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-fg: var(--warn-fg);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-fg: var(--danger-fg);
+  --color-handoff-bg: var(--handoff-bg);
+  --color-handoff-fg: var(--handoff-fg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-neutral-fg: var(--neutral-fg);
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Foco visible siempre con teclado (WCAG 2.4.7 / 2.4.11) */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
