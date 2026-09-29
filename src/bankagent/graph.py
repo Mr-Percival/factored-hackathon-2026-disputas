@@ -23,12 +23,13 @@ from typing import Annotated, Any, TypedDict
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
+from .audit import AuditLog
 from .guard import detect_injection, redact
 from .identity import AuthError
 from .policy import PolicyEngine
 from .responses import TemplateWriter, fmt_option, fmt_txn
 from .tools import BankTools, ToolError
-from .understanding import Router, RuleRouter
+from .understanding import Router, RuleRouter, detect_language
 
 DISPUTABLE_TYPES = {"Purchase", "Withdrawal", "Payment", "Transfer", "Adjustment"}
 TRANSIENT_ERRORS = {"unavailable", "timeout"}
@@ -46,6 +47,7 @@ class State(TypedDict, total=False):
     txn: dict | None
     pending_action: dict | None
     conversation: Annotated[list[dict], operator.add]  # mensajes ya enmascarados
+    strikes: int                   # intentos bloqueados + accesos prohibidos en esta conversación
     # salida del turno
     understanding: dict | None
     decision: dict | None
@@ -62,7 +64,7 @@ class State(TypedDict, total=False):
 
 # Destinos permitidos por nodo (documentación ejecutable del flujo)
 EDGES: dict[str, list[str]] = {
-    "guard": ["understand", "respond"],
+    "guard": ["understand", "respond", "handoff"],
     "understand": ["find_transaction", "find_card", "select_option", "act", "cancel", "handoff", "respond"],
     "find_card": ["respond", "handoff"],
     "find_transaction": ["decide", "respond", "handoff"],
@@ -77,8 +79,10 @@ EDGES: dict[str, list[str]] = {
 
 class Agent:
     def __init__(self, tools: BankTools, policy: PolicyEngine, router: Router | None = None,
-                 writer: TemplateWriter | None = None, min_confidence: float = 0.6, max_retries: int = 2):
+                 writer: TemplateWriter | None = None, min_confidence: float = 0.6, max_retries: int = 2,
+                 audit: AuditLog | None = None, max_strikes: int = 3):
         self.tools, self.policy = tools, policy
+        self.audit, self.max_strikes = audit, max_strikes
         self.router = router or RuleRouter()
         self.writer = writer or TemplateWriter()
         self.min_confidence, self.max_retries = min_confidence, max_retries
@@ -88,10 +92,16 @@ class Agent:
     def chat(self, thread_id: str, token: str, text: str) -> dict:
         cfg = {"configurable": {"thread_id": thread_id}}
         prev = self.graph.get_state(cfg).values
-        return self.graph.invoke({"token": token, "user_text": text, "turn": prev.get("turn", 0) + 1,
-                                  "reply": None, "outcome": None, "handoff": None, "decision": None,
-                                  "understanding": None, "reply_key": None, "handoff_reason": None,
-                                  "action_result": None}, cfg)
+        turn = prev.get("turn", 0) + 1
+        out = self.graph.invoke({"token": token, "user_text": text, "turn": turn,
+                                 "reply": None, "outcome": None, "handoff": None, "decision": None,
+                                 "understanding": None, "reply_key": None, "handoff_reason": None,
+                                 "action_result": None}, cfg)
+        if self.audit:  # persiste la traza del turno (sin texto del cliente); el último registro lleva el resultado
+            entries = [e for e in out.get("trace", []) if e["turn"] == turn]
+            for i, e in enumerate(entries):
+                self.audit.append(thread_id, e, out.get("outcome") if i == len(entries) - 1 else None)
+        return out
 
     def mermaid(self) -> str:
         return self.graph.get_graph().draw_mermaid()
@@ -121,6 +131,8 @@ class Agent:
                 out = fn(state, calls)
             except AuthError as e:
                 out = {"next": "respond", "outcome": "auth_error", "reply_key": e.code, "detail": e.code}
+                if e.code == "forbidden":  # intento de acceso a datos ajenos: cuenta para el bloqueo
+                    out["strikes"] = state.get("strikes", 0) + 1
             except ToolError as e:  # falla persistente tras reintentos -> humano
                 out = {"next": "handoff", "handoff_reason": "tool_failure", "detail": str(e)}
             if out["next"] not in EDGES[name]:
@@ -148,13 +160,22 @@ class Agent:
 
     # ------------------------------------------------------------------ nodos
     def guard(self, s: State, calls) -> dict:
-        self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
         text = s["user_text"]
         msg = {"role": "user", "turn": s["turn"], "text": redact(text)}
+        strikes = s.get("strikes", 0)
+        if strikes >= self.max_strikes:  # conversación bloqueada: nada más se procesa, pasa a un humano
+            return {"next": "handoff", "handoff_reason": "security_lockout", "conversation": [msg],
+                    "detail": f"locked strikes={strikes}"}
+        self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
         pattern = detect_injection(text)
         if pattern:
-            return {"next": "respond", "outcome": "blocked", "reply_key": "blocked_input",
-                    "conversation": [msg], "detail": f"injection_pattern={pattern}"}
+            strikes += 1
+            out = {"next": "respond", "outcome": "blocked", "reply_key": "blocked_input", "strikes": strikes,
+                   "lang": detect_language(text), "conversation": [msg],
+                   "detail": f"injection_pattern={pattern} strikes={strikes}"}
+            if strikes >= self.max_strikes:
+                out.update(next="handoff", handoff_reason="security_lockout")
+            return out
         return {"next": "understand", "conversation": [msg]}
 
     def understand(self, s: State, calls) -> dict:
@@ -268,6 +289,8 @@ class Agent:
             "out_of_scope": ["Atender la solicitud fuera del alcance del canal automático."],
             "tool_failure": ["Reintentar la consulta de movimientos; el sistema no pudo verificar datos."],
             "action_not_verified": ["Confirmar en core si la disputa/bloqueo quedaron registrados."],
+            "security_lockout": ["Revisar los intentos bloqueados en el log de auditoría.",
+                                 "Validar la identidad del cliente por un canal seguro antes de reabrir la conversación."],
         }.get(reason, ["Validar con el cliente si reconoce al comercio.", "Decidir apertura de disputa y abono provisional."])
         packet = {
             "reason": reason,
@@ -282,8 +305,8 @@ class Agent:
             "unresolved_questions": unresolved,
         }
         return {"next": "respond", "outcome": "handoff", "handoff": packet, "awaiting": None, "pending_action": None,
-                "reply_key": "tool_failure" if reason == "tool_failure" else
-                              "out_of_scope" if reason == "out_of_scope" else "handoff", "detail": reason}
+                "reply_key": reason if reason in ("tool_failure", "out_of_scope", "security_lockout") else "handoff",
+                "detail": reason}
 
     def respond(self, s: State, calls) -> dict:
         lang = s.get("lang") or "es"
