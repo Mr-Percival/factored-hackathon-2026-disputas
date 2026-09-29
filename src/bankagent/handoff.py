@@ -68,18 +68,33 @@ def _match(claim: dict, txn: dict | None, method: str | None) -> dict | None:
     return out
 
 
-def _questions(reason: str, r: dict, txn: dict | None, rules: list[dict]) -> list[str]:
+def _questions(reason: str, r: dict, txn: dict | None, rules: list[dict], trigger: str | None = None,
+               strikes: int = 0) -> list[str]:
     qs = list(r.get("open_questions") or [])
+    if trigger:  # la conversación pidió otra cosa además del cargo: el asesor tiene que atender las dos
+        qs.append(f"Además, el cliente {TRIGGER_TEXT.get(trigger, f'derivó por {trigger}')} (ver transcripción).")
     if txn and reason.startswith("H0"):  # reconocimiento según el tipo de movimiento: sin "comercio" en un retiro
         what = (f"el comercio {txn['merchant_name']}" if txn.get("merchant_name")
                 else f"el {txn.get('transaction_type', 'movimiento')} por {txn.get('channel') or 'canal desconocido'}")
         qs.insert(0, f"Validar con el cliente si reconoce {what} ({fmt_txn(txn)}).")
+    if strikes and reason not in ("security_lockout", "security_review"):  # el asesor tiene que saber que hubo intentos bloqueados antes
+        qs.append(f"La conversación tuvo {strikes} intento(s) bloqueado(s) por seguridad (acceso a datos ajenos o "
+                  "instrucciones al agente): revisar el log de auditoría antes de atender el pedido.")
     for h in rules[1:]:  # las demás reglas que se cumplieron también le importan al asesor
         qs.append(f"También se cumplió {h['id']}: {h['explain']}")
     return qs
 
 
-def build_packet(s: dict, policy: PolicyEngine, reason: str) -> dict:
+# Qué pidió la conversación cuando un cargo con regla H0x toma el caso (`trigger`, #57)
+TRIGGER_TEXT = {"customer_request": "pidió hablar con una persona", "out_of_scope": "planteó un tema fuera de alcance",
+                "account_takeover": "reportó un posible acceso indebido a su cuenta",
+                "cancel_dispute": "pidió retirar una disputa", "dispute_status": "preguntó por el estado de una disputa",
+                "clarification_exhausted": "no logró explicar su pedido en 3 intentos"}
+
+
+def build_packet(s: dict, policy: PolicyEngine, reason: str, trigger: str | None = None) -> dict:
+    """`trigger`: motivo conversacional original cuando el cargo que nombró el cliente exige una regla H0x y esa
+    regla define cola/prioridad/SLA (graph.handoff)."""
     r = route(policy, reason)
     txn = s.get("txn")
     decision = s.get("decision") or {}
@@ -93,6 +108,7 @@ def build_packet(s: dict, policy: PolicyEngine, reason: str) -> dict:
         "created_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "as_of": policy.as_of.isoformat(),
         "reason": reason,
+        "trigger": trigger,
         "queue": r.get("queue"), "priority": r.get("priority"), "sla_hours": r.get("sla_hours"),
         "next_action": r.get("next_action"),
         "language": s.get("lang", "es"),
@@ -110,7 +126,7 @@ def build_packet(s: dict, policy: PolicyEngine, reason: str) -> dict:
                      for e in trace if e["tools"]],
         "failures": [{"turn": e["turn"], "tool": c["tool"], "error": c.get("error")}
                      for e in trace for c in e["tools"] if not c["ok"]],
-        "unresolved_questions": _questions(reason, r, txn, rules),
+        "unresolved_questions": _questions(reason, r, txn, rules, trigger, s.get("strikes", 0)),
     }
     packet["summary"] = handoff_summary(packet)  # una línea determinista para el asesor (#32)
     return packet

@@ -160,6 +160,13 @@ handoff:
       next_action: "Contener el acceso: validar identidad, bloquear credenciales y productos."
       open_questions: ["Validar la identidad del cliente por un canal seguro y revisar los accesos recientes.",
                        "Bloquear credenciales y productos comprometidos; revisar movimientos posteriores al acceso."]
+    security_review:  # handoff pedido por la conversación DESPUÉS de intentos bloqueados (#57): va a seguridad
+      queue: seguridad
+      priority: alta
+      sla_hours: 4
+      next_action: "Validar la identidad y la intención del cliente antes de atender el pedido."
+      open_questions: ["Revisar en el log de auditoría los intentos bloqueados de esta conversación (¿datos ajenos, instrucciones al agente?).",
+                       "Validar por un canal seguro que quien escribe es el titular antes de atender el pedido original."]
     clarification_exhausted:
       queue: servicio
       priority: media
