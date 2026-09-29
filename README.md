@@ -10,6 +10,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
 - Evaluación offline (línea base, métricas de la rúbrica, equidad por dialecto): [`reports/eval.md`](reports/eval.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
+- Propiedades demostradas (I1–I8 con Hypothesis sobre conversaciones aleatorias + verificación estática de todos los caminos del grafo): [`docs/threat-model.md#propiedades-demostradas`](docs/threat-model.md#propiedades-demostradas) · caminos: [`docs/graph-paths.md`](docs/graph-paths.md)
 - Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
 - **Demo web** (FastAPI + React, un contenedor): sección [Demo web](#demo-web) · decisión en [ADR 0008](docs/adr/0008-frontend-web.md)
 - Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
@@ -17,6 +18,14 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
 - En PQR, **"Cargo no reconocido" + "Cobro indebido" = 36%** de los casos; el 20% incumple SLA y la mediana de resolución es de 16 días.
+
+## Replay de quejas históricas (simulación)
+Quejas reales de "Cargo no reconocido" / "Cobro indebido" convertidas en conversaciones con un cliente simulado y
+pasadas por el agente (reglas + plantillas), cada una juzgada a su fecha de creación; el modo sombra compara la decisión
+de la política con el desenlace histórico. Resultados, supuestos y limitaciones: [`reports/replay.md`](reports/replay.md).
+```bash
+python -m bankagent.evals.replay --db data/serving_full.duckdb --history-db data/bank.duckdb --n 1000 --seed 7
+```
 
 ## Pitch
 - Presentación (6 slides, con notas del orador): [`docs/pitch/deck.pptx`](docs/pitch/deck.pptx) · versión para revisar: [`docs/pitch/deck.md`](docs/pitch/deck.md)
@@ -38,8 +47,9 @@ src/bankagent/
   identity.py           sesiones simuladas con expiración (el IdP del banco)
   tools.py              herramientas bancarias: permisos por sesión, acciones verificadas
   policy.py             motor de reglas (expresiones restringidas, sin eval libre)
-  guard.py              detección de inyección + enmascarado de PII
+  guard.py              detección de inyección (interfaz: regex / clasificador ONNX) + enmascarado de PII
   audit.py              log de auditoría JSONL con cadena de hashes (`python -m bankagent.audit verify`)
+  evals/                evaluación de inyección: detección (datasets públicos) y daño (agente real)
   understanding.py      interfaz Router + RuleRouter (línea base es/pt)
   responses.py          redacción por plantillas es/pt (línea base)
   llm.py                cliente LLM agnóstico de proveedor (Anthropic + Fake para tests)
@@ -47,10 +57,15 @@ src/bankagent/
   llm_writer.py         LLMWriter + verify_reply: tono/dialecto sin agregar datos, cae a plantillas
   factory.py            build_agent(db, router="rules|llm", writer="templates|llm")
   graph.py              grafo LangGraph con transiciones declaradas y traza
+  graph_check.py        verificación estática de EDGES: caminos, alcanzabilidad, predecesores de `act`
   chat.py               chat de consola
   api/                  API FastAPI de la demo web: sesión por cookie, escenarios, turnos con traza, SPA
   evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
+  evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
+  evals/replay.py       replay de quejas históricas por el agente + modo sombra (SIMULACIÓN) -> reports/replay.md
 evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
+evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
+evals/fixtures/         fixtures del equipo: portugués traducido y mensajes bancarios (con procedencia)
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
 scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo / export_openapi)
 web/                    SPA React 19 + TypeScript + Vite (ver web/README.md)
@@ -78,6 +93,11 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 # Evaluación offline sobre el conjunto reservado -> reports/eval.md
 python -m bankagent.evals.cases --db data/serving.duckdb        # verifica evals/cases (test congelado, determinista)
 python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 --system rules --repeats 3
+
+# Evaluación de inyección (#8, #9): descarga datasets y modelos a revisión fija (caché de HF, fuera del repo)
+pip install -e ".[security-eval]"
+python -m bankagent.evals.injection                   # -> reports/injection_eval.md
+BANKAGENT_INJECTION_DETECTOR=combined python -m bankagent.chat --customer CLI-XXXXXXXX   # guard regex OR clasificador
 ```
 
 ## Demo web
@@ -114,6 +134,17 @@ dev), `BANKAGENT_COOKIE_SECURE`, `BANKAGENT_RATE_LIMIT_PER_MIN`, `BANKAGENT_DOCS
 servidor; el navegador solo tiene un id opaco. Corre con **un worker** porque el estado de la conversación vive en
 memoria ([ADR 0008](docs/adr/0008-frontend-web.md)).
 
+## Evaluación humana de los handoffs
+Kit para que 4 personas califiquen ~35 paquetes de handoff en menos de 30 minutos cada una. Rúbrica, anclajes e
+instrucciones en [`evals/human/RUBRIC.md`](evals/human/RUBRIC.md).
+```bash
+PYTHONPATH=src python -m bankagent.evals.human_kit build --db data/demo/demo.duckdb --n 30 --seed 11   # regenera el kit
+PYTHONPATH=src python -m bankagent.evals.human_kit score "evals/human/sheets/*.csv"                    # -> reports/human_eval.md
+PYTHONPATH=src python -m bankagent.evals.human_kit check --db data/demo/demo.duckdb                   # -> reports/handoff_completeness.md
+```
+`check` es la contraparte automática: campos presentes y no vacíos, y la política re-evaluada con los hechos del
+paquete tiene que reproducir las reglas disparadas. Los 5 controles degradados del kit tienen que fallar.
+
 ## Cómo activar el LLM
 El agente funciona completo sin LLM (reglas + plantillas). Para activar el router y/o el writer con modelo:
 ```bash
@@ -143,7 +174,8 @@ Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-rou
 - [x] Tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos, métricas de evaluación, equidad por dialecto y evaluación de humo sobre el fixture
 - [x] Router y writer con LLM (salida estructurada, reintentos acotados, fallback a la línea base) y verificador determinista de respuestas
 - [x] Evaluación: casos reservados (dev/test por cliente y por redacción), runner con métricas de la rúbrica, equidad por dialecto
-- [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos; inyección con datasets públicos
+- [x] Inyección con datasets públicos: detección (regex vs. clasificador) y daño de punta a punta ([reporte](reports/injection_eval.md), [ADR 0005](docs/adr/0005-deteccion-inyeccion.md))
+- [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos (LLM apagado: sin API paga)
 - [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [x] Interfaz web (FastAPI + React) en un contenedor, construido y probado en CI
 - [ ] Deploy público y video

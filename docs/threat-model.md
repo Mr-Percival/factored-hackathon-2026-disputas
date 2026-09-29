@@ -76,6 +76,61 @@ flowchart LR
 | Secretos en el repositorio | Configuración | `.env` y `*.pdf` en `.gitignore`; job `secrets` con gitleaks en `.github/workflows/ci.yml` sobre todo el historial; reglas en `CONTRIBUTING.md` | CI: job `secrets` (gitleaks) | gitleaks detecta patrones conocidos, no todos. Rotar cualquier credencial que haya circulado fuera del repo |
 | Manipulación del log de auditoría (editar, borrar, reordenar) | Integridad / no repudio | `audit.AuditLog`: JSONL append-only con cadena `sha256(prev_hash + json canónico)` desde un génesis fijo; `verify()` y `python -m bankagent.audit verify <ruta>` | `tests/test_audit.py::test_tampering_is_detected`, `::test_chain_continues_across_restarts`, `::test_cli_verify` | La cadena **no** detecta el truncado del final ni una reescritura completa si no se ancla el último hash fuera del sistema (`--head`). En producción: almacenamiento WORM (ej. S3 Object Lock), anclaje periódico del hash y clave del seudónimo en KMS |
 
+## Propiedades demostradas
+
+Los tests de ejemplo muestran que *algunos* casos funcionan. Además verificamos **propiedades**: afirmaciones que
+deben valer después de *cada* turno de *cualquier* conversación. Dos herramientas:
+
+1. **Pruebas basadas en propiedades** (`tests/test_properties.py`, Hypothesis `RuleBasedStateMachine`). Genera
+   conversaciones aleatorias de hasta 20 pasos con varios clientes e hilos intercalados: disputas con montos,
+   fechas y países al azar (es/pt), opciones válidas e inválidas, "sí/no/sim/não", pedidos nuevos a mitad de una
+   confirmación, bloqueo de tarjeta, temas fuera de alcance, inyecciones (patrones del guard + mutaciones que a
+   veces lo evaden), ids de otros clientes, PAN/email, vencimiento de la sesión en cualquier punto (reloj falso),
+   la sesión válida de *otro* cliente sobre el mismo hilo y fallas de herramientas (transitorias, persistentes,
+   fatales, "escribió pero no respondió", acción no verificada). Los invariantes se comprueban contra un modelo
+   **independiente** del agente: la validez de la sesión la calcula el test con su propio reloj, las llamadas a
+   herramientas las registra un proxy (no la traza que escribe el agente) y las acciones se leen del almacén ops.
+2. **Verificación estática del grafo** (`bankagent/graph_check.py`, `tests/test_graph_paths.py`): analiza `EDGES`
+   completo en vez de muestrear. El listado de todos los caminos está en [`graph-paths.md`](graph-paths.md).
+
+| Invariante | Qué afirma | Amenaza que acota |
+|---|---|---|
+| **I1** | Ninguna fila en `disputes`/`card_blocks` se crea salvo que el turno *inmediatamente anterior* del agente haya preguntado por *esa* transacción/tarjeta y *esa* acción, el mensaje actual sea un "sí" interpretado como `confirm`, con sesión válida y del mismo cliente al que se le preguntó | LLM06 agencia excesiva; confirmaciones viejas o ajenas |
+| **I2** | Ninguna respuesta, paquete de handoff, detalle de traza ni mensaje del agente contiene ids, comercios, ciudades, montos o tarjetas de otro cliente (incluido el señuelo `CLI-CANARY`/`T-CAN-1`); el `request` del handoff solo cita textos del propio hilo; la sesión válida de otro cliente no puede continuar un hilo ajeno | LLM02 divulgación; IDOR; hilo filtrado |
+| **I3** | Toda acción que la respuesta da por hecha existe y es del cliente en ops, y todo `DSP-…` citado existe; ninguna respuesta que no sea `resolved` afirma una acción | LLM09 desinformación |
+| **I4** | Solo ocurren transiciones declaradas; el turno empieza en `guard` y termina en `respond → END`; la traza coincide con las llamadas reales (el agente no oculta herramientas) | LLM05 manejo de la salida |
+| **I5** | Sesión vencida/ausente ⇒ ninguna herramienta (solo el IdP), resultado `auth_error`, ninguna acción | Sesión vencida o robada |
+| **I6** | El bloqueo por seguridad ocurre exactamente al 3.er intento (inyección o acceso prohibido) y después ninguna herramienta ni acción en ese hilo | LLM01 + LLM10 |
+| **I7** | La política es determinista (mismos hechos ⇒ misma decisión y reglas, sin importar el orden de los campos) y coincide con un **oráculo escrito a mano** de `policy.yaml` (primera regla que se cumple); el resultado del turno es coherente con la decisión | Política en el prompt / no reproducible |
+| **I8** | Un PAN o email escrito por el cliente no queda en la conversación, el handoff, la traza ni el log de auditoría (además la cadena de hashes se verifica al final de cada conversación) | LLM02 PII en logs |
+| **Grafo** | `EDGES` es acíclico (cada turno termina en ≤ 6 nodos), 16 caminos START→END, todo nodo alcanzable y con salida a END; `act` solo tiene a `understand` como predecesor; y `understand → act` solo ocurre con `awaiting="confirmation"` + confirmación fresca + intención `confirm` con confianza ≥ 0.6 — probado **exhaustivamente** sobre 4 × 7 × 7 × 3 = 588 combinaciones (awaiting × intención × confianza × acción pendiente fresca/vieja/ninguna) | LLM06; transiciones no previstas |
+
+**Resultados.** Perfil `ci` (en cada PR, determinista): 200 conversaciones, ~2.000 turnos, ~2 min. Perfil `deep`
+(local, `HYPOTHESIS_PROFILE=deep pytest tests/test_properties.py -s`): perfil `ci` (200 conversaciones aleatorias por corrida, ~2.000 turnos): 0 violaciones; la corrida `deep` (5.000) queda pendiente de publicar. 0 violaciones observadas no prueba ausencia de riesgo
+
+**Hallazgos (corregidos en #31, con el contraejemplo mínimo fijado como test de regresión):**
+
+- *Confirmación vieja reutilizada (I1).* "no reconozco un cargo" → "2" → *¿Confirmas?* → "la número 8" (no se
+  entiende) → "2" → "dale" ⇒ se abría la disputa y se bloqueaba la tarjeta, aunque el último mensaje del agente
+  no preguntaba nada. Lo mismo tras una inyección bloqueada o una sesión vencida. Arreglo: la acción pendiente
+  guarda el turno en que se preguntó y `understand` solo acepta el "sí" en el turno siguiente; si no se usó, se
+  descarta. (`test_regression_stale_confirmation_is_not_reused`, `…_does_not_survive_blocked_or_expired_turn`)
+- *Hilo compartido entre clientes (I2).* Con el id de hilo de Ana y una sesión válida propia, Beto respondía "6"
+  (opción inválida) y el agente le re-listaba los movimientos de Ana guardados en el estado. Arreglo: el hilo queda
+  atado al cliente de su primer turno autenticado; otra sesión recibe `forbidden` (cuenta para el bloqueo).
+  (`test_regression_thread_is_bound_to_its_customer`)
+- *"Sí" dudoso ejecutaba la acción (tabla exhaustiva del grafo).* `min_confidence` no se aplicaba a `confirm`: un
+  router (p. ej. LLM) con confianza 0.1 disparaba `act`. Arreglo: la confirmación exige la misma confianza mínima.
+  (`test_regression_low_confidence_confirm_does_not_act`)
+
+**Lo que esto NO prueba.** Cero violaciones en N conversaciones aleatorias **no demuestra ausencia de riesgo**:
+acota lo que el generador sabe producir (frases y mutaciones que escribimos nosotros, el fixture de 4 clientes,
+router por reglas y writer por plantillas; el router/writer con LLM no se ejercitan aquí). La verificación del
+grafo sí es exhaustiva, pero solo sobre la tabla `EDGES` y el enrutamiento de `understand`, no sobre el contenido
+de las respuestas. Consecuencias aceptadas de los arreglos: tras una sesión vencida el cliente debe repetir el
+pedido (la confirmación no sobrevive), y alguien con el id del hilo y *otra* sesión válida puede bloquear ese hilo
+con 3 intentos (denegación de servicio acotada a una conversación; el dueño abre otra).
+
 ## Qué falta para producción (resumen honesto)
 
 1. **Identidad real:** IdP (OIDC) con MFA y step-up antes de abrir disputas o bloquear tarjetas.
