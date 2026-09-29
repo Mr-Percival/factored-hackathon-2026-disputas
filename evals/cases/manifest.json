@@ -1,0 +1,48 @@
+{
+  "generator": "bankagent.evals.cases",
+  "seed": 20261005,
+  "policy_version": "2026-09-29.1",
+  "as_of": "2026-06-17",
+  "dev_share_pct": 30,
+  "requested": {
+    "normal": 24,
+    "normal_cancel": 4,
+    "normal_block": 8,
+    "ambiguous": 16,
+    "reject_D02": 4,
+    "reject_D03": 4,
+    "reject_D04": 4,
+    "reject_D05": 4,
+    "reject_D01": 4,
+    "handoff_high_amount": 12,
+    "handoff_fraud": 12,
+    "handoff_repeat": 8,
+    "handoff_inactive": 8,
+    "out_of_scope": 12,
+    "unknown": 8,
+    "adversarial_access": 12,
+    "expired_session": 6,
+    "no_session": 2,
+    "tool_failure_persistent": 4,
+    "tool_failure_transient": 2,
+    "tool_failure_unverified": 2,
+    "missing_vague": 4,
+    "missing_details": 8,
+    "security_lockout": 4
+  },
+  "fairness_groups": 16,
+  "shortfall": {},
+  "policy_cross_check": {
+    "checked": 142,
+    "discarded": 0
+  },
+  "n": {
+    "dev": 81,
+    "test": 159
+  },
+  "provenance": "Casos y etiquetas generados por el equipo por construcción sobre datos sintéticos del organizador; no son tráfico real ni anotación humana independiente.",
+  "sha256": {
+    "dev.jsonl": "b6b239c2d825b1e445f822377619f89967bbe6aecc95bd7c69c1990e885f77fc",
+    "test.jsonl": "424d0f78dc21efdf2e659db03876f1717fa9419dacff9c1acd2cf09d1a89040b"
+  }
+}

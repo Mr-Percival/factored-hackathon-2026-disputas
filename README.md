@@ -5,8 +5,10 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 > El modelo interpreta y redacta; **el código decide y actúa**. Permisos en las herramientas, política en un YAML
 > versionado, toda acción con confirmación y verificada, handoff con contexto completo.
 
+- **Para el jurado — cada punto del enunciado con su evidencia:** [`docs/rubric-evidence.md`](docs/rubric-evidence.md)
 - Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
+- Evaluación offline (línea base, métricas de la rúbrica, equidad por dialecto): [`reports/eval.md`](reports/eval.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
 - Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
 - Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
@@ -53,8 +55,12 @@ src/bankagent/
   factory.py            build_agent(db, router="rules|llm", writer="templates|llm")
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
+  evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
+  evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
   evals/replay.py       replay de quejas históricas por el agente + modo sombra (SIMULACIÓN) -> reports/replay.md
-tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
+evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
+evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
+tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
 scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)
 ```
 
@@ -75,7 +81,22 @@ python -m bankagent.pipeline --out data/demo/demo.duckdb --sample-customers 500 
 python scripts/verify_demo.py --db data/demo/demo.duckdb                      # 13/13 escenarios o código 1
 
 python -m bankagent.chat --customer CLI-XXXXXXXX
+
+# Evaluación offline sobre el conjunto reservado -> reports/eval.md
+python -m bankagent.evals.cases --db data/serving.duckdb        # verifica evals/cases (test congelado, determinista)
+python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 --system rules --repeats 3
 ```
+
+## Evaluación humana de los handoffs
+Kit para que 4 personas califiquen ~35 paquetes de handoff en menos de 30 minutos cada una. Rúbrica, anclajes e
+instrucciones en [`evals/human/RUBRIC.md`](evals/human/RUBRIC.md).
+```bash
+PYTHONPATH=src python -m bankagent.evals.human_kit build --db data/demo/demo.duckdb --n 30 --seed 11   # regenera el kit
+PYTHONPATH=src python -m bankagent.evals.human_kit score "evals/human/sheets/*.csv"                    # -> reports/human_eval.md
+PYTHONPATH=src python -m bankagent.evals.human_kit check --db data/demo/demo.duckdb                   # -> reports/handoff_completeness.md
+```
+`check` es la contraparte automática: campos presentes y no vacíos, y la política re-evaluada con los hechos del
+paquete tiene que reproducir las reglas disparadas. Los 5 controles degradados del kit tienen que fallar.
 
 ## Cómo activar el LLM
 El agente funciona completo sin LLM (reglas + plantillas). Para activar el router y/o el writer con modelo:
@@ -97,13 +118,15 @@ Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-rou
 | `config/policy.yaml` | Sintético, creado por el equipo (no es la política de ningún banco) |
 | Identidad y herramientas | Sandbox simulado por el equipo |
 | `tests/fixture_data.py` | Fixture de prueba creado a mano por el equipo |
+| `evals/cases/*.jsonl` | Casos y etiquetas generados por el equipo por construcción; no son tráfico real |
 
 ## Estado
 - [x] EDA y elección del flujo
 - [x] Pipeline con contratos, cuarentena, upsert incremental y linaje
 - [x] Herramientas con permisos por sesión, política, guard, grafo, línea base es/pt
-- [x] 25 tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos
+- [x] Tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos, métricas de evaluación, equidad por dialecto y evaluación de humo sobre el fixture
 - [x] Router y writer con LLM (salida estructurada, reintentos acotados, fallback a la línea base) y verificador determinista de respuestas
-- [ ] Evaluación: línea base contra agente sobre casos reservados; inyección con datasets públicos
+- [x] Evaluación: casos reservados (dev/test por cliente y por redacción), runner con métricas de la rúbrica, equidad por dialecto
+- [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos; inyección con datasets públicos
 - [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [ ] Interfaz web, deploy, slides y video

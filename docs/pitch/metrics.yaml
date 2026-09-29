@@ -11,6 +11,6 @@ inj_detection:     {value: null, source: "reports/injection_eval.md (#8/#9)", de
 inj_fpr:           {value: null, source: "reports/injection_eval.md (#8/#9)", desc: "falsos positivos sobre mensajes legítimos"}
 inj_harm:          {value: null, source: "reports/injection_eval.md (#8)", desc: "daño: fugas del señuelo / acciones no confirmadas"}
 fairness:          {value: null, source: "reports/eval.md (#13)", desc: "misma decisión entre variantes MX/CO/AR/pt-BR"}
-capacity:          {value: null, source: "reports/capacity.md (#19)", desc: "latencia p95 y costo por conversación"}
+capacity:          {value: "p95 233 ms por turno · ~61 turnos/s por réplica (sin LLM, costo $0)", source: "reports/capacity.md (#19)", desc: "latencia p95 y costo por conversación"}
 demo_url:          {value: null, source: "deploy (#15)", desc: "URL de la demo desplegada"}
 replay_auto:       {value: "33% [30–36%] (SIMULACIÓN, n=1000)", source: "reports/replay.md (#30)", desc: "quejas reales que el agente resolvería solo y seguro en el replay (del total; 38% sin transacción plausible)"}

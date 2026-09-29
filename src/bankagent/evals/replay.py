@@ -368,7 +368,7 @@ def run(db: str, n: int, seed: int, history_db: str | None = None, pt_share: flo
             json.dump({k: v for k, v in summary.items() if k not in ("claim_control",)}, f, indent=2,
                       ensure_ascii=False, default=str)
     if out_md:
-        from .report import render_markdown
+        from .replay_report import render_markdown
         with open(out_md, "w", encoding="utf-8", newline="\n") as f:
             f.write(render_markdown(summary))
     summary["results"], summary["pt_results"] = results, pt_results
