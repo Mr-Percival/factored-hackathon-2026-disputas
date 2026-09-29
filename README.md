@@ -45,8 +45,9 @@ src/bankagent/
   identity.py           sesiones simuladas con expiración (el IdP del banco)
   tools.py              herramientas bancarias: permisos por sesión, acciones verificadas
   policy.py             motor de reglas (expresiones restringidas, sin eval libre)
-  guard.py              detección de inyección + enmascarado de PII
+  guard.py              detección de inyección (interfaz: regex / clasificador ONNX) + enmascarado de PII
   audit.py              log de auditoría JSONL con cadena de hashes (`python -m bankagent.audit verify`)
+  evals/                evaluación de inyección: detección (datasets públicos) y daño (agente real)
   understanding.py      interfaz Router + RuleRouter (línea base es/pt)
   responses.py          redacción por plantillas es/pt (línea base)
   llm.py                cliente LLM agnóstico de proveedor (Anthropic + Fake para tests)
@@ -60,6 +61,7 @@ src/bankagent/
   evals/replay.py       replay de quejas históricas por el agente + modo sombra (SIMULACIÓN) -> reports/replay.md
 evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
 evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
+evals/fixtures/         fixtures del equipo: portugués traducido y mensajes bancarios (con procedencia)
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
 scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)
 ```
@@ -85,6 +87,11 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 # Evaluación offline sobre el conjunto reservado -> reports/eval.md
 python -m bankagent.evals.cases --db data/serving.duckdb        # verifica evals/cases (test congelado, determinista)
 python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 --system rules --repeats 3
+
+# Evaluación de inyección (#8, #9): descarga datasets y modelos a revisión fija (caché de HF, fuera del repo)
+pip install -e ".[security-eval]"
+python -m bankagent.evals.injection                   # -> reports/injection_eval.md
+BANKAGENT_INJECTION_DETECTOR=combined python -m bankagent.chat --customer CLI-XXXXXXXX   # guard regex OR clasificador
 ```
 
 ## Evaluación humana de los handoffs
@@ -127,6 +134,7 @@ Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-rou
 - [x] Tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos, métricas de evaluación, equidad por dialecto y evaluación de humo sobre el fixture
 - [x] Router y writer con LLM (salida estructurada, reintentos acotados, fallback a la línea base) y verificador determinista de respuestas
 - [x] Evaluación: casos reservados (dev/test por cliente y por redacción), runner con métricas de la rúbrica, equidad por dialecto
-- [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos; inyección con datasets públicos
+- [x] Inyección con datasets públicos: detección (regex vs. clasificador) y daño de punta a punta ([reporte](reports/injection_eval.md), [ADR 0005](docs/adr/0005-deteccion-inyeccion.md))
+- [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos (LLM apagado: sin API paga)
 - [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [ ] Interfaz web, deploy, slides y video
