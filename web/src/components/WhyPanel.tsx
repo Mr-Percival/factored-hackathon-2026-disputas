@@ -111,7 +111,7 @@ export function TraceTimeline({ steps, totalMs }: { steps: TraceStep[]; totalMs:
       </h3>
       <ol
         aria-label="Pasos del grafo en orden"
-        className="relative flex flex-col gap-3 border-l border-border pl-4"
+        className="relative ml-2 flex flex-col gap-3 border-l border-border pl-4"
       >
         {steps.map((s, i) => (
           <li key={`${s.node}-${i}`} className="relative">
