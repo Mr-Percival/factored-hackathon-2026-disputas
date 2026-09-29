@@ -26,6 +26,9 @@ src/bankagent/
   responses.py          redacción por plantillas es/pt (línea base)
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
+  demo_fixture.py       fixture etiquetado (tests y demo sin datos reales)
+  ui.py                 formato de la demo web (traza, política, handoff)
+app/streamlit_app.py    demo web
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
 scripts/                descarga S3 y EDA
 ```
@@ -45,13 +48,29 @@ python -m bankagent.pipeline --sample-customers 500 --out data/demo.duckdb   # b
 python -m bankagent.chat --customer CLI-XXXXXXXX
 ```
 
+## Demo web (Streamlit)
+Chat + traza del turno ("Por qué respondió así": nodos, herramientas, reglas y hechos verificados) + consola del
+asesor humano con el paquete de handoff. Sin `BANKAGENT_DB` arma al arrancar una base mínima desde el fixture
+(`src/bankagent/demo_fixture.py`); con `BANKAGENT_DB=data/demo.duckdb` usa datos reales.
+```bash
+pip install -e ".[ui]"
+streamlit run app/streamlit_app.py                     # http://localhost:8501
+BANKAGENT_DB=data/demo.duckdb streamlit run app/streamlit_app.py
+
+docker build -t bankagent-demo .
+docker run --rm -p 8501:8501 bankagent-demo            # -e PORT=... para Render / HF Spaces
+```
+- **Healthcheck:** `GET /_stcore/health` → `ok` (endpoint nativo de Streamlit), o `python -m bankagent.app_health [--url http://localhost:8501]`.
+- **Deploy:** Streamlit Community Cloud (usa `requirements.txt`, archivo `app/streamlit_app.py`), Hugging Face Spaces (Docker) o Render (Docker).
+- La lógica de formato vive en `src/bankagent/ui.py` y se prueba sin navegador en `tests/test_ui.py`.
+
 ## Qué es real, qué es sintético
 | Insumo | Origen |
 |---|---|
 | Dataset LATAM Bank | Sintético, provisto por el organizador |
 | `config/policy.yaml` | Sintético, creado por el equipo (no es la política de ningún banco) |
 | Identidad y herramientas | Sandbox simulado por el equipo |
-| `tests/fixture_data.py` | Fixture de prueba creado a mano por el equipo |
+| `src/bankagent/demo_fixture.py` | Fixture de prueba y demo creado a mano por el equipo |
 
 ## Estado
 - [x] EDA y elección del flujo
@@ -61,4 +80,5 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 - [ ] Router y writer con LLM, más un verificador de salida
 - [ ] Evaluación: línea base contra agente sobre casos reservados; inyección con datasets públicos
 - [ ] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
-- [ ] Interfaz web, deploy, slides y video
+- [x] Interfaz web de demo (chat + traza + consola de handoff)
+- [ ] Deploy, slides y video
