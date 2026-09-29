@@ -193,5 +193,7 @@ sequenceDiagram
   ([`operations.md`](operations.md)).
 - **Concurrencia dentro del proceso:** turnos de conversaciones distintas corren en paralelo en el pool de hilos
   (cursores DuckDB por hilo en `BankTools`, #29); los de una misma conversación se serializan con un lock propio.
+- **Aislamiento por sesión de demo:** cada login tiene su agente y su almacén ops (schema DuckDB) propios, borrados
+  al cerrar o vencer la sesión; tope de 200 sesiones. Solo en la demo: en producción el almacén ops es único.
 - **Escenarios como datos:** `docs/demo/demo_customers.json` (clientes reales, con `BANKAGENT_DB`) o
   `config/demo_scenarios.json` (fixture). Los `customer_id` listados son la allowlist del login simulado.

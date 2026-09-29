@@ -74,7 +74,7 @@ def test_health_and_ready(client):
 
 
 def test_ready_reports_503_when_db_is_gone(client):
-    rt(client).agent.tools._ro.close()
+    rt(client).tools._ro.close()
     assert client.get("/readyz").status_code == 503
 
 
@@ -135,6 +135,62 @@ def test_cookie_is_secure_under_https(make_client):
     assert "secure" in r.headers["set-cookie"].lower()
     assert "strict-transport-security" in r.headers
     assert c.get("/api/sessions/current").status_code == 200  # el cliente reenvía la cookie Secure
+
+
+def _dispute_77(c):
+    cid = conversation(c)
+    first = say(c, cid, "No reconozco un cargo de 77 dólares")
+    return first, (say(c, cid, "sí") if first["awaiting"] == "confirmation" else None)
+
+
+def _ops_schemas(c) -> int:
+    q = "SELECT count(*) FROM information_schema.schemata WHERE schema_name LIKE 's\\_%' ESCAPE '\\'"
+    return rt(c).tools._ops.cursor().execute(q).fetchone()[0]
+
+
+def test_demo_sessions_are_isolated_so_the_demo_is_repeatable(client):
+    """Dos jueces con el mismo escenario: ambos ven el flujo normal; D01 solo dentro de la misma sesión."""
+    other = TestClient(client.app)
+    for browser in (client, other):
+        login(browser)
+        first, done = _dispute_77(browser)
+        assert first["decision"]["rules"] == [] and done["outcome"] == "resolved"
+    again, _ = _dispute_77(client)  # misma sesión, otra conversación: la disputa ya existe
+    assert again["outcome"] == "informed" and again["decision"]["rules"][0]["id"] == "D01_already_disputed"
+    login(client)  # login nuevo = sesión limpia
+    first, done = _dispute_77(client)
+    assert first["decision"]["rules"] == [] and done["outcome"] == "resolved"
+
+
+def test_session_resources_are_released_on_logout_and_expiry(client):
+    base = _ops_schemas(client)
+    login(client)
+    _dispute_77(client)
+    assert _ops_schemas(client) == base + 1
+    client.delete("/api/sessions/current")
+    assert _ops_schemas(client) == base and not rt(client).sessions and not rt(client).owners
+    login(client)
+    assert _ops_schemas(client) == base + 1
+    runtime = rt(client)
+    real = runtime.clock
+    runtime.clock = lambda: real() + runtime.settings.session_ttl_s + 1  # la sesión del navegador venció
+    try:
+        assert client.get("/api/sessions/current").status_code == 401
+    finally:
+        runtime.clock = real
+    assert _ops_schemas(client) == base and not runtime.sessions
+
+
+def test_concurrent_session_cap_returns_429(make_client):
+    c = make_client(max_sessions=2)
+    browsers = [TestClient(c.app) for _ in range(3)]
+    login(browsers[0])
+    login(browsers[1])
+    r = browsers[2].post("/api/sessions", json={"customer_id": "CLI-ANA"})
+    assert r.status_code == 429 and r.json()["error"]["code"] == "too_many_sessions"
+    login(browsers[1])  # re-login del mismo navegador reemplaza su sesión: no suma
+    browsers[0].delete("/api/sessions/current")
+    login(browsers[2])
 
 
 def test_new_login_replaces_previous_session(client):

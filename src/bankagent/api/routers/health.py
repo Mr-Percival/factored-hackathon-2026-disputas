@@ -28,4 +28,4 @@ def readyz(rt: RuntimeDep):
         ok = False
     if not ok:
         return JSONResponse(Ready(status="not_ready").model_dump(), status_code=503)
-    return Ready(status="ready", policy_version=rt.agent.policy.version, data_source=rt.data_source)
+    return Ready(status="ready", policy_version=rt.policy.version, data_source=rt.data_source)
