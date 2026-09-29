@@ -41,8 +41,8 @@ class Settings:
     rate_limit_per_min: int = 30
     session_rate_limit_per_min: int = 30  # cada clic en un escenario es un login: holgura para la demo en vivo
     max_body_bytes: int = 16 * 1024
-    session_ttl_s: int = 2 * 60 * 60   # sesión del navegador (la del agente dura 15 min, la del IdP simulado)
-    max_sessions: int = 500
+    session_ttl_s: int = 30 * 60  # sesión del navegador (el token del agente dura 15 min); luego se libera todo
+    max_sessions: int = 200  # cada sesión tiene su agente y su almacén ops; al tope, 429
     max_conversations_per_session: int = 50
     web_dist: str = DEFAULT_WEB_DIST
     docs: bool = True

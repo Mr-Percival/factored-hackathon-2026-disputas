@@ -30,6 +30,7 @@ MESSAGES = {
     "customer_not_found": "Cliente no encontrado.",
     "conversation_not_found": "Conversación no encontrada.",
     "rate_limited": "Demasiadas solicitudes. Espera un momento e intenta de nuevo.",
+    "too_many_sessions": "La demo tiene demasiadas sesiones abiertas. Intenta de nuevo en unos minutos.",
     "bad_request": "La solicitud no se pudo leer (se espera JSON en UTF-8).",
     "not_found": "Recurso no encontrado.",
     "method_not_allowed": "Método no permitido.",

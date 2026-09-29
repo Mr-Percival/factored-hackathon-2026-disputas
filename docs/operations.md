@@ -17,6 +17,12 @@ de solo lectura, un almacén `ops` en memoria, router/writer LLM opcionales con 
 auditoría JSONL con cadena de hashes (`audit.py`). Setup reproducible: `pip install -e ".[dev]"`, `pytest -q` sin datos
 ni llaves, pipeline idempotente con manifiesto (`data/runs/<run_id>.json`). UI y contenedor: #14.
 
+**Demo web (API, [ADR 0008](adr/0008-frontend-web.md)):** un contenedor, un worker. Cada sesión de demo tiene su
+propio agente y su propio almacén ops (schema DuckDB), que se borran al cerrar o vencer la sesión (30 min), con un
+tope de 200 sesiones simultáneas. Así cada juez ve el flujo completo aunque otro ya haya disputado el mismo cargo.
+**Esto es solo para la demo:** en producción el almacén ops es único y transaccional (ver tabla abajo), porque una
+disputa abierta debe verse desde todos los canales y sesiones.
+
 ### Producción (propuesta)
 
 ```mermaid

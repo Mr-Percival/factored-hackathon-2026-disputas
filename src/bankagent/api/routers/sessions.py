@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from ..deps import RuntimeDep, SessionDep, clear_session_cookie, client_ip, set_session_cookie, COOKIE
-from ..runtime import BrowserSession, Runtime
+from ..runtime import BrowserSession, Runtime, TooManySessions
 from ..schemas import ErrorResponse, SessionCreate, SessionInfo
 
 router = APIRouter(prefix="/sessions", tags=["sesiones"])
@@ -29,10 +29,11 @@ def create_session(body: SessionCreate, request: Request, response: Response, rt
         raise HTTPException(403, detail="customer_not_allowed")
     if not rt.customer_exists(body.customer_id):
         raise HTTPException(404, detail="customer_not_found")
-    old = request.cookies.get(COOKIE)
-    if old:
-        rt.logout(old)  # una sesión por navegador: el login nuevo invalida la anterior
-    s = rt.login(body.customer_id)
+    try:
+        # una sesión por navegador: el login nuevo libera la anterior (agente, disputas y bloqueos de demo)
+        s = rt.login(body.customer_id, replaces=request.cookies.get(COOKIE))
+    except TooManySessions:
+        raise HTTPException(429, detail="too_many_sessions") from None
     set_session_cookie(response, request, rt, s.sid)
     return _info(rt, s)
 

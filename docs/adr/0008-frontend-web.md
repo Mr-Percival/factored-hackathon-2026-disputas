@@ -23,6 +23,16 @@ la conversación en memoria (`InMemorySaver`) y las acciones en un `ops` en memo
    solo un id opaco (`secrets.token_urlsafe(32)`) en una cookie `HttpOnly`, `SameSite=Strict`, `Secure` bajo https,
    `Path=/api`. Cada conversación queda ligada a la sesión que la creó; una ajena responde 404 (no revela existencia).
 4. **Un worker uvicorn**, a propósito (Dockerfile + `docker/entrypoint.sh`).
+5. **Aislamiento por sesión de demo (solo la API web):** cada login crea su propio `Agent` (checkpointer propio) y su
+   propio almacén ops (disputas y bloqueos) como un schema DuckDB dentro de la conexión ops compartida
+   (`BankTools.fork_ops`). La conexión de serving (solo lectura) también se comparte, con cursores por hilo. Así la
+   demo es repetible para muchos jueces: una sesión nueva empieza limpia y D01 ("ya existe una disputa") solo refleja
+   acciones de esa misma sesión. Al cerrar sesión, reemplazarla o vencer su TTL (30 min) se borran el schema y el
+   agente. Hay un tope de 200 sesiones simultáneas (luego 429 `too_many_sessions`). Costo medido: ~15 ms y ~0,1 MB de agente
+   por login (más las filas de la sesión). Un `:memory:` DuckDB por sesión costaba ~3,8 MB y se descartó.
+   **Es una decisión de demo:** en producción el almacén ops es uno solo y transaccional (una disputa existe para
+   todos los canales). La consola, la evaluación y los tests siguen usando el almacén por defecto (`ops_schema=None`),
+   sin cambios de comportamiento.
 
 ## Alternativas consideradas
 | Opción | A favor | En contra |
