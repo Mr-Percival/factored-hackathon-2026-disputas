@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "boto3>=1.34", "pandas>=2"]
+dev = ["pytest>=8", "hypothesis>=6.100", "boto3>=1.34", "pandas>=2"]
 llm = ["anthropic>=1.0"]  # router/writer con LLM (opcional; sin esto el agente usa reglas y plantillas)
 pitch = ["python-pptx>=1.0", "matplotlib>=3.8", "pyyaml>=6"]
 

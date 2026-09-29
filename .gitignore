@@ -25,3 +25,4 @@ __pycache__/
 
 # Worktrees y estado local de Claude Code
 .claude/
+.hypothesis/
