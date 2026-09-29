@@ -14,15 +14,16 @@ npm ci
 npm run dev                                          # http://localhost:5173 (proxy /api -> :8000)
 ```
 
-| Comando                           | Qué hace                                                                                                       |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                     | Vite en :5173 con proxy de `/api`, `/healthz`, `/readyz` a `VITE_API_TARGET` (default `http://127.0.0.1:8000`) |
-| `npm run lint`                    | ESLint (typescript-eslint _strict type-checked_, React Hooks, jsx-a11y _strict_), sin warnings                 |
-| `npm run format` / `format:check` | Prettier                                                                                                       |
-| `npm run typecheck`               | `tsc -b` en modo estricto (`noUncheckedIndexedAccess`, etc.)                                                   |
-| `npm run test`                    | Vitest + Testing Library (jsdom) con una API falsa tipada                                                      |
-| `npm run build`                   | `dist/` (lo sirve FastAPI)                                                                                     |
-| `npm run gen:api`                 | Regenera `src/api/schema.d.ts` desde `src/api/openapi.json`                                                    |
+| Comando                           | Qué hace                                                                                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`                     | Vite en :5173 con proxy de `/api`, `/healthz`, `/readyz` a `VITE_API_TARGET` (default `http://127.0.0.1:8000`)                                                                             |
+| `npm run lint`                    | ESLint (typescript-eslint _strict type-checked_, React Hooks, jsx-a11y _strict_), sin warnings                                                                                             |
+| `npm run format` / `format:check` | Prettier                                                                                                                                                                                   |
+| `npm run typecheck`               | `tsc -b` en modo estricto (`noUncheckedIndexedAccess`, etc.)                                                                                                                               |
+| `npm run test`                    | Vitest + Testing Library (jsdom) con una API falsa tipada                                                                                                                                  |
+| `npm run build`                   | `dist/` (lo sirve FastAPI)                                                                                                                                                                 |
+| `npm run e2e`                     | Playwright + axe-core (WCAG 2.2 A/AA) y chequeos de seguridad contra `dist/` servido por uvicorn con el fixture (`E2E_PYTHON` = python del proyecto). Ver `reports/a11y_security_audit.md` |
+| `npm run gen:api`                 | Regenera `src/api/schema.d.ts` desde `src/api/openapi.json`                                                                                                                                |
 
 ## Contrato con la API
 

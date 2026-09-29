@@ -1,0 +1,28 @@
+# Actualizaciones semanales de dependencias (#17). Las acciones van fijadas por SHA con el tag en comentario:
+# Dependabot actualiza ambos. Si un PR de pip cambia pyproject.toml, regenerar los locks con `bash scripts/lock.sh`
+# en la misma rama (tests/test_supply_chain.py falla si el lock no cubre una dependencia declarada).
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      python:
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      web:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

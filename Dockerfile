@@ -27,7 +27,11 @@ WORKDIR /app
 
 RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin app
 
-# Instalación editable: policy.py y la API resuelven config/ y web/dist relativos a /app.
+# Dependencias exactas y verificadas por hash (#17): regenerar con `bash scripts/lock.sh`. Capa aparte para caché.
+COPY requirements/api.lock requirements/api.lock
+RUN pip install --require-hashes -r requirements/api.lock
+
+# Instalación editable sin resolver dependencias: policy.py y la API resuelven config/ y web/dist relativos a /app.
 COPY pyproject.toml ./
 COPY src/ src/
 COPY config/ config/
@@ -37,7 +41,7 @@ COPY docs/demo/demo_customers.json docs/demo/demo_customers.json
 # BANKAGENT_ROUTER=rules en tiempo de ejecución vuelve a la línea base. El full (MiniLM, 252 MB) no entra.
 COPY models/intent_router_lite/ models/intent_router_lite/
 ENV BANKAGENT_ROUTER=embeddings
-RUN pip install -e ".[api,ml]"
+RUN pip install --no-deps -e .
 
 COPY docker/ docker/
 COPY --from=web /web/dist web/dist

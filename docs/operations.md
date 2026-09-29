@@ -186,7 +186,7 @@ se cargan documento, email, dirección, fecha de nacimiento, ingreso ni score (`
 8. Retención y borrado automáticos (sección 5) validados por Compliance; DPA con el proveedor LLM.
 9. Multi-región / DR: RPO/RTO definidos, backups de ops y checkpointer probados, runbook de conmutación.
 10. Accesibilidad de la UI (WCAG 2.1 AA) y canal alternativo para quien no puede usar el chat.
-11. Dependencias fijadas con hashes y acciones de CI por SHA (#17); escaneo de imagen.
+11. Escaneo de imagen e imágenes base por digest (las dependencias con hash y las acciones por SHA ya están: #17).
 12. Monitoreo de deriva: distribución de intenciones, tasa de handoff por segmento y equidad por dialecto (#13).
 
 ## Deploy de la demo (Render)

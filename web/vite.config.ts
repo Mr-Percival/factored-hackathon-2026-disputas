@@ -1,9 +1,9 @@
-/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from "node:url";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 
 // https://vite.dev/config/
 // En desarrollo la SPA corre en :5173 y /api, /healthz y /readyz se reenvían a uvicorn (:8000), así el
@@ -36,5 +36,7 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     css: false,
     restoreMocks: true,
+    // e2e/ es de Playwright (npm run e2e), no de Vitest.
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
 });

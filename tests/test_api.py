@@ -491,6 +491,26 @@ def test_spa_is_served_with_fallback(make_client, tmp_path):
     assert "script-src 'self'" in c.get("/").headers["content-security-policy"]
 
 
+def test_spa_security_headers_and_hsts_under_https(make_client, tmp_path):
+    """#35: la SPA y sus assets bajo https llevan HSTS y el set completo de cabeceras (el e2e corre sobre http)."""
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><div id=root></div>", encoding="utf-8")
+    (dist / "assets" / "app-abc.js").write_text("console.log(1)", encoding="utf-8")
+    c = make_client(base_url="https://testserver", web_dist=str(dist))
+    for path in ("/", "/assets/app-abc.js", "/api/scenarios"):
+        h = c.get(path).headers
+        csp = dict((d.split(" ", 1) + [""])[:2] for d in (x.strip() for x in h["content-security-policy"].split(";")))
+        assert csp["script-src"] == "'self'" and csp["style-src"] == "'self'", path  # sin unsafe-inline
+        assert csp["frame-ancestors"] == "'none'" and h["x-frame-options"] == "DENY"
+        assert h["strict-transport-security"] == "max-age=31536000; includeSubDomains"
+        assert h["x-content-type-options"] == "nosniff" and h["referrer-policy"] == "no-referrer"
+        assert "camera=()" in h["permissions-policy"]
+    r = login(c)
+    cookie = [p.strip().lower() for p in r.headers["set-cookie"].split(";")]
+    assert {"httponly", "secure", "samesite=strict", "path=/api"} <= set(cookie)
+
+
 def test_audit_log_via_env_path(make_client, tmp_path):
     path = tmp_path / "audit.jsonl"
     c = make_client(audit_path=str(path))

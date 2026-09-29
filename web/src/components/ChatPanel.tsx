@@ -12,14 +12,17 @@ import type { ChatMessage, Demo } from "@/state/useDemo";
 export function ChatPanel({ demo, scenarios = [] }: { demo: Demo; scenarios?: Scenario[] }) {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
   const counterId = useId();
   const hintId = useId();
   const canChat = Boolean(demo.conversationId);
   const lastAgent = [...demo.messages].reverse().find((m) => m.role === "agent");
 
+  // Se desplaza el contenedor (no scrollIntoView): scrollIntoView movía el punto de partida de la navegación
+  // con Tab al final del chat y el primer Tab de la página saltaba el enlace "Saltar al contenido" (#35).
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    const log = logRef.current;
+    if (log) log.scrollTop = log.scrollHeight;
   }, [demo.messages.length, demo.sending]);
 
   const submit = (e?: SyntheticEvent) => {
@@ -68,7 +71,17 @@ export function ChatPanel({ demo, scenarios = [] }: { demo: Demo; scenarios?: Sc
         </div>
       )}
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" aria-busy={demo.sending}>
+      {/* Región desplazable enfocable: con teclado se puede leer el historial aunque no tenga controles
+          (axe scrollable-region-focusable, WCAG 2.1.1). */}
+      <div
+        ref={logRef}
+        role="region"
+        aria-label="Historial del chat"
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- región desplazable: WCAG 2.1.1
+        tabIndex={0}
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
+        aria-busy={demo.sending}
+      >
         {!demo.session && <StartHere demo={demo} scenarios={scenarios} />}
         <ol aria-label="Mensajes de la conversación" className="flex flex-col gap-3">
           {demo.messages.map((m) => (
@@ -86,7 +99,6 @@ export function ChatPanel({ demo, scenarios = [] }: { demo: Demo; scenarios?: Sc
             </span>
           </p>
         )}
-        <div ref={endRef} />
       </div>
 
       {/* Solo la última respuesta del agente se anuncia a lectores de pantalla (WAI-ARIA live region). */}
