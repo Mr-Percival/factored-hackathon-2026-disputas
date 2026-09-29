@@ -7,6 +7,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 
 - Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
+- Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
 
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
@@ -22,6 +23,7 @@ src/bankagent/
   tools.py              herramientas bancarias: permisos por sesión, acciones verificadas
   policy.py             motor de reglas (expresiones restringidas, sin eval libre)
   guard.py              detección de inyección + enmascarado de PII
+  audit.py              log de auditoría JSONL con cadena de hashes (`python -m bankagent.audit verify`)
   understanding.py      interfaz Router + RuleRouter (línea base es/pt)
   responses.py          redacción por plantillas es/pt (línea base)
   graph.py              grafo LangGraph con transiciones declaradas y traza
@@ -60,5 +62,5 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 - [x] 25 tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos
 - [ ] Router y writer con LLM, más un verificador de salida
 - [ ] Evaluación: línea base contra agente sobre casos reservados; inyección con datasets públicos
-- [ ] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
+- [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [ ] Interfaz web, deploy, slides y video
