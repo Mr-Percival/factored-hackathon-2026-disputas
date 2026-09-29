@@ -21,12 +21,14 @@ src/bankagent/
   identity.py           sesiones simuladas con expiración (el IdP del banco)
   tools.py              herramientas bancarias: permisos por sesión, acciones verificadas
   policy.py             motor de reglas (expresiones restringidas, sin eval libre)
-  guard.py              detección de inyección + enmascarado de PII
+  guard.py              detección de inyección (interfaz: regex / clasificador ONNX) + enmascarado de PII
+  evals/                evaluación de inyección: detección (datasets públicos) y daño (agente real)
   understanding.py      interfaz Router + RuleRouter (línea base es/pt)
   responses.py          redacción por plantillas es/pt (línea base)
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
+evals/fixtures/         fixtures del equipo: portugués traducido y mensajes bancarios (con procedencia)
 scripts/                descarga S3 y EDA
 ```
 
@@ -43,6 +45,11 @@ python -m bankagent.pipeline                          # -> data/serving.duckdb +
 python -m bankagent.pipeline --sample-customers 500 --out data/demo.duckdb   # base liviana para el deploy
 
 python -m bankagent.chat --customer CLI-XXXXXXXX
+
+# Evaluación de inyección (#8, #9): descarga datasets y modelos a revisión fija (caché de HF, fuera del repo)
+pip install -e ".[security-eval]"
+python -m bankagent.evals.injection                   # -> reports/injection_eval.md
+BANKAGENT_INJECTION_DETECTOR=combined python -m bankagent.chat --customer CLI-XXXXXXXX   # guard regex OR clasificador
 ```
 
 ## Qué es real, qué es sintético
@@ -59,6 +66,7 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 - [x] Herramientas con permisos por sesión, política, guard, grafo, línea base es/pt
 - [x] 25 tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos
 - [ ] Router y writer con LLM, más un verificador de salida
-- [ ] Evaluación: línea base contra agente sobre casos reservados; inyección con datasets públicos
+- [x] Inyección con datasets públicos: detección (regex vs. clasificador) y daño de punta a punta ([reporte](reports/injection_eval.md), [ADR 0004](docs/adr/0004-deteccion-inyeccion.md))
+- [ ] Evaluación: línea base contra agente sobre casos reservados
 - [ ] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [ ] Interfaz web, deploy, slides y video

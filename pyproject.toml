@@ -11,6 +11,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "boto3>=1.34", "pandas>=2"]
+# Evaluación de inyección (#8, #9) y detector con modelo (opt-in). Sin torch: ONNX Runtime en CPU.
+security-eval = ["onnxruntime>=1.17", "tokenizers>=0.15", "huggingface_hub>=0.23", "numpy>=1.26", "pandas>=2", "pyarrow>=14"]
 
 [build-system]
 requires = ["setuptools>=68"]
