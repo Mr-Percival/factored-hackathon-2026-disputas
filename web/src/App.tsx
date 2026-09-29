@@ -1,8 +1,9 @@
-import { Landmark, ListChecks, MessageSquare, Moon, Search, Sun } from "lucide-react";
+import { Cpu, Landmark, ListChecks, MessageSquare, Moon, Search, Sun } from "lucide-react";
 
 import { ChatPanel } from "@/components/ChatPanel";
 import { InsightPanel } from "@/components/InsightPanel";
 import { ScenarioPanel } from "@/components/ScenarioPanel";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery, useTheme } from "@/lib/hooks";
@@ -35,7 +36,7 @@ export function App() {
       source={scenarios.data.source}
     />
   );
-  const chat = <ChatPanel demo={demo} />;
+  const chat = <ChatPanel demo={demo} scenarios={scenarios.data?.scenarios ?? []} />;
   const insight = <InsightPanel demo={demo} />;
 
   return (
@@ -50,11 +51,20 @@ export function App() {
         <div className="mx-auto flex max-w-[110rem] items-center gap-3 px-4 py-3">
           <Landmark aria-hidden="true" className="size-6 text-primary" />
           <div className="flex-1">
-            <h1 className="text-base font-semibold leading-tight">Agente de disputas de cargos no reconocidos</h1>
+            <h1 className="text-base font-semibold leading-tight">
+              Agente de disputas de cargos no reconocidos
+            </h1>
             <p className="text-xs text-muted-foreground">
-              El modelo interpreta y redacta; el código decide y actúa. Reglas + plantillas, sin LLM.
+              Atiende cargos no reconocidos, cobros indebidos y bloqueo de tarjeta · español y portugués
             </p>
           </div>
+          <Badge
+            tone="info"
+            title="Router por reglas y respuestas por plantillas: sin llamadas a un modelo de lenguaje"
+          >
+            <Cpu aria-hidden="true" />
+            Modo reglas (sin LLM)
+          </Badge>
           <Button
             variant="ghost"
             size="icon"
@@ -65,6 +75,17 @@ export function App() {
             {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
           </Button>
         </div>
+        <details className="mx-auto max-w-[110rem] px-4 pb-2 text-xs text-muted-foreground">
+          <summary className="w-fit cursor-pointer">Limitaciones conocidas</summary>
+          <ul className="mt-1 list-disc pl-5">
+            <li>
+              Entiende por reglas y palabras clave (línea base): funciona mejor con monto, fecha o país (“no
+              reconozco un cargo de 77 dólares”). Si no entiende, pregunta en vez de adivinar.
+            </li>
+            <li>Las sesiones duran 15 minutos y viven en la memoria del servidor: un reinicio las borra.</li>
+            <li>Identidad, herramientas y política son un sandbox: ninguna acción mueve dinero real.</li>
+          </ul>
+        </details>
       </header>
 
       <main id="main" className="mx-auto w-full max-w-[110rem] flex-1 px-4 py-4">

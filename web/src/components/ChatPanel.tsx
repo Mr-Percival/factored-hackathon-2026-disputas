@@ -2,14 +2,14 @@ import { AlertTriangle, Bot, SendHorizontal, User, X } from "lucide-react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type SyntheticEvent } from "react";
 
 import { MAX_MESSAGE_CHARS } from "@/api/client";
-import type { TurnResult } from "@/api/types";
+import type { Scenario, TurnResult } from "@/api/types";
 import { OutcomeBadge } from "@/components/OutcomeBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, Demo } from "@/state/useDemo";
 
-export function ChatPanel({ demo }: { demo: Demo }) {
+export function ChatPanel({ demo, scenarios = [] }: { demo: Demo; scenarios?: Scenario[] }) {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -51,7 +51,10 @@ export function ChatPanel({ demo }: { demo: Demo }) {
       </CardHeader>
 
       {demo.error && (
-        <div role="alert" className="mx-4 mt-3 flex items-start gap-2 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger-fg">
+        <div
+          role="alert"
+          className="mx-4 mt-3 flex items-start gap-2 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger-fg"
+        >
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           <p className="flex-1">{demo.error.message}</p>
           <button
@@ -66,6 +69,7 @@ export function ChatPanel({ demo }: { demo: Demo }) {
       )}
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" aria-busy={demo.sending}>
+        {!demo.session && <StartHere demo={demo} scenarios={scenarios} />}
         <ol aria-label="Mensajes de la conversación" className="flex flex-col gap-3">
           {demo.messages.map((m) => (
             <MessageItem key={m.id} message={m} demo={demo} isLast={m === lastAgent} />
@@ -90,6 +94,8 @@ export function ChatPanel({ demo }: { demo: Demo }) {
         {lastAgent ? `Agente: ${lastAgent.text}` : ""}
       </div>
 
+      <Suggestions demo={demo} />
+
       <form onSubmit={submit} className="border-t border-border p-3">
         <label htmlFor="composer" className="sr-only">
           Mensaje para el agente
@@ -110,7 +116,11 @@ export function ChatPanel({ demo }: { demo: Demo }) {
             aria-describedby={`${hintId} ${counterId}`}
             className="min-h-[2.5rem] flex-1 resize-y rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground disabled:opacity-60"
           />
-          <Button type="submit" disabled={!canChat || demo.sending || !draft.trim()} aria-label="Enviar mensaje">
+          <Button
+            type="submit"
+            disabled={!canChat || demo.sending || !draft.trim()}
+            aria-label="Enviar mensaje"
+          >
             <SendHorizontal aria-hidden="true" />
             <span className="hidden sm:inline">Enviar</span>
           </Button>
@@ -171,7 +181,13 @@ function TurnActions({ result, demo }: { result: TurnResult; demo: Demo }) {
     return (
       <div role="group" aria-label="Opciones" className="flex flex-wrap gap-1.5">
         {result.candidates.map((c) => (
-          <Button key={c.index} size="sm" variant="outline" disabled={disabled} onClick={() => void demo.send(String(c.index))}>
+          <Button
+            key={c.index}
+            size="sm"
+            variant="outline"
+            disabled={disabled}
+            onClick={() => void demo.send(String(c.index))}
+          >
             Elegir {c.index}
           </Button>
         ))}
@@ -184,11 +200,71 @@ function TurnActions({ result, demo }: { result: TurnResult; demo: Demo }) {
         <Button size="sm" disabled={disabled} onClick={() => void demo.send(pt ? "sim" : "sí")}>
           {pt ? "Sim, confirmo" : "Sí, confirmo"}
         </Button>
-        <Button size="sm" variant="outline" disabled={disabled} onClick={() => void demo.send(pt ? "não" : "no")}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          onClick={() => void demo.send(pt ? "não" : "no")}
+        >
           {pt ? "Não" : "No"}
         </Button>
       </div>
     );
   }
   return null;
+}
+
+/** Sin sesión: los primeros escenarios, a un clic (en móvil el selector está en otra pestaña). */
+function StartHere({ demo, scenarios }: { demo: Demo; scenarios: Scenario[] }) {
+  if (scenarios.length === 0) return null;
+  return (
+    <div className="mb-4 rounded-md border border-dashed border-border p-3">
+      <h3 className="text-sm font-semibold">Empieza con un escenario</h3>
+      <p className="mb-2 text-xs text-muted-foreground">
+        Inicia una sesión simulada con un cliente de demo y usa los mensajes sugeridos, o escribe los tuyos.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {scenarios.slice(0, 4).map((s) => (
+          <Button
+            key={s.id}
+            size="sm"
+            variant="outline"
+            disabled={demo.busy}
+            onClick={() => void demo.startScenario(s)}
+          >
+            {s.title}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Mensajes sugeridos del guion del escenario activo (el siguiente, resaltado). */
+function Suggestions({ demo }: { demo: Demo }) {
+  const turns = demo.scenario?.turns ?? [];
+  if (!demo.conversationId || turns.length === 0) return null;
+  const pending = turns.map((t, i) => ({ t, i })).filter(({ i }) => i >= demo.nextTurn);
+  if (pending.length === 0) return null;
+  return (
+    <div
+      role="group"
+      aria-label="Mensajes sugeridos"
+      className="flex flex-wrap items-center gap-1.5 border-t border-border px-3 pt-2"
+    >
+      <span className="text-xs text-muted-foreground">Sugerido:</span>
+      {pending.map(({ t, i }) => (
+        <Button
+          key={i}
+          size="sm"
+          variant={i === demo.nextTurn ? "default" : "outline"}
+          className="h-auto max-w-full whitespace-normal py-1 text-left"
+          disabled={demo.busy}
+          onClick={() => void demo.playTurn(i)}
+        >
+          {t.kind === "expire_session" ? "(vencer la sesión)" : t.text}
+        </Button>
+      ))}
+    </div>
+  );
 }

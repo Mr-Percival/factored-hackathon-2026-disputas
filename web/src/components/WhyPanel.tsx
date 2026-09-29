@@ -23,8 +23,8 @@ export function WhyPanel({ result }: { result: TurnResult | null }) {
   if (!result) {
     return (
       <p className="text-sm text-muted-foreground">
-        Envía un mensaje: aquí verás cada paso del grafo, las herramientas que usó, las reglas de la política y
-        los hechos verificados que explican la respuesta.
+        Envía un mensaje: aquí verás cada paso del grafo, las herramientas que usó, las reglas de la política
+        y los hechos verificados que explican la respuesta.
       </p>
     );
   }
@@ -39,9 +39,64 @@ export function WhyPanel({ result }: { result: TurnResult | null }) {
           <span className="text-muted-foreground">{outcomeMeta(result.outcome).description}</span>
         </div>
       </section>
+      <UnderstandingView result={result} />
       <TraceTimeline steps={result.trace} totalMs={result.trace_total_ms} />
       <PolicyView decision={result.decision ?? null} />
     </div>
+  );
+}
+
+const INTENTS: Record<string, string> = {
+  dispute_charge: "disputar un cargo",
+  block_card: "bloquear una tarjeta",
+  confirm: "confirmar",
+  deny: "no confirmar",
+  select_option: "elegir una opción",
+  out_of_scope: "tema fuera de alcance",
+  unknown: "no se reconoce",
+};
+const SLOT_LABELS: Record<string, string> = {
+  amount: "monto",
+  date_from: "desde",
+  date_to: "hasta",
+  country: "país",
+  option: "opción",
+  merchant: "comercio",
+};
+
+/** Qué entendió el router y, si no alcanzó, qué faltó: el agente pregunta en vez de adivinar. */
+function UnderstandingView({ result }: { result: TurnResult }) {
+  const u = result.understanding;
+  if (!u) return null;
+  const lowConfidence = u.intent === "unknown" || u.confidence < 0.6;
+  const noMatch = result.trace.some((s) => s.node === "find_transaction" && s.detail === "0 candidates");
+  const slots = Object.entries(u.slots);
+  const missingSearchData =
+    u.intent === "dispute_charge" && !["amount", "date_from", "country"].some((k) => k in u.slots);
+  return (
+    <section aria-labelledby="why-understanding">
+      <h3 id="why-understanding" className="mb-1 text-sm font-semibold">
+        Qué entendió
+      </h3>
+      <p className="text-sm">
+        Intención <code className="font-semibold">{u.intent}</code> ({INTENTS[u.intent] ?? u.intent}) ·
+        confianza {u.confidence.toFixed(2)} · router <code>{u.router}</code>
+      </p>
+      {slots.length > 0 && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Datos: {slots.map(([k, v]) => `${SLOT_LABELS[k] ?? k}=${formatValue(v)}`).join(" · ")}
+        </p>
+      )}
+      {(lowConfidence || noMatch || missingSearchData) && (
+        <p className="mt-2 rounded-md bg-info-bg px-2 py-1.5 text-xs text-info-fg">
+          {lowConfidence
+            ? "No entendió con suficiente confianza: pidió aclaración en vez de adivinar."
+            : noMatch
+              ? "No encontró movimientos con esos datos: pidió monto aproximado o fecha."
+              : "Faltó un dato para buscar el cargo (monto, fecha o país)."}
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -54,10 +109,16 @@ export function TraceTimeline({ steps, totalMs }: { steps: TraceStep[]; totalMs:
           {steps.length} pasos · {formatMs(totalMs)}
         </span>
       </h3>
-      <ol aria-label="Pasos del grafo en orden" className="relative flex flex-col gap-3 border-l border-border pl-4">
+      <ol
+        aria-label="Pasos del grafo en orden"
+        className="relative flex flex-col gap-3 border-l border-border pl-4"
+      >
         {steps.map((s, i) => (
           <li key={`${s.node}-${i}`} className="relative">
-            <span aria-hidden="true" className="absolute -left-[1.3rem] top-1.5 size-2.5 rounded-full border-2 border-primary bg-card" />
+            <span
+              aria-hidden="true"
+              className="absolute -left-[1.3rem] top-1.5 size-2.5 rounded-full border-2 border-primary bg-card"
+            />
             <div className="flex flex-wrap items-center gap-1.5 text-sm">
               <code className="font-semibold">{s.node}</code>
               <ArrowRight aria-hidden="true" className="size-3.5 text-muted-foreground" />
@@ -123,7 +184,11 @@ function PolicyView({ decision }: { decision: Decision | null }) {
                 <li key={r.id} className="rounded-md border border-border p-2">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <code className="font-semibold">{r.id}</code>
-                    <Badge tone={r.outcome === "handoff" ? "handoff" : r.outcome === "reject" ? "warn" : "info"}>{r.outcome}</Badge>
+                    <Badge
+                      tone={r.outcome === "handoff" ? "handoff" : r.outcome === "reject" ? "warn" : "info"}
+                    >
+                      {r.outcome}
+                    </Badge>
                     {i === 0 && <span className="text-xs text-muted-foreground">(decide)</span>}
                   </div>
                   <p className="mt-1 text-muted-foreground">{r.explain}</p>

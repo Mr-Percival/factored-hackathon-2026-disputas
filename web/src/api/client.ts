@@ -1,12 +1,6 @@
 // Cliente HTTP tipado. Mismo origen: la cookie de sesión (HttpOnly) la maneja el navegador; este código
 // nunca ve ni guarda credenciales.
-import type {
-  ConversationCreated,
-  ErrorBody,
-  ScenariosResponse,
-  SessionInfo,
-  TurnResult,
-} from "./types";
+import type { ConversationCreated, ErrorBody, ScenariosResponse, SessionInfo, TurnResult } from "./types";
 
 export const MAX_MESSAGE_CHARS = 1000;
 
@@ -39,7 +33,10 @@ async function request<T>(method: "GET" | "POST" | "DELETE", path: string, body?
     res = await fetch(path, {
       method,
       credentials: "same-origin",
-      headers: body === undefined ? { accept: "application/json" } : { "content-type": "application/json", accept: "application/json" },
+      headers:
+        body === undefined
+          ? { accept: "application/json" }
+          : { "content-type": "application/json", accept: "application/json" },
       body: body === undefined ? null : JSON.stringify(body),
     });
   } catch {
@@ -59,5 +56,7 @@ export const api = {
   logout: () => request<undefined>("DELETE", "/api/sessions/current"),
   newConversation: () => request<ConversationCreated>("POST", "/api/conversations"),
   sendMessage: (conversationId: string, text: string) =>
-    request<TurnResult>("POST", `/api/conversations/${encodeURIComponent(conversationId)}/messages`, { text }),
+    request<TurnResult>("POST", `/api/conversations/${encodeURIComponent(conversationId)}/messages`, {
+      text,
+    }),
 };

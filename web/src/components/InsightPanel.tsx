@@ -20,7 +20,9 @@ export function InsightPanel({ demo }: { demo: Demo }) {
     setTab("advisor");
   }
   const announce =
-    demo.handoffSeq > 0 ? `Caso ${demo.handoffSeq} derivado a un asesor humano: la consola del asesor está abierta.` : "";
+    demo.handoffSeq > 0
+      ? `Caso ${demo.handoffSeq} derivado a un asesor humano: la consola del asesor está abierta.`
+      : "";
 
   return (
     <Card aria-label="Explicación y consola del asesor" className="flex h-full flex-col">

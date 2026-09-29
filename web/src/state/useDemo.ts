@@ -71,7 +71,15 @@ export function reducer(state: State, action: Action): State {
       );
     case "conversation":
       return withMessage(
-        { ...state, conversationId: action.conversationId, messages: [], nextTurn: 0, last: null, handoff: null, error: null },
+        {
+          ...state,
+          conversationId: action.conversationId,
+          messages: [],
+          nextTurn: 0,
+          last: null,
+          handoff: null,
+          error: null,
+        },
         "system",
         action.note,
       );
@@ -114,6 +122,11 @@ export function reducer(state: State, action: Action): State {
   }
 }
 
+export const RESTART_SESSION =
+  "La sesión se reinició (el servidor se reinició o la sesión expiró del todo). Elige el escenario de nuevo para continuar.";
+export const RESTART_CONVERSATION =
+  "La conversación se reinició porque el servidor ya no la tenía (reinicio o deploy). Abrí una nueva: vuelve a enviar tu mensaje.";
+
 function asApiError(e: unknown): ApiError {
   return e instanceof ApiError ? e : new ApiError(0, undefined);
 }
@@ -133,11 +146,29 @@ export function useDemo() {
       api.sendMessage(conversationId, text),
   });
 
-  const fail = useCallback((e: unknown) => {
-    const err = asApiError(e);
-    if (err.code === "session_required") dispatch({ type: "signedOut" });
-    dispatch({ type: "error", error: err });
-  }, []);
+  // El estado de las conversaciones vive en memoria del servidor (1 worker): tras un reinicio o un deploy
+  // la sesión o la conversación dejan de existir. Se explica y se recupera en vez de mostrar un error.
+  const fail = useCallback(
+    async (e: unknown) => {
+      const err = asApiError(e);
+      if (err.code === "session_required") {
+        dispatch({ type: "signedOut" });
+        dispatch({ type: "system", text: RESTART_SESSION });
+        return;
+      }
+      if (err.code === "conversation_not_found") {
+        try {
+          const { conversation_id } = await conversation.mutateAsync();
+          dispatch({ type: "conversation", conversationId: conversation_id, note: RESTART_CONVERSATION });
+        } catch (e2) {
+          dispatch({ type: "error", error: asApiError(e2) });
+        }
+        return;
+      }
+      dispatch({ type: "error", error: err });
+    },
+    [conversation],
+  );
 
   const startScenario = useCallback(
     async (scenario: Scenario) => {
@@ -152,7 +183,7 @@ export function useDemo() {
           note: `Sesión simulada como ${scenario.customer_id} · ${scenario.title}`,
         });
       } catch (e) {
-        fail(e);
+        await fail(e);
       }
     },
     [login, conversation, fail],
@@ -161,9 +192,13 @@ export function useDemo() {
   const newConversation = useCallback(async () => {
     try {
       const { conversation_id } = await conversation.mutateAsync();
-      dispatch({ type: "conversation", conversationId: conversation_id, note: "Nueva conversación (misma sesión)" });
+      dispatch({
+        type: "conversation",
+        conversationId: conversation_id,
+        note: "Nueva conversación (misma sesión)",
+      });
     } catch (e) {
-      fail(e);
+      await fail(e);
     }
   }, [conversation, fail]);
 
@@ -178,7 +213,7 @@ export function useDemo() {
           ...(scriptIndex === undefined ? {} : { scriptIndex }),
         });
       } catch (e) {
-        fail(e);
+        await fail(e);
       }
     },
     [expire, fail],
@@ -193,7 +228,7 @@ export function useDemo() {
         const result = await message.mutateAsync({ conversationId, text });
         dispatch({ type: "agent", result });
       } catch (e) {
-        fail(e);
+        await fail(e);
       }
     },
     [state.conversationId, message, fail],

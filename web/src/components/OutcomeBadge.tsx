@@ -1,7 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { outcomeMeta } from "@/lib/outcomes";
 
-export function OutcomeBadge({ outcome, className }: { outcome: string | null | undefined; className?: string }) {
+export function OutcomeBadge({
+  outcome,
+  className,
+}: {
+  outcome: string | null | undefined;
+  className?: string;
+}) {
   const meta = outcomeMeta(outcome);
   const Icon = meta.icon;
   return (

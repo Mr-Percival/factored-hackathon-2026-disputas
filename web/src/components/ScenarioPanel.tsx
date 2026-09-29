@@ -35,7 +35,10 @@ export function ScenarioPanel({ demo, scenarios, quickReplies, source }: Props) 
         <CardContent className="flex flex-col gap-4">
           {groups.map((g) => (
             <div key={g.key} role="group" aria-labelledby={`group-${g.key}`}>
-              <h3 id={`group-${g.key}`} className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <h3
+                id={`group-${g.key}`}
+                className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              >
                 {g.label}
               </h3>
               <ul className="flex flex-col gap-2">
@@ -78,11 +81,21 @@ export function ScenarioPanel({ demo, scenarios, quickReplies, source }: Props) 
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" disabled={!demo.session || demo.busy} onClick={() => void demo.newConversation()}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!demo.session || demo.busy}
+              onClick={() => void demo.newConversation()}
+            >
               <MessageSquarePlus aria-hidden="true" />
               Nueva conversación
             </Button>
-            <Button variant="outline" size="sm" disabled={!demo.session || demo.busy} onClick={() => void demo.expireSession()}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!demo.session || demo.busy}
+              onClick={() => void demo.expireSession()}
+            >
               <TimerOff aria-hidden="true" />
               Vencer sesión
             </Button>
@@ -90,7 +103,9 @@ export function ScenarioPanel({ demo, scenarios, quickReplies, source }: Props) 
 
           {active && (
             <div>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Guion: un clic por turno</h3>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Guion: un clic por turno
+              </h3>
               <ol className="flex flex-col gap-2">
                 {active.turns.map((t, i) => {
                   const done = i < demo.nextTurn;
@@ -106,7 +121,11 @@ export function ScenarioPanel({ demo, scenarios, quickReplies, source }: Props) 
                         onClick={() => void demo.playTurn(i)}
                         aria-describedby={t.expect_outcome ? `turn-exp-${i}` : undefined}
                       >
-                        {t.kind === "expire_session" ? <Clock aria-hidden="true" /> : <Play aria-hidden="true" />}
+                        {t.kind === "expire_session" ? (
+                          <Clock aria-hidden="true" />
+                        ) : (
+                          <Play aria-hidden="true" />
+                        )}
                         <span className="flex-1">
                           <span className="sr-only">
                             Turno {i + 1}
@@ -129,10 +148,18 @@ export function ScenarioPanel({ demo, scenarios, quickReplies, source }: Props) 
           )}
 
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Respuestas rápidas</h3>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Respuestas rápidas
+            </h3>
             <div className="flex flex-wrap gap-2">
               {quickReplies.map((q) => (
-                <Button key={q.label} variant="secondary" size="sm" disabled={!canChat} onClick={() => void demo.send(q.text)}>
+                <Button
+                  key={q.label}
+                  variant="secondary"
+                  size="sm"
+                  disabled={!canChat}
+                  onClick={() => void demo.send(q.text)}
+                >
                   {q.label}
                 </Button>
               ))}

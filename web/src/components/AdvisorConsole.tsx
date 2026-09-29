@@ -10,8 +10,8 @@ export function AdvisorConsole({ handoff }: { handoff: Handoff | null }) {
   if (!handoff) {
     return (
       <p className="text-sm text-muted-foreground">
-        Se abre sola cuando el agente deriva un caso a una persona: motivo, hechos verificados, reglas, acciones
-        tomadas, evidencia y preguntas abiertas.
+        Se abre sola cuando el agente deriva un caso a una persona: motivo, hechos verificados, reglas,
+        acciones tomadas, evidencia y preguntas abiertas.
       </p>
     );
   }
@@ -27,7 +27,8 @@ export function AdvisorConsole({ handoff }: { handoff: Handoff | null }) {
         </h3>
         <p className="mt-1">{handoff.reason_text}</p>
         <p className="mt-1 text-xs">
-          Idioma del cliente: {handoff.language === "pt" ? "portugués" : "español"} · creado {handoff.created_at}
+          Idioma del cliente: {handoff.language === "pt" ? "portugués" : "español"} · creado{" "}
+          {handoff.created_at}
         </p>
       </section>
 
@@ -101,12 +102,18 @@ export function AdvisorConsole({ handoff }: { handoff: Handoff | null }) {
         </ul>
       </Section>
 
+      {handoff.extra && Object.keys(handoff.extra).length > 0 && (
+        <Facts title="Otros campos del paquete" facts={handoff.extra} />
+      )}
+
       <details className="rounded-md border border-border">
         <summary className="flex cursor-pointer items-center gap-1.5 px-3 py-2 text-xs font-medium">
           <ClipboardList aria-hidden="true" className="size-4" />
           Paquete completo (JSON)
         </summary>
-        <pre className="max-h-80 overflow-auto border-t border-border p-3 text-xs">{JSON.stringify(handoff, null, 2)}</pre>
+        <pre className="max-h-80 overflow-auto border-t border-border p-3 text-xs">
+          {JSON.stringify(handoff, null, 2)}
+        </pre>
       </details>
     </div>
   );

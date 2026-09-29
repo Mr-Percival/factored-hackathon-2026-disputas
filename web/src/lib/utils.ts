@@ -13,7 +13,8 @@ export function formatMs(ms: number): string {
 export function formatValue(v: unknown): string {
   if (v === null || v === undefined || v === "") return "—";
   if (typeof v === "boolean") return v ? "sí" : "no";
-  if (typeof v === "number") return Number.isInteger(v) ? String(v) : v.toLocaleString("es", { maximumFractionDigits: 2 });
+  if (typeof v === "number")
+    return Number.isInteger(v) ? String(v) : v.toLocaleString("es", { maximumFractionDigits: 2 });
   if (Array.isArray(v)) return v.length ? v.map(formatValue).join(", ") : "ninguno";
   if (typeof v === "object") return JSON.stringify(v);
   return typeof v === "string" ? v : "—";
