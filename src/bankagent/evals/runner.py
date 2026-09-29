@@ -98,7 +98,8 @@ def _embeddings(full: bool = False) -> System:
     router = shared_router(name)
     if getattr(router, "model", None) is None or router.model() is None:
         raise RuntimeError(f"El router aprendido no cargó: {getattr(router, '_error', 'falta numpy (extra ml)')}")
-    return System(name, router, TemplateWriter(), uses_model=True,
+    # uses_model=False: el modelo es local (sin proveedor ni tokens): el costo de inferencia medido es US$ 0
+    return System(name, router, TemplateWriter(), uses_model=False,
                   meta={"description": f"Agente con router aprendido ({router.model().model_id}) + plantillas",
                         "router_model": router.model().model_id,
                         "router_prompt_version": router.model().meta.get("version")})

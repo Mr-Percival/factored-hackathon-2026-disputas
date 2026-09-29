@@ -40,7 +40,11 @@ def rss_mb() -> float:
                                                "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage")]
         c = PMC()
         c.cb = ctypes.sizeof(PMC)
-        ctypes.windll.psapi.GetProcessMemoryInfo(ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(c), c.cb)
+        k32, psapi = ctypes.WinDLL("kernel32"), ctypes.WinDLL("psapi")
+        k32.GetCurrentProcess.restype = wintypes.HANDLE
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(PMC), wintypes.DWORD]
+        if not psapi.GetProcessMemoryInfo(k32.GetCurrentProcess(), ctypes.byref(c), c.cb):
+            return float("nan")
         return c.WorkingSetSize / 1e6
     for line in Path("/proc/self/status").read_text().splitlines():
         if line.startswith("VmRSS:"):

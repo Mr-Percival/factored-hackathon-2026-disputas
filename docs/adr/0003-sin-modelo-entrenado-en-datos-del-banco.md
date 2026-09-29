@@ -26,3 +26,10 @@ No entrenamos sobre esos textos. El componente aprendido se evalúa donde sí ha
 
 ## Consecuencias
 La limitación del dataset se documenta como hallazgo en lugar de esconderse. Los datos del banco alimentan la política, las herramientas y la línea base operativa.
+
+## Actualización 2026-09-29 (#42)
+El punto 2 se cumplió **sin LLM**: un router de intención aprendido localmente (n-gramas de caracteres +
+regresión logística calibrada con abstención; variante con MiniLM para evaluación offline) entrenado y evaluado
+sobre un corpus conversacional **generado y etiquetado por el equipo**, con split por autor y test congelado, contra
+`RuleRouter` sobre el mismo test. Sigue sin usarse ningún texto del organizador. Ver
+[ADR 0009](0009-router-aprendido.md) y [`reports/intent_router.md`](../../reports/intent_router.md).

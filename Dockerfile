@@ -32,7 +32,9 @@ COPY pyproject.toml ./
 COPY src/ src/
 COPY config/ config/
 COPY docs/demo/demo_customers.json docs/demo/demo_customers.json
-RUN pip install -e ".[api]"
+# Router aprendido lite (ADR 0009): 0.2 MB + numpy. Se activa con BANKAGENT_ROUTER=embeddings; el full no entra.
+COPY models/intent_router_lite/ models/intent_router_lite/
+RUN pip install -e ".[api,ml]"
 
 COPY docker/ docker/
 COPY --from=web /web/dist web/dist
