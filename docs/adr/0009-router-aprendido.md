@@ -71,7 +71,8 @@ que cambian entre corridas). Es un test ajeno a este corpus y **no se usó para 
 | Transferencias útiles / correctas | 31/31 | 34/36 (2 paquetes incompletos) |
 | Acuerdo de decisión entre dialectos (grupos) | 10/11 | 9/11 |
 | Resultados inseguros | 0 | 0 |
-| Latencia por caso p50 / p95 | 95 / 143 ms | 92 / 153 ms |
+| Latencia por caso p50 / p95 | 97 / 159 ms | 101 / 167 ms |
+| Costo de inferencia | US$ 0 | US$ 0 |
 
 La contención baja (81 → 76) porque ahora transfiere los casos que **debía** transferir. Un grupo de dialecto más
 queda en desacuerdo y dos paquetes de handoff salen incompletos: son los puntos a revisar.

@@ -1,6 +1,6 @@
 # Evaluación offline: línea base contra agente
 
-> Generado por `python -m bankagent.evals.run --split test --repeats 3 --system rules --system embeddings` · commit `4a4b820` · 2026-09-29 01:33. No editar a mano: volver a correr el comando.
+> Generado por `python -m bankagent.evals.run --split test --repeats 3 --system rules --system embeddings` · commit `70715cd` · 2026-09-29 01:38. No editar a mano: volver a correr el comando.
 
 > **Qué es esto:** una medición OFFLINE sobre casos generados por el equipo con un cliente SIMULADO por guion, contra datos sintéticos del organizador. No es tráfico real ni una prueba con usuarios.
 
@@ -21,9 +21,9 @@ Conjunto **test** reservado: **115 casos** (principal) + **44** variantes de equ
 | Transferencias innecesarias | 3/77 (3.9%) | 3/77 (3.9%) |
 | Casos con resultado inseguro (cota sup. 95%) | 0/115 (0.0%) (≤ 2.6%) | 0/115 (0.0%) (≤ 2.6%) |
 | Casos con alguna respuesta en otro idioma | 4/115 (3.5%) | 4/115 (3.5%) |
-| Latencia por caso p50 / p95 | 95 ms / 143 ms | 92 ms / 153 ms |
-| Costo por caso procesado | US$ 0.0000 | no medido |
-| Costo por resolución automática segura | US$ 0.0000 | no medido |
+| Latencia por caso p50 / p95 | 97 ms / 159 ms | 101 ms / 167 ms |
+| Costo por caso procesado | US$ 0.0000 | US$ 0.0000 |
+| Costo por resolución automática segura | US$ 0.0000 | US$ 0.0000 |
 | Acuerdo de decisión entre dialectos (grupos) | 10/11 (90.9%) | 9/11 (81.8%) |
 
 | Sistema | Qué es |
@@ -71,11 +71,11 @@ Conjunto **test** reservado: **115 casos** (principal) + **44** variantes de equ
 | router_model | — | char2-5-tfidf |
 | router_prompt_version | — | intent-v2-lite |
 | system | rules | embeddings |
-| uses_model | False | True |
+| uses_model | False | False |
 | writer | templates | templates |
 | política | 2026-09-29.3 | 2026-09-29.3 |
 
-Commit `4a4b820` (con cambios locales sin commitear) · Python 3.12.2 · langgraph 1.2.12 · base `serving.duckdb` · 3 corrida(s).
+Commit `70715cd` · Python 3.12.2 · langgraph 1.2.12 · base `serving.duckdb` · 3 corrida(s).
 
 ## 4. Métricas detalladas · `rules`
 
@@ -106,7 +106,7 @@ Commit `4a4b820` (con cambios locales sin commitear) · Python 3.12.2 · langgra
 - Cero observado no es riesgo cero: con n casos, la cota superior al 95% es ≈ 3/n (regla de tres). Las verificaciones son deterministas: acciones leídas del almacén ops, tarjetas `****NNNN` e IDs de cliente ajenos en la respuesta, marcadores de la víctima en respuesta y paquete.
 
 ### Eficiencia operativa (medición offline, máquina local)
-- Latencia de punta a punta por caso (suma de turnos del agente, sin tiempo del cliente): p50 95 ms · p95 143 ms. Por turno: p50 23 ms · p95 106 ms.
+- Latencia de punta a punta por caso (suma de turnos del agente, sin tiempo del cliente): p50 97 ms · p95 159 ms. Por turno: p50 22 ms · p95 113 ms.
 - Costo total US$ 0.0000 (sin llamadas a modelos) · por caso procesado US$ 0.0000 · por resolución automática segura US$ 0.0000. Solo cómputo de inferencia; no incluye infraestructura.
 
 ## 4. Métricas detalladas · `embeddings`
@@ -138,8 +138,8 @@ Commit `4a4b820` (con cambios locales sin commitear) · Python 3.12.2 · langgra
 - Cero observado no es riesgo cero: con n casos, la cota superior al 95% es ≈ 3/n (regla de tres). Las verificaciones son deterministas: acciones leídas del almacén ops, tarjetas `****NNNN` e IDs de cliente ajenos en la respuesta, marcadores de la víctima en respuesta y paquete.
 
 ### Eficiencia operativa (medición offline, máquina local)
-- Latencia de punta a punta por caso (suma de turnos del agente, sin tiempo del cliente): p50 92 ms · p95 153 ms. Por turno: p50 22 ms · p95 109 ms.
-- Costo total no medido · por caso procesado no medido · por resolución automática segura no medido. Solo cómputo de inferencia; no incluye infraestructura.
+- Latencia de punta a punta por caso (suma de turnos del agente, sin tiempo del cliente): p50 101 ms · p95 167 ms. Por turno: p50 22 ms · p95 109 ms.
+- Costo total US$ 0.0000 (sin llamadas a modelos) · por caso procesado US$ 0.0000 · por resolución automática segura US$ 0.0000. Solo cómputo de inferencia; no incluye infraestructura.
 
 ## 5. Variabilidad entre corridas
 
@@ -147,13 +147,13 @@ Commit `4a4b820` (con cambios locales sin commitear) · Python 3.12.2 · langgra
 
 - Correctos: 102/115 en todas las corridas · resolución automática segura: 49/57 en todas las corridas · contención: 81/115 en todas las corridas · transferencias: 34/115 en todas las corridas · inseguros: 0/115 en todas las corridas.
 - Casos cuya decisión (resultado, regla, acciones) cambió entre corridas: **0**.
-- p95 de latencia por caso en cada corrida: 143 ms, 139 ms, 131 ms.
+- p95 de latencia por caso en cada corrida: 159 ms, 140 ms, 140 ms.
 
 **`embeddings`** · 3 corrida(s) completas del conjunto test:
 
 - Correctos: 106/115 en todas las corridas · resolución automática segura: 53/57 en todas las corridas · contención: 76/115 en todas las corridas · transferencias: 39/115 en todas las corridas · inseguros: 0/115 en todas las corridas.
 - Casos cuya decisión (resultado, regla, acciones) cambió entre corridas: **0**.
-- p95 de latencia por caso en cada corrida: 153 ms, 154 ms, 144 ms.
+- p95 de latencia por caso en cada corrida: 167 ms, 164 ms, 163 ms.
 
 ## 6. Resultados por idioma, dialecto, país y segmento
 
