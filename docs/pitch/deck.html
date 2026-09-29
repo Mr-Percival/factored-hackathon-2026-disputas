@@ -65,30 +65,30 @@ body.single .slide.show { display:flex; }
 <tbody>
 <tr>
 <td>Agente vs línea base</td>
-<td><strong><span class="pending">[[PENDIENTE: reports/eval.md]]</span></strong></td>
-<td>línea base: <span class="pending">[[PENDIENTE: reports/eval.md]]</span></td>
-<td>Éxito de tarea en casos reservados · <span class="pending">[[PENDIENTE: reports/eval.md]]</span></td>
+<td><strong>86% resolución segura (49/57) · 0/115 inseguros</strong></td>
+<td>línea base: sin política: 82/115 inseguros · deriva todo: 0/57 resueltos</td>
+<td>Éxito de tarea en casos reservados · 115 casos + 44 variantes de dialecto, 3 corridas</td>
 </tr>
 <tr>
 <td>Inyección: detección</td>
-<td><strong><span class="pending">[[PENDIENTE: reports/injection_eval.md]]</span></strong></td>
-<td>falsos positivos: <span class="pending">[[PENDIENTE: reports/injection_eval.md]]</span></td>
+<td><strong>regex AUC 0.55 · clasificador AUC 0.97</strong></td>
+<td>falsos positivos: regex 0/58 · clasificador 20/58 en mensajes bancarios</td>
 <td>Datasets públicos etiquetados (split de prueba) + muestra en pt generada por el equipo</td>
 </tr>
 <tr>
 <td>Inyección: daño</td>
-<td><strong><span class="pending">[[PENDIENTE: reports/injection_eval.md]]</span></strong></td>
+<td><strong>0/2.531 ataques con daño, incluso con el guard apagado</strong></td>
 <td>medido aparte de la detección</td>
 <td>Aunque el guard falle, el cliente sale del token y toda acción se confirma</td>
 </tr>
 <tr>
 <td>Equidad por dialecto</td>
-<td><strong><span class="pending">[[PENDIENTE: reports/eval.md]]</span></strong></td>
+<td><strong>10/11 grupos con la misma decisión</strong></td>
 <td>misma decisión MX · CO · AR · pt-BR</td>
 <td>No enrutamos por acento: el EDA no muestra efecto (FCR 76.7% vs 76.6%)</td>
 </tr>
 </tbody>
-</table></div></div><sub>80 tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, acceso ajeno, inyección directa e indirecta, cliente señuelo</sub></section><section class="slide"><div class="num">5 / 7</div><h2>5. Decisiones tomadas por los datos, no a pesar de ellos</h2>
+</table></div></div><sub>528 tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, acceso ajeno, inyección directa e indirecta, cliente señuelo</sub></section><section class="slide"><div class="num">5 / 7</div><h2>5. Decisiones tomadas por los datos, no a pesar de ellos</h2>
 <p><em>Datos e ingeniería que lo sostienen</em></p><div class="body"><div class="col"><p><img alt="04_umbral_fraude.png" src="charts/04_umbral_fraude.png" /></p></div><div class="col"><ul>
 <li><strong>42</strong> textos de cliente distintos en 171k transcripciones → no entrenamos intención con ellos</li>
 <li><strong>20%</strong> de transacciones sin fraud_score → riesgo residual documentado; H02/H04 y el analista</li>
@@ -114,16 +114,6 @@ body.single .slide.show { display:flex; }
 <li>Capacidad: p95 233 ms por turno · ~61 turnos/s por réplica (sin LLM, costo $0)</li>
 </ul></div></div><sub>github.com/Mr-Percival/factored-hackathon-2026-disputas · docs/threat-model.md · docs/adr/</sub></section><section class="slide"><div class="num">7 / 7</div><h2>Pendientes</h2><div class="body"><div class="col"><ul>
 <li><span class="pending">[[PENDIENTE: URL de la demo desplegada — deploy (#15)]]</span></li>
-<li><span class="pending">[[PENDIENTE: éxito de tarea del agente (LLM) en casos reservados — reports/eval.md (#12)]]</span></li>
-<li><span class="pending">[[PENDIENTE: éxito de tarea de la línea base (reglas + plantillas) — reports/eval.md (#12)]]</span></li>
-<li><span class="pending">[[PENDIENTE: n.º de casos reservados y cómo se generaron — reports/eval.md (#12)]]</span></li>
-<li><span class="pending">[[PENDIENTE: recall de detección de inyección (clasificador vs patrones) — reports/injection_eval.md (#8/#9)]]</span></li>
-<li><span class="pending">[[PENDIENTE: falsos positivos sobre mensajes legítimos — reports/injection_eval.md (#8/#9)]]</span></li>
-<li><span class="pending">[[PENDIENTE: daño: fugas del señuelo / acciones no confirmadas — reports/injection_eval.md (#8)]]</span></li>
-<li><span class="pending">[[PENDIENTE: misma decisión entre variantes MX/CO/AR/pt-BR — reports/eval.md (#13)]]</span></li>
-<li><span class="pending">[[PENDIENTE: captura escena 1 — docs/pitch/screens/escena1.png (UI #14)]]</span></li>
-<li><span class="pending">[[PENDIENTE: captura escena 2 — docs/pitch/screens/escena2.png (UI #14)]]</span></li>
-<li><span class="pending">[[PENDIENTE: captura escena 3 — docs/pitch/screens/escena3.png (UI #14)]]</span></li>
 </ul></div></div></section><section class="notes"><h2>Notas del orador</h2><h3>1. 1. Disputar un cargo es el peor momento del servicio</h3><p>Empezamos por los datos, no por la tecnología. En el call center, las quejas son el 17% de los contactos pero solo el 43.6% se resuelve al primer contacto, contra 91.5% en consultas transaccionales; el 63% necesita seguimiento y duran 2.1 veces más. En PQR, cargo no reconocido y cobro indebido son el 36.5%, con un 20% fuera de SLA y 16 días de mediana. Elegimos ese flujo: mucho volumen, peor experiencia y acciones seguras, porque abrir una disputa y bloquear una tarjeta no mueven dinero.</p><h3>2. 2. El modelo interpreta y redacta; el código decide y actúa</h3><p>Un solo agente en LangGraph con pasos explícitos. El modelo aparece solo en dos lugares: entender qué quiere el cliente y redactar la respuesta. Todo lo que puede causar daño es código: el guard filtra inyecciones y enmascara PII; las herramientas derivan el cliente del token, así que un prompt no puede pedir datos ajenos; la elegibilidad la decide un YAML con reglas identificadas; y cada acción pide confirmación y se verifica releyendo el estado. Cada interfaz del modelo tiene una versión con reglas y plantillas: es la línea base y el camino alternativo si el modelo falla.</p><h3>3. 3. Un solo flujo: resuelve, pregunta o deriva — nunca adivina</h3><p>Tres conversaciones del mismo flujo. Primera: Ana no reconoce un cargo de 77 dólares; hay un único candidato, la política lo permite y, tras su sí, se abre la disputa y se bloquea la tarjeta; solo decimos &#x27;listo&#x27; si la verificación lo confirma. Segunda: 350 coincide con dos cargos, así que el agente pregunta en vez de adivinar. Tercera, en portugués: un cargo en Brasil con score de fraude alto activa la regla H03 y pasa a un asesor con la traza, los hechos verificados y la regla. Y si alguien escribe &#x27;olvida las reglas&#x27;, el guard lo bloquea antes de llegar al modelo.</p><h3>4. 4. Evaluación honesta: contra una línea base y en casos reservados</h3><p>No entrenamos sobre las transcripciones del dataset: solo hay 42 textos de cliente distintos, así que cualquier métrica sería inválida. Evaluamos donde hay etiquetas válidas. Uno: el agente contra la línea base de reglas en casos reservados, generados por el equipo y declarados como tales. Dos: la detección de inyección con datasets públicos, y por separado el daño, porque aunque el detector falle el ataque no tiene con qué dañar. Tres: equidad; el mismo caso escrito en dialectos distintos debe dar la misma decisión.</p><h3>5. 5. Decisiones tomadas por los datos, no a pesar de ellos</h3><p>La política no se escribió a ojo. El umbral de fraude provisional era 60; lo calibramos con un split temporal: elegido en datos previos a 2026 con un presupuesto de derivación de 2%, y medido una sola vez en 2026. Con 30 recuperamos 72% de los fraudes con score derivando 0,08% de las transacciones; con 60 perdíamos seis de cada diez. El quiebre tan limpio es un artefacto del generador sintético: con datos reales hay que recalibrar con el mismo script. Y cada límite de los datos se reporta y cambió una decisión.</p><h3>6. 6. Qué está listo en el sandbox y qué falta para producción</h3><p>Cerramos con lo que falta, sin maquillaje. El núcleo que no depende del modelo ya está: permisos, política, acciones verificadas, pipeline con linaje y auditoría encadenada. Para producción faltan piezas conocidas: un proveedor de identidad real con MFA y step-up antes de bloquear una tarjeta, un gateway con límites, auditoría en almacenamiento inmutable, cadena de suministro fijada y un verificador de salida para el LLM. Y con datos reales, recalibrar el umbral. La arquitectura no cambia: cambian los adaptadores.</p></section><script>
 const n = parseInt((location.hash || '').replace('#s', ''), 10);
 if (n) { document.body.classList.add('single');

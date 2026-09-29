@@ -90,6 +90,19 @@ sobreajustar.
 
 En los dos casos es la misma política (`2026-09-29.1`) y el mismo grafo; solo cambia `understanding.py`.
 
+### Segunda ronda: robustez conversacional (#54)
+| Conjunto | Versión | Correctos | Resolución automática segura | Transf. faltantes / innecesarias | Otro idioma | Inseguros |
+|---|---|---|---|---|---|---|
+| **test (v2, congelado)** | después de #48 | 93/115 | 46/57 | 11 / 0 | 17 | 0 |
+| **test (v2, congelado)** | después de #54 | **102/115** | **49/57** | **7 / 3** | **4** | **0** |
+
+**Uso del test declarado (honestidad metodológica).** En #54 nadie abrió los casos de test ni los resultados por
+caso: se ajustó con dev, con frases propias etiquetadas y con los ejemplos de los issues. Pero **se hizo una ronda
+de arreglos genéricos después de ver los números agregados** de una corrida sobre test (93 correctos, 3
+transferencias innecesarias). Eso es una fuga leve: el test ya no es completamente ciego para esta versión. Las 3
+transferencias innecesarias no se diagnosticaron justamente para no mirar casos. Para una medición limpia de la
+próxima versión hay que construir un test v3 con redacciones nuevas escritas por otra persona.
+
 El reporte completo (con variabilidad, desgloses y fallas) está en [`reports/eval.md`](../../reports/eval.md).
 
 ## Limitaciones
