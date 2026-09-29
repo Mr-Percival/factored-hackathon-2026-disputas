@@ -147,6 +147,15 @@ option_msg = st.builds(lambda tpl, n: tpl.format(n=n), st.sampled_from(["{n}", "
 noise_msg = st.text(alphabet="bcdfghjklmnpqrstvwxz0123456789 .,;!?-", max_size=30)
 
 
+OWN_TXNS = {  # (monto, fecha) de movimientos del fixture, por cliente
+    "CLI-ANA": [(350, dt.date(2026, 6, 15)), (340, dt.date(2026, 6, 5)), (1200, dt.date(2026, 6, 10)),
+                (89.9, dt.date(2026, 6, 12)), (45, dt.date(2026, 6, 16)), (515, dt.date(2026, 1, 10)),
+                (77, dt.date(2026, 6, 13))],
+    "CLI-BETO": [(200000, dt.date(2026, 6, 11))],
+    "CLI-CARLA": [(15000, dt.date(2026, 6, 11))],
+}
+
+
 @st.composite
 def pan(draw):
     digits = "4" + "".join(str(draw(st.integers(0, 9))) for _ in range(15))
@@ -340,10 +349,24 @@ class ConversationMachine(RuleBasedStateMachine):
         self.model[tid] = th
         return tid
 
-    @rule(tid=threads, msg=message())
-    def say(self, tid, msg):
+    @rule(tid=threads, msg=message(), refresh=st.integers(0, 3))
+    def say(self, tid, msg, refresh):
         th = self.model[tid]
+        if refresh and self.clock.t >= th.expires:  # casi siempre el cliente vuelve a entrar a la app
+            self._login(th)
         self._turn(th, th.token, th.owner, *msg)
+
+    @rule(tid=threads, idx=st.integers(0, 20), lang=st.sampled_from(["es", "pt"]))
+    def dispute_own_txn(self, tid, idx, lang):
+        """Sesgo hacia `decide`: describe (monto + fecha) un movimiento REAL del cliente dueño del hilo."""
+        th = self.model[tid]
+        txns = OWN_TXNS[th.owner]
+        amount, date = txns[idx % len(txns)]
+        text = (f"no reconozco un cargo de {amount:g} del {date:%d/%m/%Y}" if lang == "es"
+                else f"não reconheço uma cobrança de {amount:g} de {date:%d/%m/%Y}")
+        if self.clock.t >= th.expires:
+            self._login(th)
+        self._turn(th, th.token, th.owner, "dispute", text, None)
 
     @rule(tid=threads, word=st.sampled_from(CONFIRMS))
     def confirm_pending(self, tid, word):
@@ -351,12 +374,27 @@ class ConversationMachine(RuleBasedStateMachine):
         th = self.model[tid]
         self._turn(th, th.token, th.owner, "confirm", word, None)
 
+    def _asking(self):
+        return sorted(t for t, th in self.model.items() if th.last_out and "Confirma" in (th.last_out["reply"] or ""))
+
+    @precondition(lambda self: self._asking())
+    @rule(data=st.data())
+    def answer_confirmation(self, data):
+        """Responde (sí / no / otra cosa) justo cuando el agente acaba de preguntar: camino de las acciones."""
+        th = self.model[data.draw(st.sampled_from(self._asking()))]
+        cat = data.draw(st.sampled_from(["confirm", "confirm", "deny", "other"]))
+        if cat == "other":
+            cat, text, pii = data.draw(message())
+        else:
+            text, pii = data.draw(st.sampled_from(CONFIRMS if cat == "confirm" else DENIES)), None
+        self._turn(th, th.token, th.owner, cat, text, pii)
+
     @rule(tid=threads, n=st.integers(0, 6))
     def pick_option(self, tid, n):
         th = self.model[tid]
         self._turn(th, th.token, th.owner, "option", str(n), None)
 
-    @rule(tid=threads, seconds=st.sampled_from([1, 60, 300, 899, 900, 901, 1200]))
+    @rule(tid=threads, seconds=st.sampled_from([1, 30, 60, 300, 899, 900, 901]))
     def advance_clock(self, tid, seconds):  # tid solo para anclar la regla a un hilo existente
         self.clock.t += seconds
 
@@ -433,6 +471,7 @@ class ConversationMachine(RuleBasedStateMachine):
 
         # ---- I6: tras el bloqueo por seguridad, ninguna herramienta y siempre el mismo resultado
         if was_locked:
+            STATS["checked:I6_locked_turn"] += 1
             assert not calls, f"I6: herramientas llamadas en un hilo bloqueado: {calls}"
             assert out["outcome"] == "handoff" and (out.get("handoff") or {}).get("reason") == "security_lockout", \
                 f"I6: hilo bloqueado respondió {out['outcome']}"
@@ -440,12 +479,14 @@ class ConversationMachine(RuleBasedStateMachine):
 
         # ---- I5: sesión vencida/ausente => solo identidad, auth_error (o lockout)
         elif not session_valid:
+            STATS["checked:I5_invalid_session_turn"] += 1
             assert not calls, f"I5: herramientas llamadas sin sesión válida: {calls}"
             assert out["outcome"] == "auth_error", f"I5: sin sesión válida el resultado fue {out['outcome']}"
             assert not new_d and not new_b, "I5: acción sin sesión válida"
 
         # ---- I2 (acceso): el hilo es de su primer cliente autenticado; otra sesión válida no lo continúa
         elif th.bound is not None and actor != th.bound:
+            STATS["checked:I2_foreign_session_turn"] += 1
             assert out["outcome"] == "auth_error" and not calls, \
                 f"I2: {actor} continuó el hilo de {th.bound} ({out['outcome']}, {calls})"
             assert not new_d and not new_b
@@ -455,7 +496,7 @@ class ConversationMachine(RuleBasedStateMachine):
         # ---- I1: una acción solo existe si el turno anterior pidió confirmación EXACTAMENTE para ella,
         #          el mensaje actual es un "sí" interpretado como confirmación y la sesión es válida.
         if new_d or new_b:
-            STATS["actions_created"] += len(new_d) + len(new_b)
+            STATS["checked:I1_actions_created"] += len(new_d) + len(new_b)
             pa = (prev or {}).get("pending_action") or {}
             asked = (prev or {}).get("reply") or ""
             assert prev is not None and prev["outcome"] == "clarify" and "Confirma" in asked, \
@@ -484,6 +525,7 @@ class ConversationMachine(RuleBasedStateMachine):
         for cid in CASE_RX.findall(reply):
             assert cid in disputes_all and disputes_all[cid][1] == actor, f"I3: la respuesta cita {cid} inexistente/ajeno"
         if out["outcome"] == "resolved":
+            STATS["checked:I3_resolved_turn"] += 1
             ar = out["action_result"]
             if ar["dispute"]:
                 cid = ar["dispute"]["case_id"]
@@ -501,7 +543,7 @@ class ConversationMachine(RuleBasedStateMachine):
         # ---- I7: la política es determinista y coincide con la primera regla del YAML (oráculo manual)
         dec = out.get("decision")
         if dec and any(e["node"] == "decide" for e in entries):
-            STATS["policy_decisions"] += 1
+            STATS["checked:I7_policy_decisions"] += 1
             facts = dec["facts"]
             customer = {"customer_status": facts["customer_status"], "segment": facts["segment"]}
             history = {k: facts[k] for k in ("complaints_last_90d", "is_repeat_complainer", "open_dispute_transactions")}
@@ -541,7 +583,7 @@ class ConversationMachine(RuleBasedStateMachine):
         # ---- I8: PAN/email escritos por el cliente no quedan en conversación, handoff, traza ni auditoría
         if pii:
             self.pii_seen.append(pii)
-            STATS["pii_inputs"] += 1
+            STATS["checked:I8_pii_inputs"] += 1
         if self.pii_seen:
             stored = [m["text"] for m in out["conversation"]] + [json.dumps(packet or {}, default=str)] + \
                 [str(e.get("detail") or "") for e in out["trace"]]
@@ -579,9 +621,14 @@ class ConversationMachine(RuleBasedStateMachine):
 def test_conversation_invariants(serving_db):
     """I1–I8 sobre conversaciones aleatorias (cantidad según el perfil de Hypothesis)."""
     ConversationMachine.serving_db = serving_db
+    STATS.clear()
     run_state_machine_as_test(ConversationMachine)
-    if os.environ.get("HYPOTHESIS_PROFILE") in ("deep", "stats"):
-        print("\nESTADÍSTICAS", json.dumps(dict(sorted(STATS.items())), indent=1))
+    print("\nESTADÍSTICAS", json.dumps(dict(sorted(STATS.items())), indent=1))
+    # La prueba no es vacía: cada invariante se evaluó en su caso interesante al menos una vez.
+    missing = [k for k in ("checked:I1_actions_created", "checked:I3_resolved_turn", "checked:I5_invalid_session_turn",
+                           "checked:I6_locked_turn", "checked:I7_policy_decisions", "checked:I8_pii_inputs",
+                           "checked:I2_foreign_session_turn", "lockouts") if not STATS[k]]
+    assert not missing, f"el generador no ejercitó: {missing}"
 
 
 # ---------------------------------------------------------------------------------------------- I7 aislado
