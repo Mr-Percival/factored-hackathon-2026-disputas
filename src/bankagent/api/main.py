@@ -30,12 +30,13 @@ MESSAGES = {
     "customer_not_found": "Cliente no encontrado.",
     "conversation_not_found": "Conversación no encontrada.",
     "rate_limited": "Demasiadas solicitudes. Espera un momento e intenta de nuevo.",
+    "bad_request": "La solicitud no se pudo leer (se espera JSON en UTF-8).",
     "not_found": "Recurso no encontrado.",
     "method_not_allowed": "Método no permitido.",
     "validation_error": "La solicitud no es válida.",
     "internal_error": "Ocurrió un error inesperado. Intenta de nuevo.",
 }
-STATUS_CODES = {404: "not_found", 405: "method_not_allowed"}
+STATUS_CODES = {400: "bad_request", 404: "not_found", 405: "method_not_allowed"}
 
 
 def _error(status: int, code: str, fields: list[str] | None = None) -> JSONResponse:

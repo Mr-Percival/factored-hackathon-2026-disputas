@@ -290,6 +290,15 @@ def test_oversized_and_blank_text_are_rejected_without_echo(client):
     assert client.post(f"/api/conversations/{cid}/messages", json={"text": "hola", "extra": 1}).status_code == 422
 
 
+def test_malformed_body_gets_a_clear_generic_error(client):
+    login(client)
+    cid = conversation(client)
+    r = client.post(f"/api/conversations/{cid}/messages", content='{"text": "sí"}'.encode("cp1252"),
+                    headers={"content-type": "application/json"})
+    assert r.status_code in (400, 422) and r.json()["error"]["code"] in ("bad_request", "validation_error")
+    assert "Traceback" not in r.text
+
+
 def test_body_size_limit(client):
     login(client)
     cid = conversation(client)
@@ -310,7 +319,7 @@ def test_rate_limit_returns_429(make_client):
 
 
 def test_session_creation_is_rate_limited_per_ip(make_client):
-    c = make_client()
+    c = make_client(session_rate_limit_per_min=10)
     codes = [c.post("/api/sessions", json={"customer_id": "CLI-ANA"}).status_code for _ in range(12)]
     assert codes[:10] == [201] * 10 and codes[-1] == 429
 
