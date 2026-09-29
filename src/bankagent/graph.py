@@ -46,7 +46,8 @@ class State(TypedDict, total=False):
     awaiting: str | None           # None | "option" | "confirmation"
     candidates: list[dict]
     txn: dict | None
-    pending_action: dict | None
+    pending_action: dict | None    # {type, transaction_id, block_card, card_label, declined}
+    consent_retries: int           # re-preguntas por una confirmación ambigua (límite en policy.yaml)
     conversation: Annotated[list[dict], operator.add]  # mensajes ya enmascarados
     strikes: int                   # intentos bloqueados + accesos prohibidos en esta conversación
     # salida del turno
@@ -59,6 +60,7 @@ class State(TypedDict, total=False):
     # comunicación entre nodos dentro del turno
     next: str
     reply_key: str | None
+    reply_prefix: str | None       # frase fija antes de la respuesta (ej. "no me quedó clara tu respuesta")
     handoff_reason: str | None
     action_result: dict | None
 
@@ -97,7 +99,7 @@ class Agent:
         out = self.graph.invoke({"token": token, "user_text": text, "turn": turn,
                                  "reply": None, "outcome": None, "handoff": None, "decision": None,
                                  "understanding": None, "reply_key": None, "handoff_reason": None,
-                                 "action_result": None}, cfg)
+                                 "action_result": None, "reply_prefix": None}, cfg)
         if self.audit:  # persiste la traza del turno (sin texto del cliente); el último registro lleva el resultado
             entries = [e for e in out.get("trace", []) if e["turn"] == turn]
             for i, e in enumerate(entries):
@@ -191,10 +193,14 @@ class Agent:
                                "lang": u.language, "detail": f"{u.intent}@{u.confidence:.2f} router={u.router}",
                                "llm": u.llm}
         awaiting = s.get("awaiting")
-        if awaiting == "confirmation" and u.intent == "confirm":
-            return {**out, "next": "act"}
-        if awaiting == "confirmation" and u.intent == "deny":
-            return {**out, "next": "cancel"}
+        if awaiting == "confirmation":
+            if u.intent == "confirm":
+                pending = _apply_denials(s.get("pending_action"), u.sub_action_denials)
+                return {**out, "next": "act", "pending_action": pending} if pending else {**out, "next": "cancel"}
+            if u.intent == "deny":
+                return {**out, "next": "cancel"}
+            if u.intent in ("unclear", "unknown") or u.confidence < self.min_confidence:
+                return {**out, **self._reask_consent(s, u.sub_action_denials)}
         if awaiting == "option" and u.intent == "select_option":
             return {**out, "next": "select_option"}
         if u.confidence < self.min_confidence or u.intent == "unknown":
@@ -202,7 +208,23 @@ class Agent:
         if u.intent == "out_of_scope":
             return {**out, "next": "handoff", "handoff_reason": "out_of_scope"}
         nxt = "find_card" if u.intent == "block_card" else "find_transaction"
-        return {**out, "next": nxt, "awaiting": None, "pending_action": None, "txn": None}
+        return {**out, "next": nxt, "awaiting": None, "pending_action": None, "txn": None, "consent_retries": 0}
+
+    def _reask_consent(self, s: State, denials: list[str]) -> dict:
+        """Confirmación ambigua: nunca se actúa. Se re-pregunta una vez (sin lo que el cliente ya rechazó) y,
+        si sigue sin quedar claro, pasa a un humano con motivo `consent_unclear`."""
+        retries = s.get("consent_retries", 0)
+        if retries >= self.policy.conversation.get("max_consent_reasks", 1):
+            return {"next": "handoff", "handoff_reason": "consent_unclear", "detail": f"consent_retries={retries}"}
+        pending = s.get("pending_action") or {}
+        narrowed = _apply_denials(pending, denials)
+        if narrowed is None:  # rechazó la única acción ofrecida (el bloqueo)
+            return {"next": "cancel"}
+        newly_declined = set(narrowed.get("declined", [])) - set(pending.get("declined", []))
+        return {"next": "respond", "outcome": "clarify", "reply_key": _confirm_key(narrowed),
+                "reply_prefix": "block_excluded" if newly_declined else "reask_consent",
+                "pending_action": narrowed, "consent_retries": retries + 1,
+                "detail": f"consent unclear retry={retries + 1}"}
 
     def find_transaction(self, s: State, calls) -> dict:
         sl = s["understanding"]["slots"]
@@ -227,7 +249,7 @@ class Agent:
         chosen = cands[opt - 1]
         if chosen.get("kind") == "card":
             return {"next": "respond", "outcome": "clarify", "reply_key": "block_confirm", "candidates": [],
-                    "awaiting": "confirmation", "detail": f"card option={opt}",
+                    "awaiting": "confirmation", "detail": f"card option={opt}", "consent_retries": 0,
                     "pending_action": {"type": "block_card", "block_card": chosen["product_id"],
                                        "card_label": chosen["product_number"]}}
         return {"next": "decide", "txn": cands[opt - 1], "candidates": [], "awaiting": None, "detail": f"option={opt}"}
@@ -247,12 +269,13 @@ class Agent:
             return {**base, "next": "respond", "outcome": "rejected" if d.outcome == "reject" else "informed",
                     "reply_key": "rule"}
         cards = self._call(calls, "list_cards", s["token"])
-        card = next((c for c in cards if c["product_id"] == txn["product_id"] and c["product_status"] == "Active"), None)
+        card = next((c for c in cards if c["product_id"] == txn["product_id"]), None)
+        offer = self.policy.offer_block(card, txn)  # solo tarjeta activa del producto (actions.block_card.offer_when)
         action = {"type": "open_dispute", "transaction_id": txn["transaction_id"],
-                  "block_card": card["product_id"] if card else None,
-                  "card_label": card["product_number"] if card else None}
-        return {**base, "next": "respond", "outcome": "clarify", "reply_key": "confirm_dispute",
-                "pending_action": action, "awaiting": "confirmation"}
+                  "block_card": card["product_id"] if offer else None,
+                  "card_label": card["product_number"] if offer else None, "declined": []}
+        return {**base, "next": "respond", "outcome": "clarify", "reply_key": _confirm_key(action),
+                "pending_action": action, "awaiting": "confirmation", "consent_retries": 0}
 
     def find_card(self, s: State, calls) -> dict:
         cards = [c for c in self._call(calls, "list_cards", s["token"]) if c["product_status"] == "Active"]
@@ -261,6 +284,7 @@ class Agent:
         if len(cards) == 1:
             c = cards[0]
             return {"next": "respond", "outcome": "clarify", "reply_key": "block_confirm", "awaiting": "confirmation",
+                    "consent_retries": 0,
                     "pending_action": {"type": "block_card", "block_card": c["product_id"], "card_label": c["product_number"]}}
         cands = [{"kind": "card", **c} for c in cards[:5]]
         return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "candidates": cands, "awaiting": "option",
@@ -278,7 +302,8 @@ class Agent:
             return {"next": "handoff", "handoff_reason": "action_not_verified", "detail": "verification failed"}
         return {"next": "respond", "outcome": "resolved", "reply_key": "done_dispute" if res else "block_done",
                 "awaiting": None, "pending_action": None,
-                "action_result": {"dispute": res, "block": blocked, "card_label": a.get("card_label")},
+                "action_result": {"dispute": res, "block": blocked, "card_label": a.get("card_label"),
+                                  "declined": a.get("declined", [])},
                 "detail": f"case={res and res['case_id']} blocked={bool(blocked)}"}
 
     def cancel(self, s: State, calls) -> dict:
@@ -311,7 +336,7 @@ class Agent:
             "unresolved_questions": unresolved,
         }
         return {"next": "respond", "outcome": "handoff", "handoff": packet, "awaiting": None, "pending_action": None,
-                "reply_key": reason if reason in ("tool_failure", "out_of_scope", "security_lockout") else "handoff",
+                "reply_key": reason if reason in HANDOFF_REPLIES else "handoff",
                 "detail": reason}
 
     def respond(self, s: State, calls) -> dict:
@@ -323,21 +348,26 @@ class Agent:
             facts["txn"] = fmt_txn(txn)
         if key == "choose":
             facts["options"] = "\n".join(f"{i}) {fmt_option(t)}" for i, t in enumerate(s.get("candidates") or [], 1))
-        if key == "confirm_dispute":
-            a = s["pending_action"]
-            facts["card"] = a.get("card_label") or "-"
+        if key in ("confirm_dispute", "block_confirm"):
+            facts["card"] = s["pending_action"]["card_label"]  # estas claves solo se usan si hay tarjeta ofrecida
         if key == "done_dispute":
             r = s["action_result"]
             facts["case_id"] = r["dispute"]["case_id"]
-            facts["block"] = self.writer.write("block_suffix", lang, card=r["card_label"]) if r["block"] else ""
-        if key in ("block_confirm", "block_done"):
-            facts["card"] = (s.get("pending_action") or s.get("action_result") or {}).get("card_label", "-")
+            facts["block"] = ""
+            if r["block"]:
+                facts["block"] = self.writer.write("block_suffix", lang, card=r["card_label"])
+            elif "block_card" in r.get("declined", []):
+                facts["block"] = self.writer.write("block_declined_suffix", lang)
+        if key == "block_done":
+            facts["card"] = s["action_result"]["card_label"]
         if key in ("rule", "handoff"):
             hit = (s.get("decision") or {}).get("rules", [{}])[0] if s.get("decision") else {}
             facts["explain"] = self.writer.rule_text(hit.get("id", ""), hit.get("explain", ""), lang) if hit else ""
             facts.setdefault("txn", "-")
         # el país (dialecto) se consulta solo si el writer lo necesita para esta respuesta
         reply, llm = self.writer.compose(key, lang, facts, country=lambda: self._customer_country(s, calls))
+        if s.get("reply_prefix"):  # texto fijo (no pasa por el modelo): dice por qué se vuelve a preguntar
+            reply = f"{self.writer.write(s['reply_prefix'], lang)}\n{reply}"
         return {"next": END, "reply": reply, "outcome": s.get("outcome") or "clarify", "llm": llm,
                 "detail": f"writer_fallback={llm['fallback']}" if llm and llm["fallback"] else None,
                 "conversation": [{"role": "assistant", "turn": s.get("turn"), "text": reply}]}
@@ -350,6 +380,27 @@ class Agent:
             return self._call(calls, "get_profile", s["token"]).get("country")
         except (AuthError, ToolError):
             return None
+
+
+# Motivos de handoff con una respuesta propia al cliente; el resto usa la plantilla genérica "handoff".
+HANDOFF_REPLIES = {"tool_failure", "out_of_scope", "security_lockout", "consent_unclear", "no_active_card"}
+
+
+def _confirm_key(action: dict) -> str:
+    """Plantilla de confirmación según lo que efectivamente se ofrece (nunca "tarjeta -")."""
+    if action.get("type") == "block_card":
+        return "block_confirm"
+    return "confirm_dispute" if action.get("block_card") else "confirm_dispute_no_card"
+
+
+def _apply_denials(pending: dict | None, denials: list[str]) -> dict | None:
+    """Quita de la acción pendiente las sub-acciones que el cliente rechazó. None = no queda nada por hacer."""
+    if not pending or "block_card" not in denials:
+        return pending
+    if pending.get("type") == "block_card":
+        return None
+    declined = set(pending.get("declined", [])) | ({"block_card"} if pending.get("block_card") else set())
+    return {**pending, "block_card": None, "declined": sorted(declined)}
 
 
 def _jsonable(d: dict) -> dict:

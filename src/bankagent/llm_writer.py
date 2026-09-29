@@ -21,7 +21,8 @@ from .responses import Country, T, TemplateWriter
 PROMPT_VERSION = "writer-v1"
 
 # Mensajes de seguridad/sesión: texto fijo y auditado, no se reescriben (y no se gasta una llamada).
-FIXED_KEYS = {"session_missing", "session_expired", "forbidden", "blocked_input", "block_suffix", "security_lockout"}
+FIXED_KEYS = {"session_missing", "session_expired", "forbidden", "blocked_input", "block_suffix", "security_lockout",
+              "block_declined_suffix", "reask_consent", "block_excluded"}
 
 DIALECTS = {"México": "es-MX", "Colombia": "es-CO", "Argentina": "es-AR", "Spain": "es-ES", "USA": "es-US"}
 DIALECT_HINTS = {

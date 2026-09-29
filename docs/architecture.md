@@ -69,7 +69,8 @@ flowchart TD
     guard -->|sesión inválida / ataque| respond
     guard -->|3 intentos bloqueados| handoff
     guard --> understand
-    understand -->|"sí" a acción pendiente| act
+    understand -->|"sí" a acción pendiente (por acción)| act
+    understand -->|confirmación ambigua 2 veces| handoff
     understand -->|"no"| cancel
     understand -->|elige opción| select_option
     understand -->|disputa| find_transaction
@@ -108,8 +109,8 @@ sequenceDiagram
     A->>T: get_transaction · get_profile · dispute_history
     A->>P: decide_dispute(hechos verificados)
     P-->>A: auto_with_confirmation (ninguna regla de bloqueo)
-    A-->>C: "Encontré el cargo … ¿Confirmas?"
-    C->>A: "sí"
+    A-->>C: "Encontré el cargo … ¿Abro la disputa? ¿Bloqueo también la tarjeta?"
+    C->>A: "sí, ambas" (o "solo la disputa": cada acción tiene su consentimiento)
     A->>T: open_dispute(confirmed) · block_card(confirmed)
     T-->>A: verified=true
     A-->>C: "Abrí la disputa DSP-… y bloqueé la tarjeta ****4111"

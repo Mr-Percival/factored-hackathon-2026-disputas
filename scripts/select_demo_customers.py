@@ -172,12 +172,24 @@ def select_all(sel: Selector) -> list[dict]:
         return scenario("normal_mx", "Disputa normal con bloqueo (es-MX)", "es-MX", c, [
             {"say": f"Hola, me llegó un cargo de {txt} que no reconozco",
              "expect": {"outcome": "clarify", "lang": "es", "txn_id": c["transaction_id"], "reply_contains": "Confirmas"}},
-            {"say": "sí", "expect": {"outcome": "resolved", "dispute_and_block_verified": True, "reply_contains": "Abrí la disputa"}},
+            {"say": "sí, ambas", "expect": {"outcome": "resolved", "dispute_and_block_verified": True, "reply_contains": "Abrí la disputa"}},
         ], {"outcome": "resolved", "rule": None})
     normal = add(sel.find("normal_mx", [
         "c.country = 'México'", active_ok, "t.transaction_type = 'Purchase'", "t.transaction_status = 'Approved'",
         recent(30), "t.merchant_name IS NOT NULL", low_fraud, "t.amount < {HIGH}", "t.amount >= 50", card_active],
         "t.fraud_score, t.transaction_date DESC", b_normal))
+
+    # 1b. Consentimiento por acción (#38): mismo cargo; acepta la disputa pero NO el bloqueo -> solo disputa.
+    if normal:
+        sc = dict(normal, id="partial_consent_mx", title="Acepta la disputa y rechaza el bloqueo (es-MX)", turns=[
+            normal["turns"][0],
+            {"say": "sí, pero no bloquees la tarjeta que la uso para todo",
+             "expect": {"outcome": "resolved", "actions_verified": ["dispute"], "reply_contains": "no bloqueé la tarjeta"}}])
+        sc.pop("selection", None)
+        ok, log = run_scenario(sel.db, sc, sel.policy_path)
+        if not ok:
+            raise SystemExit(f"partial_consent_mx no pasó: {log[-1]['problems']}")
+        add(sc)
 
     # 2. Ambiguo (es-CO): 2–4 movimientos cerca del monto -> pregunta cuál -> opción -> confirma.
     def b_ambiguous(c, h):
@@ -190,7 +202,7 @@ def select_all(sel: Selector) -> list[dict]:
             {"say": f"Buenas, me aparece un cobro de {txt} que yo no hice",
              "expect": {"outcome": "clarify", "lang": "es", "candidate_ids": w, "reply_contains": "Responde con el número"}},
             {"say": f"la {opt}", "expect": {"outcome": "clarify", "txn_id": c["transaction_id"], "reply_contains": "Confirmas"}},
-            {"say": "sí, confirmo", "expect": {"outcome": "resolved", "dispute_and_block_verified": True}},
+            {"say": "sí, las dos", "expect": {"outcome": "resolved", "dispute_and_block_verified": True}},
         ], {"outcome": "resolved", "rule": None}, candidate_ids=w, option=opt)
     ambiguous = add(sel.find("ambiguous_co", [
         "c.country = 'Colombia'", active_ok, "t.currency = 'COP'", "t.transaction_type = 'Purchase'",
@@ -248,7 +260,7 @@ def select_all(sel: Selector) -> list[dict]:
         return scenario("brazil_pt", "Cargo en Brasil: disputa en portugués (pt-BR)", "pt-BR", c, [
             {"say": f"Oi, não reconheço uma cobrança de {txt} no Brasil",
              "expect": {"outcome": "clarify", "lang": "pt", "txn_id": c["transaction_id"], "reply_contains": "Confirma"}},
-            {"say": "sim", "expect": {"outcome": "resolved", "lang": "pt", "dispute_and_block_verified": True,
+            {"say": "sim, as duas", "expect": {"outcome": "resolved", "lang": "pt", "dispute_and_block_verified": True,
                                       "reply_contains": "Abri a contestação"}},
         ], {"outcome": "resolved", "rule": None})
     add(sel.find("brazil_pt", [
@@ -342,7 +354,7 @@ def main():
     sel = Selector(a.db, a.policy, a.max_runs)
     print(f"política {sel.policy['version']} · as_of {sel.as_of} · umbral fraude {sel.thr:g}")
     scenarios = select_all(sel)
-    expected_ids = {"normal_mx", "ambiguous_co", "high_amount_ar", "fraud_pt", "brazil_pt", "repeat_h04", "inactive_h01",
+    expected_ids = {"normal_mx", "partial_consent_mx", "ambiguous_co", "high_amount_ar", "fraud_pt", "brazil_pt", "repeat_h04", "inactive_h01",
                     "declined_d02", "too_old_d05", "out_of_scope", "unknown", "injection", "expired_session"}
     missing = sorted(expected_ids - {s["id"] for s in scenarios})
     doc = {

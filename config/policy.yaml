@@ -1,6 +1,6 @@
 # POLÍTICA SINTÉTICA — creada por el equipo para el hackathon. NO es la política de ningún banco real.
 # El modelo de lenguaje nunca decide elegibilidad: solo este archivo, evaluado por bankagent/policy.py.
-version: "2026-09-29.1"
+version: "2026-09-29.2"
 
 # Fecha "hoy" del sandbox: los datos terminan el 2026-06-17.
 as_of: "2026-06-17"
@@ -55,6 +55,15 @@ dispute:
     ARS: 1000000
 
 # Acciones permitidas y si requieren confirmación explícita del cliente.
+# Cada acción tiene su propio consentimiento: "sí, pero no bloquees" abre la disputa y NO bloquea (#38).
 actions:
   open_dispute: {requires_confirmation: true}
-  block_card: {requires_confirmation: true}
+  block_card:
+    requires_confirmation: true
+    # Cuándo se OFRECE el bloqueo preventivo junto con la disputa. `card` es la tarjeta del producto de la
+    # transacción (None si el cargo es de una cuenta o préstamo); su estado ya refleja los bloqueos de ops.
+    offer_when: "card is not None and card.product_status == 'Active'"
+
+# Límites de la conversación: cuántas veces re-preguntar antes de pasar a un humano.
+conversation:
+  max_consent_reasks: 1       # confirmación ambigua ("no sé, creo que sí"): 1 re-pregunta, luego handoff

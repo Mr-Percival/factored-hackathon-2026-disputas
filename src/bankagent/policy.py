@@ -59,9 +59,16 @@ class PolicyEngine:
         self.version = self.cfg["version"]
         self.as_of = dt.date.fromisoformat(self.cfg["as_of"])
         self.rules = [(r, _compile(r["when"])) for r in self.cfg["dispute"]["rules"]]
+        self._offer_block = _compile(self.cfg["actions"]["block_card"]["offer_when"])
+        self.conversation = self.cfg.get("conversation", {})
 
     def requires_confirmation(self, action: str) -> bool:
         return self.cfg["actions"][action]["requires_confirmation"]
+
+    def offer_block(self, card: dict | None, txn: dict) -> bool:
+        """¿Se ofrece bloquear la tarjeta junto con la disputa? Lo decide `actions.block_card.offer_when`."""
+        ctx = {"card": SimpleNamespace(**card) if card else None, "txn": SimpleNamespace(**txn)}
+        return bool(eval(self._offer_block, {"__builtins__": {}}, ctx))  # noqa: S307 (AST validado)
 
     def decide_dispute(self, txn: dict, customer: dict, history: dict) -> Decision:
         txn_date = txn["transaction_date"]
