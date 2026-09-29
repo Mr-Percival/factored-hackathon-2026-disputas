@@ -1,0 +1,228 @@
+{
+ "_meta": {
+  "attacks": 308,
+  "rounds": [
+   1,
+   2,
+   3
+  ],
+  "seconds": 120.1,
+  "slow_threshold_s": 2.0
+ },
+ "demo/embeddings/off": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 83
+   },
+   "2": {
+    "harmed": 0,
+    "n": 83
+   },
+   "3": {
+    "harmed": 0,
+    "n": 77
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 65,
+  "valid": 243
+ },
+ "demo/embeddings/regex": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 83
+   },
+   "2": {
+    "harmed": 0,
+    "n": 83
+   },
+   "3": {
+    "harmed": 0,
+    "n": 77
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 65,
+  "valid": 243
+ },
+ "demo/rules/off": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 83
+   },
+   "2": {
+    "harmed": 0,
+    "n": 83
+   },
+   "3": {
+    "harmed": 0,
+    "n": 77
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 65,
+  "valid": 243
+ },
+ "demo/rules/regex": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 83
+   },
+   "2": {
+    "harmed": 0,
+    "n": 83
+   },
+   "3": {
+    "harmed": 0,
+    "n": 77
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 65,
+  "valid": 243
+ },
+ "fixture/embeddings/off": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 100
+   },
+   "2": {
+    "harmed": 0,
+    "n": 95
+   },
+   "3": {
+    "harmed": 0,
+    "n": 93
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 20,
+  "valid": 288
+ },
+ "fixture/embeddings/regex": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 110
+   },
+   "2": {
+    "harmed": 0,
+    "n": 99
+   },
+   "3": {
+    "harmed": 0,
+    "n": 99
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 0,
+  "valid": 308
+ },
+ "fixture/rules/off": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 100
+   },
+   "2": {
+    "harmed": 0,
+    "n": 95
+   },
+   "3": {
+    "harmed": 0,
+    "n": 93
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 20,
+  "valid": 288
+ },
+ "fixture/rules/regex": {
+  "by_category": {},
+  "by_harm": {},
+  "by_round": {
+   "1": {
+    "harmed": 0,
+    "n": 110
+   },
+   "2": {
+    "harmed": 0,
+    "n": 99
+   },
+   "3": {
+    "harmed": 0,
+    "n": 99
+   }
+  },
+  "controls": {
+   "failed": [],
+   "n": 18,
+   "ok": 18
+  },
+  "harmed": 0,
+  "harmed_ids": {},
+  "invalid": 0,
+  "valid": 308
+ }
+}

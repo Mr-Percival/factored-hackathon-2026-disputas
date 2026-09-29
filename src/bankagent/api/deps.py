@@ -18,6 +18,16 @@ RuntimeDep = Annotated[Runtime, Depends(get_runtime)]
 
 
 def client_ip(request: Request) -> str:
+    """IP del cliente para las cuotas (logins por minuto, sesiones vivas por IP).
+
+    Red team #33: con `uvicorn --proxy-headers --forwarded-allow-ips '*'` (docker/entrypoint.sh) `request.client`
+    es la PRIMERA entrada de X-Forwarded-For, que escribe el cliente: inventándola se esquivaban las cuotas por IP.
+    Con BANKAGENT_TRUSTED_PROXY_HOPS=N (N proxies propios delante) se toma la entrada N-ésima desde la DERECHA, la
+    que agregó nuestro proxy y el cliente no controla. 0 (default fuera del contenedor) = conexión directa."""
+    hops = request.app.state.runtime.settings.trusted_proxy_hops
+    xff = [h.strip() for v in request.headers.getlist("x-forwarded-for") for h in v.split(",") if h.strip()]
+    if hops > 0 and xff:
+        return xff[-hops] if len(xff) >= hops else xff[0]
     return request.client.host if request.client else "unknown"
 
 

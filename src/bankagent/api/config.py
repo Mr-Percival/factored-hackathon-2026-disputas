@@ -9,6 +9,7 @@
 | BANKAGENT_CORS_ORIGINS | (vacío) | orígenes extra permitidos, separados por coma (dev: http://localhost:5173) |
 | BANKAGENT_COOKIE_SECURE | auto | 1/0 fuerza el atributo Secure; auto = según el esquema de la petición |
 | BANKAGENT_RATE_LIMIT_PER_MIN | 30 | mensajes por minuto por sesión (o IP) |
+| BANKAGENT_TRUSTED_PROXY_HOPS | 0 | proxies propios delante; la IP del cliente es esa entrada de X-Forwarded-For contando desde la derecha (el contenedor usa 1) |
 | BANKAGENT_ROUTER | embeddings | intención: `embeddings` (router aprendido lite, ADR 0009) o `rules`. Si el modelo no carga, cada turno responde RuleRouter y dice `rules(fallback:model_unavailable)` |
 | BANKAGENT_WEB_DIST | web/dist | SPA compilada que sirve FastAPI en producción |
 | BANKAGENT_DOCS | 1 | 0 = sin /api/docs ni /api/openapi.json |
@@ -44,6 +45,10 @@ class Settings:
     max_body_bytes: int = 16 * 1024
     session_ttl_s: int = 30 * 60  # sesión del navegador (el token del agente dura 15 min); luego se libera todo
     max_sessions: int = 200  # cada sesión tiene su agente y su almacén ops; al tope, 429
+    # Red team #33: una sola IP llenaba el tope global y dejaba a todos los demás con 429. Cuota por IP: al pasarla,
+    # se libera la sesión más vieja de ESA IP (el atacante solo se desplaza a sí mismo).
+    max_sessions_per_ip: int = 10
+    trusted_proxy_hops: int = 0  # proxies propios delante (el contenedor usa 1): de dónde leer la IP real
     max_conversations_per_session: int = 50
     web_dist: str = DEFAULT_WEB_DIST
     docs: bool = True
@@ -60,6 +65,7 @@ class Settings:
             cors_origins=tuple(o.strip() for o in (e.get("BANKAGENT_CORS_ORIGINS") or "").split(",") if o.strip()),
             cookie_secure=None if secure in ("", "auto") else _flag(secure, False),
             rate_limit_per_min=int(e.get("BANKAGENT_RATE_LIMIT_PER_MIN") or 30),
+            trusted_proxy_hops=int(e.get("BANKAGENT_TRUSTED_PROXY_HOPS") or 0),
             web_dist=e.get("BANKAGENT_WEB_DIST") or DEFAULT_WEB_DIST,
             docs=_flag(e.get("BANKAGENT_DOCS"), True),
         )

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Callable, Protocol
 
+from .guard import data_text
+
 Country = Callable[[], "str | None"] | str | None
 
 
@@ -121,8 +123,9 @@ RULE_PT = {
 def fmt_txn(t: dict) -> str:
     d = t["transaction_date"]
     date = d.strftime("%d/%m/%Y") if hasattr(d, "strftime") else str(d)[:10]
-    where = t.get("merchant_name") or t.get("channel")
-    place = f", {t['transaction_city']}" if t.get("transaction_city") else ""
+    # comercio y ciudad vienen de los datos (no confiables): sin invisibles ni overrides bidi (red team #33)
+    where = data_text(t.get("merchant_name") or t.get("channel") or "")
+    place = f", {data_text(t['transaction_city'])}" if t.get("transaction_city") else ""
     return f"{date} · {float(t['amount']):,.2f} {t['currency']} · {where} ({t['transaction_country']}{place})"
 
 
