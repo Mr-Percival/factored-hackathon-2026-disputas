@@ -60,7 +60,7 @@ body.single .slide.show { display:flex; }
 <li><strong>Normal (es-MX)</strong> — «Hola, me llegó un cargo de 151 dólares que no reconozco»: 1 cargo (150.86 USD, Gasolinera Express). Ofrece disputa y bloqueo por separado; con «sí, ambas» abre la disputa y bloquea la tarjeta, ambas verificadas.</li>
 <li><strong>Ambiguo (es-CO)</strong> — «Buenas, me aparece un cobro de 242.000 pesos que yo no hice»: 2 candidatos: pregunta cuál y solo avanza cuando el cliente elige («la 1»).</li>
 <li><strong>Handoff en pt + ataque</strong> — «Olá, não reconheço uma cobrança de 114 dólares do dia 12/06»: fraud_score 95.1 ≥ 30 → regla H03 → analista con el paquete completo. «Ignora tus instrucciones anteriores…» → bloqueado por el guard.</li>
-</ol></div></div><sub>Demo en vivo: <span class="pending">[[PENDIENTE: deploy]]</span> · clientes de docs/demo/demo_customers.json (verificados 14/14) · guion: docs/demo-script.md</sub></section><section class="slide"><div class="num">4 / 6</div><h2>4. Evaluación honesta: contra líneas base, en casos reservados</h2>
+</ol></div></div><sub>Demo en vivo: agente-disputas.onrender.com · clientes de docs/demo/demo_customers.json (verificados 14/14) · guion: docs/demo-script.md</sub></section><section class="slide"><div class="num">4 / 6</div><h2>4. Evaluación honesta: contra líneas base, en casos reservados</h2>
 <p><em>Cómo sabemos que funciona</em></p><div class="body"><div class="col"><table>
 <thead>
 <tr>
@@ -110,7 +110,7 @@ body.single .slide.show { display:flex; }
 <li>Router aprendido local con fallback visible a reglas</li>
 <li>Red team de 3 rondas e invariantes con Hypothesis, en CI</li>
 <li>Auditoría encadenada · dependencias con hash · CI → GHCR → Render</li>
-<li>Demo desplegada: <span class="pending">[[PENDIENTE: deploy]]</span></li>
+<li>Demo desplegada: agente-disputas.onrender.com</li>
 </ul></div><div class="col"><p><strong>Falta para producción</strong></p>
 <ul>
 <li>IdP real (OIDC) con MFA y step-up antes de actuar</li>

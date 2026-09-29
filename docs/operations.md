@@ -205,3 +205,10 @@ flowchart LR
   (`/readyz`, `/api/scenarios`) antes de avisar a Render.
 - Plan gratis de Render: 512 MB, 0.1 CPU, se duerme a los 15 min; `keepalive.yml` lo mantiene despierto hasta la final.
   Memoria medida en local: ~200 MB tras 39 sesiones de demo.
+
+### Medición en vivo (Render, plan gratis, 2026-09-29)
+Replay de los 14 escenarios de `docs/demo/demo_customers.json` por HTTPS contra `agente-disputas.onrender.com`,
+desde una conexión residencial en LATAM (incluye red y TLS): **14/14 correctos**; turno p50 **184 ms**, p95 **401 ms**,
+máx 505 ms (n=20 turnos); login p50 295 ms. El primer login tardó **85 s**: arranque en frío tras dormirse el
+servicio, que es lo que evita `keepalive.yml` durante la evaluación. Cabeceras verificadas en producción: CSP estricta,
+HSTS, `X-Frame-Options: DENY`.
