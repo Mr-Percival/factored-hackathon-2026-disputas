@@ -50,3 +50,22 @@ def test_concurrent_conversations_complete(env):
     for t in threads:
         t.join()
     assert results == ["clarify"] * 8
+
+
+def test_fork_ops_isolates_actions_per_demo_session(env):
+    """Solo demo web: cada fork escribe en su schema; el almacén por defecto no cambia de comportamiento."""
+    import pytest
+
+    tok = env.login("CLI-ANA")
+    a, b = env.tools.fork_ops("s_a"), env.tools.fork_ops("s_b")
+    assert a.open_dispute(tok, "T-ANA-8", "x", confirmed=True)["verified"]
+    assert a.dispute_history(tok)["open_dispute_transactions"] == ["T-ANA-8"]
+    assert b.dispute_history(tok)["open_dispute_transactions"] == []
+    assert env.tools.dispute_history(tok)["open_dispute_transactions"] == []
+    assert env.tools._ops.execute("SELECT count(*) FROM disputes").fetchone()[0] == 0
+    a.drop_ops()
+    assert env.tools._ops.execute("SELECT count(*) FROM information_schema.schemata WHERE schema_name = 's_a'").fetchone()[0] == 0
+    with pytest.raises(ValueError):
+        env.tools.fork_ops("x; DROP TABLE disputes")
+    with pytest.raises(ValueError):
+        env.tools.drop_ops()

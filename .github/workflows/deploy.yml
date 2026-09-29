@@ -1,0 +1,81 @@
+name: deploy
+
+# Imagen de la demo con la base de clientes reales, SIN que los datos del organizador pasen por el repo:
+# los datos se bajan de S3 con secretos, la base se construye en el runner efímero, se hornea en la imagen y la
+# imagen se publica en GHCR (privada). Render despliega esa imagen vía deploy hook. Ver docs/operations.md.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/mr-percival/agente-disputas
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e . boto3
+
+      - name: Datos del organizador (solo las 4 tablas que usa el agente)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
+        run: python scripts/s3_download.py --tables customers,products,transactions,complaints
+
+      - name: Base de demo (500 clientes + escenarios verificados)
+        run: |
+          python -m bankagent.pipeline --raw data/raw --out data/demo/demo.duckdb \
+            --sample-customers 500 --include-customers docs/demo/demo_customers.json
+          python scripts/verify_demo.py --db data/demo/demo.duckdb
+          mkdir -p docker/demo-db && cp data/demo/demo.duckdb docker/demo-db/demo.duckdb
+          ls -la docker/demo-db/
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test de la imagen publicada
+        run: |
+          docker run -d --name demo -p 8000:8000 ${{ env.IMAGE }}:${{ github.sha }}
+          for i in $(seq 1 30); do curl -fs localhost:8000/readyz && break; sleep 2; done
+          curl -fs localhost:8000/api/scenarios | grep -q "CLI-" || (echo "la imagen no trae la base de demo" && exit 1)
+          docker rm -f demo
+
+      - name: Desplegar en Render (imagen exacta de este commit)
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          IMG: ${{ env.IMAGE }}:${{ github.sha }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK no configurado: se omite el deploy"; exit 0; fi
+          ENC=$(python -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["IMG"], safe=""))')
+          curl -fsS -X POST "${HOOK}&imgURL=${ENC}" -o /dev/null
+          echo "deploy disparado para ${IMG}"

@@ -11,6 +11,7 @@ Reglas de esta capa (no negociables, no dependen del prompt):
 from __future__ import annotations
 
 import datetime as dt
+import re
 import threading
 import time
 import uuid
@@ -21,6 +22,7 @@ import duckdb
 from .identity import AuthError, IdentityService
 
 CARD_TYPES = ("Tarjeta Crédito", "Tarjeta Débito")
+OPS_SCHEMA_RX = re.compile(r"[a-z][a-z0-9_]{0,62}")
 
 
 class ToolError(Exception):
@@ -42,16 +44,51 @@ class BankTools:
     identity: IdentityService
     ops_db: str = ":memory:"
     audit: list[ToolCall] = field(default_factory=list)
+    # Solo la demo web: espacio de nombres (schema) del almacén ops por sesión, sobre conexiones compartidas.
+    # None = tablas `main` de siempre (consola, evaluación, tests). Ver `fork_ops` y ADR 0008.
+    ops_schema: str | None = None
+    shared: tuple | None = field(default=None, repr=False)
 
     def __post_init__(self):
-        self._ro = duckdb.connect(self.serving_db, read_only=True)
-        self._ops = duckdb.connect(self.ops_db)
+        if self.ops_schema is not None and not OPS_SCHEMA_RX.fullmatch(self.ops_schema):
+            raise ValueError("ops_schema inválido")
+        if self.shared:
+            self._ro, self._ops = self.shared
+        else:
+            self._ro = duckdb.connect(self.serving_db, read_only=True)
+            self._ops = duckdb.connect(self.ops_db)
         self._local = threading.local()
-        self._ops.execute("""CREATE TABLE IF NOT EXISTS card_blocks (
-            product_id VARCHAR PRIMARY KEY, customer_id VARCHAR, blocked_at TIMESTAMP, reason VARCHAR)""")
-        self._ops.execute("""CREATE TABLE IF NOT EXISTS disputes (
-            case_id VARCHAR PRIMARY KEY, customer_id VARCHAR, transaction_id VARCHAR UNIQUE,
-            reason VARCHAR, status VARCHAR, created_at TIMESTAMP)""")
+        ns = f"{self.ops_schema}." if self.ops_schema else ""
+        self._t_blocks, self._t_disputes = f"{ns}card_blocks", f"{ns}disputes"
+        setup = self._ops.cursor()  # cursor propio: las conexiones pueden estar compartidas entre hilos
+        try:
+            if self.ops_schema:
+                setup.execute(f"CREATE SCHEMA IF NOT EXISTS {self.ops_schema}")
+            setup.execute(f"""CREATE TABLE IF NOT EXISTS {self._t_blocks} (
+                product_id VARCHAR PRIMARY KEY, customer_id VARCHAR, blocked_at TIMESTAMP, reason VARCHAR)""")
+            setup.execute(f"""CREATE TABLE IF NOT EXISTS {self._t_disputes} (
+                case_id VARCHAR PRIMARY KEY, customer_id VARCHAR, transaction_id VARCHAR UNIQUE,
+                reason VARCHAR, status VARCHAR, created_at TIMESTAMP)""")
+        finally:
+            setup.close()
+
+    def fork_ops(self, schema: str) -> "BankTools":
+        """Mismas conexiones (serving de solo lectura + ops) e identidad, con un almacén ops propio en `schema`.
+
+        Lo usa la demo web para que cada sesión empiece limpia (D01 solo refleja acciones de esa sesión). Cada
+        instancia tiene sus propios cursores por hilo. En producción el almacén ops es uno solo y transaccional.
+        """
+        return BankTools(self.serving_db, self.identity, ops_schema=schema, shared=(self._ro, self._ops))
+
+    def drop_ops(self) -> None:
+        """Borra el almacén ops de una instancia creada con `fork_ops` (libera la memoria de la sesión)."""
+        if not self.ops_schema:
+            raise ValueError("solo para almacenes creados con fork_ops")
+        c = self._ops.cursor()
+        try:
+            c.execute(f"DROP SCHEMA IF EXISTS {self.ops_schema} CASCADE")
+        finally:
+            c.close()
 
     # ------------------------------------------------------------------ utilidades
     # Un cursor por hilo. Una conexión DuckDB compartida entre hilos MEZCLA resultados: la prueba de carga
@@ -99,7 +136,7 @@ class BankTools:
             cards = self._rows(f"""WITH own AS MATERIALIZED (SELECT product_id, product_type, product_number, currency,
                     product_status FROM products WHERE customer_id = ?)
                 SELECT * FROM own WHERE product_type IN {CARD_TYPES} ORDER BY product_type""", [cid])
-            blocked = {r[0] for r in self._ops_c.execute("SELECT product_id FROM card_blocks WHERE customer_id = ?", [cid]).fetchall()}
+            blocked = {r[0] for r in self._ops_c.execute(f"SELECT product_id FROM {self._t_blocks} WHERE customer_id = ?", [cid]).fetchall()}
             for c in cards:
                 if c["product_id"] in blocked:
                     c["product_status"] = "Blocked"
@@ -147,9 +184,29 @@ class BankTools:
             cid = self.identity.resolve(token).customer_id
             r = self._ro_c.execute("""SELECT count(*) FILTER (WHERE creation_date >= (SELECT max(creation_date) FROM complaints) - INTERVAL 90 DAY),
                     bool_or(is_repeat_complainer) FROM complaints WHERE customer_id = ?""", [cid]).fetchone()
-            open_disputes = [x[0] for x in self._ops_c.execute("SELECT transaction_id FROM disputes WHERE customer_id = ?", [cid]).fetchall()]
+            open_disputes = [x[0] for x in self._ops_c.execute(f"SELECT transaction_id FROM {self._t_disputes} WHERE customer_id = ?", [cid]).fetchall()]
             return {"complaints_last_90d": r[0] or 0, "is_repeat_complainer": bool(r[1]), "open_dispute_transactions": open_disputes}
         return self._run("dispute_history", {}, fn)
+
+    def list_merchants(self, token: str) -> list[str]:
+        """Comercios distintos en los movimientos de ESTE cliente: el grafo compara el texto contra esta lista
+        acotada por sesión (nunca contra comercios de otros clientes)."""
+        def fn():
+            cid = self.identity.resolve(token).customer_id
+            rows = self._ro_c.execute("""WITH own AS MATERIALIZED (SELECT merchant_name FROM transactions WHERE customer_id = ?)
+                SELECT DISTINCT merchant_name FROM own WHERE merchant_name IS NOT NULL AND merchant_name <> ''
+                ORDER BY 1""", [cid]).fetchall()
+            return [r[0] for r in rows]
+        return self._run("list_merchants", {}, fn)
+
+    def list_disputes(self, token: str) -> list[dict]:
+        """Disputas abiertas por ESTE cliente (ops). Para "¿en qué va mi disputa?": nunca de otro cliente."""
+        def fn():
+            cid = self.identity.resolve(token).customer_id
+            cur = self._ops_c.execute("""SELECT case_id, transaction_id, status, created_at FROM disputes
+                WHERE customer_id = ? ORDER BY created_at DESC""", [cid])
+            return [dict(zip(("case_id", "transaction_id", "status", "created_at"), r)) for r in cur.fetchall()]
+        return self._run("list_disputes", {}, fn)
 
     # ------------------------------------------------------------------ acciones (requieren confirmación)
     def block_card(self, token: str, product_id: str, confirmed: bool) -> dict:
@@ -161,8 +218,8 @@ class BankTools:
                 SELECT product_type FROM p WHERE customer_id = ?""", [product_id, cid])
             if not own or own[0]["product_type"] not in CARD_TYPES:
                 raise AuthError("forbidden")
-            self._ops_c.execute("INSERT OR IGNORE INTO card_blocks VALUES (?, ?, now(), 'customer_reported')", [product_id, cid])
-            verified = self._ops_c.execute("SELECT count(*) FROM card_blocks WHERE product_id = ?", [product_id]).fetchone()[0] == 1
+            self._ops_c.execute(f"INSERT OR IGNORE INTO {self._t_blocks} VALUES (?, ?, now(), 'customer_reported')", [product_id, cid])
+            verified = self._ops_c.execute(f"SELECT count(*) FROM {self._t_blocks} WHERE product_id = ?", [product_id]).fetchone()[0] == 1
             return {"product_id": product_id, "status": "Blocked" if verified else "Unknown", "verified": verified}
         return self._run("block_card", {"product_id": product_id, "confirmed": confirmed}, fn)
 
@@ -172,11 +229,11 @@ class BankTools:
             if not confirmed:
                 raise ToolError("confirmation_required")
             self.get_transaction(token, transaction_id)  # valida propiedad
-            existing = self._ops_c.execute("SELECT case_id FROM disputes WHERE transaction_id = ?", [transaction_id]).fetchone()
+            existing = self._ops_c.execute(f"SELECT case_id FROM {self._t_disputes} WHERE transaction_id = ?", [transaction_id]).fetchone()
             case_id = existing[0] if existing else "DSP-" + uuid.uuid4().hex[:10].upper()
             if not existing:  # idempotente: repetir la acción no abre dos casos
-                self._ops_c.execute("INSERT INTO disputes VALUES (?, ?, ?, ?, 'Open', now())", [case_id, cid, transaction_id, reason])
-            verified = self._ops_c.execute("SELECT count(*) FROM disputes WHERE case_id = ? AND customer_id = ?", [case_id, cid]).fetchone()[0] == 1
+                self._ops_c.execute(f"INSERT INTO {self._t_disputes} VALUES (?, ?, ?, ?, 'Open', now())", [case_id, cid, transaction_id, reason])
+            verified = self._ops_c.execute(f"SELECT count(*) FROM {self._t_disputes} WHERE case_id = ? AND customer_id = ?", [case_id, cid]).fetchone()[0] == 1
             return {"case_id": case_id, "transaction_id": transaction_id, "status": "Open", "verified": verified}
         return self._run("open_dispute", {"transaction_id": transaction_id, "confirmed": confirmed}, fn)
 

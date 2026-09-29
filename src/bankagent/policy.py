@@ -53,15 +53,28 @@ class Decision:
 
 
 class PolicyEngine:
-    def __init__(self, path: str = POLICY):
+    def __init__(self, path: str = POLICY, as_of: dt.date | dt.datetime | str | None = None):
+        """`as_of` reemplaza la fecha "hoy" del YAML (D05 y fechas relativas del router). Lo usa el replay
+        histórico (`bankagent.evals.replay`) para juzgar cada queja a la fecha en que se creó."""
         with open(path, encoding="utf-8") as f:
             self.cfg = yaml.safe_load(f)
         self.version = self.cfg["version"]
-        self.as_of = dt.date.fromisoformat(self.cfg["as_of"])
+        as_of = as_of if as_of is not None else self.cfg["as_of"]
+        if isinstance(as_of, str):
+            as_of = dt.date.fromisoformat(as_of[:10])
+        self.as_of = as_of.date() if isinstance(as_of, dt.datetime) else as_of
         self.rules = [(r, _compile(r["when"])) for r in self.cfg["dispute"]["rules"]]
+        self._offer_block = _compile(self.cfg["actions"]["block_card"]["offer_when"])
+        self.conversation = self.cfg.get("conversation", {})
+        self.window_days = int(self.cfg["dispute"]["window_days"])
 
     def requires_confirmation(self, action: str) -> bool:
         return self.cfg["actions"][action]["requires_confirmation"]
+
+    def offer_block(self, card: dict | None, txn: dict) -> bool:
+        """¿Se ofrece bloquear la tarjeta junto con la disputa? Lo decide `actions.block_card.offer_when`."""
+        ctx = {"card": SimpleNamespace(**card) if card else None, "txn": SimpleNamespace(**txn)}
+        return bool(eval(self._offer_block, {"__builtins__": {}}, ctx))  # noqa: S307 (AST validado)
 
     def decide_dispute(self, txn: dict, customer: dict, history: dict) -> Decision:
         txn_date = txn["transaction_date"]
@@ -74,6 +87,7 @@ class PolicyEngine:
             "txn_age_days": (self.as_of - txn_date).days,
             "txn_already_disputed": txn["transaction_id"] in history.get("open_dispute_transactions", []),
             "high_amount": self.cfg["dispute"]["high_amount"],
+            "window_days": self.window_days,
         }
         hits = [RuleHit(r["id"], r["outcome"], r["explain"])
                 for r, code in self.rules if eval(code, {"__builtins__": {}}, ctx)]  # noqa: S307 (AST validado)

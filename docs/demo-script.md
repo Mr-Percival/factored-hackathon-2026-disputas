@@ -11,7 +11,7 @@ mensajes exactos por turno y el resultado esperado.
 ## 0. Antes de salir a escena (5 min antes)
 
 ```bash
-python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw    # debe terminar en 13/13 OK (código 0)
+python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw    # debe terminar en 14/14 OK (código 0)
 ```
 - La sesión simulada dura 15 min (`IdentityService(ttl_seconds=900)`). Iniciar cada escena con un login nuevo.
 - Tener abierta esta página y el JSON para copiar los mensajes.
@@ -36,21 +36,24 @@ se lo pasa a un humano sin que el cliente tenga que repetir nada."
 ### Escena 1: disputa normal con bloqueo (es-MX): `CLI-ZT72318S7XDV`
 | Turno | Cliente escribe | Agente (esperado) |
 |---|---|---|
-| 1 | `Hola, me llegó un cargo de 151 dólares que no reconozco` | Encontró el cargo del 18/05/2026 · 150.86 USD · Gasolinera Express (Puebla). Pide confirmar la disputa y el bloqueo de la tarjeta ****2444 → `clarify` |
-| 2 | `sí` | "Listo. Abrí la disputa DSP-… y bloqueé la tarjeta ****2444" → `resolved` |
+| 1 | `Hola, me llegó un cargo de 151 dólares que no reconozco` | Encontró el cargo del 18/05/2026 · 150.86 USD · Gasolinera Express (Puebla). Ofrece la disputa y, **por separado**, el bloqueo de la tarjeta ****2444: «sí, ambas» · «solo la disputa» · «no» → `clarify` |
+| 2 | `sí, ambas` | "Listo. Abrí la disputa DSP-… y bloqueé la tarjeta ****2444" → `resolved` |
 
 Qué mostrar:
 - **Traza:** `guard → understand → find_transaction → decide → respond`. `search_transactions` busca con monto ±10% y solo
   devuelve movimientos del dueño de la sesión, porque el cliente sale del token y no del texto.
 - **Decisión:** `auto_with_confirmation` sin reglas disparadas, con la versión de la política a la vista.
-- **Después del "sí":** `open_dispute` y `block_card` con `verified=true`. Hasta ese momento no se escribió nada.
+- **Después del "sí, ambas":** `open_dispute` y `block_card` con `verified=true`. Hasta ese momento no se escribió nada.
+- **Variante (si hay tiempo, escenario `partial_consent_mx`):** en el turno 2 escribir
+  `sí, pero no bloquees la tarjeta que la uso para todo` → abre **solo** la disputa y lo dice ("Como pediste, no bloqueé
+  la tarjeta"). Una respuesta ambigua ("no sé, creo que sí") no ejecuta nada: re-pregunta una vez y luego pasa a un asesor.
 
 ### Escena 2: cargo ambiguo (es-CO): `CLI-N70CIEUDZ4TJ`
 | Turno | Cliente escribe | Agente (esperado) |
 |---|---|---|
 | 1 | `Buenas, me aparece un cobro de 242.000 pesos que yo no hice` | Muestra 2 opciones: 1) 17/06/2026 · 241,764.72 COP · Mercado Central; 2) 02/02/2025 · 265,625.17 COP · Streaming Music → `clarify` |
 | 2 | `la 1` | Pide confirmar la disputa y el bloqueo de la tarjeta ****1666 → `clarify` |
-| 3 | `sí, confirmo` | Disputa abierta y tarjeta bloqueada → `resolved` |
+| 3 | `sí, las dos` | Disputa abierta y tarjeta bloqueada → `resolved` |
 
 Qué mostrar: cuando hay más de una candidata, el agente **pregunta en vez de adivinar** (`find_transaction` → `2 candidates`).
 "242.000" se entiende como miles, al estilo colombiano.
@@ -64,7 +67,8 @@ Qué mostrar en el **panel de handoff**:
 - `reason = H02_high_amount` y `policy.rules_fired` con el ID de la regla y su versión.
 - `verified_facts.transaction`: 2,154,962.73 ARS, transferencia del 17/06/2026 en La Plata. Son hechos leídos de las
   herramientas, no del texto del cliente.
-- `request` (lo que dijo el cliente, con la PII enmascarada) y `unresolved_questions` (lo que le queda por decidir al asesor).
+- `request` (lo que dijo el cliente, con la PII enmascarada) y `unresolved_questions` (lo que le queda por decidir al asesor, propias de H02).
+- Paquete versionado (`handoff/v1`, [esquema](handoff.schema.json)): `handoff_id` (el cliente lo recibe: "Tu número de caso es HND-…"), cola `disputas`, prioridad `alta`, SLA 8 h, `customer_claim` (2.155.000 declarado) y `match` (diferencia de monto con el movimiento verificado, `single_candidate`).
 - `summary`: una línea para el asesor con el motivo, la transacción, el estado del cliente y las acciones hechas. Se arma
   de forma determinista con los campos del paquete, sin modelo.
 - La decisión la toma `policy.yaml` (ARS ≥ 1.000.000), no el modelo.
@@ -74,7 +78,7 @@ Qué mostrar en el **panel de handoff**:
 | Turno | Cliente escribe | Agente (esperado) |
 |---|---|---|
 | 1 | `Oi, não reconheço uma cobrança de 496 dólares no Brasil` | "Encontrei a cobrança: 27/05/2026 · 496.13 USD · Centro Comercial (Brazil, Brasília)… Confirma?" → `clarify` |
-| 2 | `sim` | "Pronto. Abri a contestação DSP-… e bloqueei o cartão ****6633." → `resolved` |
+| 2 | `sim, as duas` | "Pronto. Abri a contestação DSP-… e bloqueei o cartão ****6633." → `resolved` |
 
 **4b. Señal de fraude, handoff al analista: `CLI-JP52WOIS6RWO`**
 | Turno | Cliente escribe | Agente (esperado) |
@@ -136,7 +140,7 @@ determinista de 500 clientes (orden por `hash(customer_id)`), construida con el 
 python scripts/select_demo_customers.py --db data/serving.duckdb --raw data/raw   # -> docs/demo/demo_customers.json
 python -m bankagent.pipeline --raw data/raw --out data/demo/demo.duckdb \
        --sample-customers 500 --include-customers docs/demo/demo_customers.json
-python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw           # 13/13 OK o código 1
+python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw           # 14/14 OK o código 1
 ```
 
 | Métrica | Valor (2026-09-28) |
@@ -144,7 +148,7 @@ python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw         
 | Tamaño de `data/demo/demo.duckdb` | **4.5 MB** (509 clientes · 1,317 productos · 14,665 transacciones · 244 quejas) |
 | Tiempo de construcción | ≈ 110–135 s (lee todos los CSV de `data/raw` y filtra) |
 | Selección de clientes | ≈ 10–15 s (13 escenarios, 9 corridas del agente sobre la base completa) |
-| Verificación | 13/13 OK en la base completa y en la de demo, con el umbral de fraude vigente (30, PR #18) y con el anterior (60) |
+| Verificación | 14/14 OK en la base completa y en la de demo con la política 2026-09-29.3 (consentimiento por acción, #38); antes, 13/13 con el umbral de fraude vigente (30, PR #18) y con el anterior (60) |
 
 **Huella de la entrega usada** (sha256 de `ruta|tamaño` por tabla, misma fórmula que `source_fingerprint` del
 manifiesto del pipeline en el PR #18):

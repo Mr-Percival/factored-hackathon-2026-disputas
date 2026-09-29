@@ -1,6 +1,6 @@
 # POLÍTICA SINTÉTICA — creada por el equipo para el hackathon. NO es la política de ningún banco real.
 # El modelo de lenguaje nunca decide elegibilidad: solo este archivo, evaluado por bankagent/policy.py.
-version: "2026-09-29.1"
+version: "2026-09-29.3"
 
 # Fecha "hoy" del sandbox: los datos terminan el 2026-06-17.
 as_of: "2026-06-17"
@@ -27,7 +27,7 @@ dispute:
       explain: "La transacción está pendiente; se puede disputar cuando se asiente."
     - id: D05_too_old
       outcome: reject
-      when: "txn_age_days > 120"
+      when: "txn_age_days > window_days"
       explain: "Supera el plazo de 120 días para disputar."
     - id: H01_customer_not_active
       outcome: handoff
@@ -48,6 +48,8 @@ dispute:
       when: "history.is_repeat_complainer"
       explain: "Cliente con reclamos recientes: requiere revisión humana."
 
+  window_days: 120  # plazo para disputar (D05); también ordena las candidatas: las fuera de plazo van al final
+
   high_amount:  # por moneda, en unidades locales
     USD: 1000
     MXN: 20000
@@ -55,6 +57,130 @@ dispute:
     ARS: 1000000
 
 # Acciones permitidas y si requieren confirmación explícita del cliente.
+# Cada acción tiene su propio consentimiento: "sí, pero no bloquees" abre la disputa y NO bloquea (#38).
 actions:
   open_dispute: {requires_confirmation: true}
-  block_card: {requires_confirmation: true}
+  block_card:
+    requires_confirmation: true
+    # Cuándo se OFRECE el bloqueo preventivo junto con la disputa. `card` es la tarjeta del producto de la
+    # transacción (None si el cargo es de una cuenta o préstamo); su estado ya refleja los bloqueos de ops.
+    offer_when: "card is not None and card.product_status == 'Active'"
+
+# Límites de la conversación: cuántas veces re-preguntar antes de pasar a un humano.
+conversation:
+  max_consent_reasks: 1       # confirmación ambigua ("no sé, creo que sí"): 1 re-pregunta, luego handoff
+  max_clarifications: 3       # 3 aclaraciones seguidas sin avanzar (no entendí, sin coincidencias...) -> handoff
+
+# Paquete de handoff (#44): a qué cola va cada motivo, con qué prioridad y tiempo objetivo, y qué le queda por
+# resolver al asesor. La explicación sale de aquí (política), no del modelo. Esquema: docs/handoff.schema.json.
+handoff:
+  schema_version: "handoff/v1"
+  queues:  # nombre visible para el cliente, por idioma
+    fraude: {es: "un analista de fraude", pt: "um analista de fraude"}
+    seguridad: {es: "el equipo de seguridad", pt: "a equipe de segurança"}
+    disputas: {es: "un analista de disputas", pt: "um analista de contestações"}
+    servicio: {es: "un asesor", pt: "um atendente"}
+    operaciones: {es: "el equipo de operaciones", pt: "a equipe de operações"}
+  reasons:
+    H01_customer_not_active:
+      queue: servicio
+      priority: media
+      sla_hours: 24
+      next_action: "Regularizar la cuenta y retomar la disputa."
+      open_questions: ["Validar por qué la cuenta no está activa y si el cliente puede tramitar disputas.",
+                       "Decidir si se abre la disputa una vez regularizada la cuenta."]
+    H02_high_amount:
+      queue: disputas
+      priority: alta
+      sla_hours: 8
+      next_action: "Revisar el caso y decidir apertura y abono provisional."
+      open_questions: ["Confirmar con el cliente el monto y la fecha que reclama frente al movimiento verificado.",
+                       "Decidir apertura de la disputa y abono provisional por monto alto."]
+    H03_fraud_signal:
+      queue: fraude
+      priority: alta
+      sla_hours: 4
+      next_action: "Revisar señales de fraude y bloquear el producto si corresponde."
+      open_questions: ["Revisar las señales de fraude del movimiento y otros cargos recientes del mismo producto.",
+                       "Decidir bloqueo preventivo del producto y apertura de disputa por fraude."]
+    H04_repeat_complainer:
+      queue: disputas
+      priority: media
+      sla_hours: 24
+      next_action: "Revisar el historial de reclamos antes de decidir."
+      open_questions: ["Revisar los reclamos de los últimos 90 días y si alguno es por el mismo motivo.",
+                       "Decidir si la disputa procede o requiere documentación adicional."]
+    out_of_scope:
+      queue: servicio
+      priority: baja
+      sla_hours: 48
+      next_action: "Atender el pedido por el canal que corresponda."
+      open_questions: ["Atender la solicitud, que está fuera del alcance del canal automático."]
+    tool_failure:
+      queue: operaciones
+      priority: media
+      sla_hours: 4
+      next_action: "Reintentar la consulta y responder al cliente."
+      open_questions: ["Reintentar la consulta que falló y verificar los datos antes de responder al cliente."]
+    action_not_verified:
+      queue: operaciones
+      priority: alta
+      sla_hours: 2
+      next_action: "Verificar en core la acción y avisar al cliente."
+      open_questions: ["Confirmar en core si la disputa o el bloqueo quedaron registrados."]
+    security_lockout:
+      queue: seguridad
+      priority: alta
+      sla_hours: 4
+      next_action: "Validar la identidad del cliente por un canal seguro."
+      open_questions: ["Revisar los intentos bloqueados en el log de auditoría.",
+                       "Validar la identidad del cliente por un canal seguro antes de reabrir la conversación."]
+    no_active_card:
+      queue: servicio
+      priority: media
+      sla_hours: 24
+      next_action: "Confirmar qué producto quiere bloquear el cliente."
+      open_questions: ["Confirmar qué tarjeta quiere bloquear el cliente y el estado actual de sus productos."]
+    consent_unclear:
+      queue: servicio
+      priority: media
+      sla_hours: 24
+      next_action: "Confirmar con el cliente qué acciones autoriza."
+      open_questions: ["Confirmar si el cliente autoriza abrir la disputa y, por separado, el bloqueo de la tarjeta."]
+    customer_request:
+      queue: servicio
+      priority: media
+      sla_hours: 24
+      next_action: "Contactar al cliente y retomar la conversación."
+      open_questions: ["Retomar el pedido del cliente con lo ya conversado (ver transcripción)."]
+    account_takeover:
+      queue: seguridad
+      priority: alta
+      sla_hours: 1
+      next_action: "Contener el acceso: validar identidad, bloquear credenciales y productos."
+      open_questions: ["Validar la identidad del cliente por un canal seguro y revisar los accesos recientes.",
+                       "Bloquear credenciales y productos comprometidos; revisar movimientos posteriores al acceso."]
+    clarification_exhausted:
+      queue: servicio
+      priority: media
+      sla_hours: 24
+      next_action: "Contactar al cliente para entender su pedido."
+      open_questions: ["Entender qué necesita el cliente: el agente no lo identificó en 3 intentos seguidos."]
+    dispute_status:
+      queue: disputas
+      priority: baja
+      sla_hours: 48
+      next_action: "Informar el estado del caso al cliente."
+      open_questions: ["Buscar la disputa que menciona el cliente (puede venir de otro canal) e informar su estado."]
+    cancel_dispute:
+      queue: disputas
+      priority: media
+      sla_hours: 24
+      next_action: "Confirmar y gestionar el retiro de la disputa."
+      open_questions: ["Confirmar qué disputa quiere retirar el cliente y por qué (¿reconoció el cargo?)."]
+  default:
+    queue: servicio
+    priority: media
+    sla_hours: 24
+    next_action: "Revisar el caso con el cliente."
+    open_questions: ["Revisar el caso con el cliente."]

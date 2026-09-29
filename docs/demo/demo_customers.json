@@ -2,7 +2,7 @@
   "_comment": "Generado por scripts/select_demo_customers.py. Clientes REALES del dataset sintético del organizador; sin PII (solo IDs, montos, fechas, comercios, países). Regenerar si cambia dataset_fingerprint.",
   "generated_at": "2026-09-28T21:51:06",
   "policy": {
-    "version": "2026-09-29.1",
+    "version": "2026-09-29.3",
     "as_of": "2026-06-17",
     "fraud_threshold": 30.0,
     "high_amount": {
@@ -82,7 +82,7 @@
           }
         },
         {
-          "say": "sí",
+          "say": "sí, ambas",
           "expect": {
             "outcome": "resolved",
             "dispute_and_block_verified": true,
@@ -97,6 +97,56 @@
       "selection": {
         "sql_candidates": 400,
         "agent_runs": 1
+      }
+    },
+    {
+      "id": "partial_consent_mx",
+      "title": "Acepta la disputa y rechaza el bloqueo (es-MX)",
+      "locale": "es-MX",
+      "customer_id": "CLI-ZT72318S7XDV",
+      "customer": {
+        "customer_id": "CLI-ZT72318S7XDV",
+        "country": "México",
+        "status": "Active",
+        "repeat_complainer": false
+      },
+      "transaction": {
+        "transaction_id": "TRX-FGEJ2EHPYORTLOALKX1A",
+        "date": "2026-05-18 14:54:19",
+        "type": "Purchase",
+        "amount": 150.86,
+        "currency": "USD",
+        "merchant": "Gasolinera Express",
+        "country": "México",
+        "city": "Puebla",
+        "status": "Approved",
+        "fraud_score": 0.01,
+        "card_type": "Tarjeta Crédito"
+      },
+      "turns": [
+        {
+          "say": "Hola, me llegó un cargo de 151 dólares que no reconozco",
+          "expect": {
+            "outcome": "clarify",
+            "lang": "es",
+            "txn_id": "TRX-FGEJ2EHPYORTLOALKX1A",
+            "reply_contains": "Confirmas"
+          }
+        },
+        {
+          "say": "sí, pero no bloquees la tarjeta que la uso para todo",
+          "expect": {
+            "outcome": "resolved",
+            "actions_verified": [
+              "dispute"
+            ],
+            "reply_contains": "no bloqueé la tarjeta"
+          }
+        }
+      ],
+      "expected": {
+        "outcome": "resolved",
+        "rule": null
       }
     },
     {
@@ -145,7 +195,7 @@
           }
         },
         {
-          "say": "sí, confirmo",
+          "say": "sí, las dos",
           "expect": {
             "outcome": "resolved",
             "dispute_and_block_verified": true
@@ -300,7 +350,7 @@
           }
         },
         {
-          "say": "sim",
+          "say": "sim, as duas",
           "expect": {
             "outcome": "resolved",
             "lang": "pt",
