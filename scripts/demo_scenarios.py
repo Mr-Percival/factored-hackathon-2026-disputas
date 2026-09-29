@@ -18,7 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from bankagent.graph import Agent  # noqa: E402
+from bankagent.factory import build_agent  # noqa: E402
 from bankagent.identity import IdentityService  # noqa: E402
 from bankagent.pipeline import load_contracts  # noqa: E402
 from bankagent.policy import POLICY, PolicyEngine  # noqa: E402
@@ -87,11 +87,12 @@ def _check(expect: dict, got: dict) -> list[str]:
     return bad
 
 
-def run_scenario(db: str, sc: dict, policy_path: str = POLICY) -> tuple[bool, list[dict]]:
-    """Corre el escenario con un agente nuevo (ops en memoria: sin estado de otros escenarios)."""
+def run_scenario(db: str, sc: dict, policy_path: str = POLICY, router: str = "rules") -> tuple[bool, list[dict]]:
+    """Corre el escenario con un agente nuevo (ops en memoria: sin estado de otros escenarios).
+    `router`: "rules" (línea base) o "embeddings" (router aprendido lite, extra ml)."""
     identity = IdentityService()
     tools = BankTools(db, identity)
-    agent = Agent(tools, PolicyEngine(policy_path))
+    agent = build_agent(tools, router=router, policy=PolicyEngine(policy_path))
     token = identity.login(sc["customer_id"])
     log, ok = [], True
     try:

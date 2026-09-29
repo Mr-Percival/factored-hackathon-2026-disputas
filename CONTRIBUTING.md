@@ -40,6 +40,19 @@ Equipo de 4 · entrega el **5 de octubre de 2026**. Objetivo: cambios pequeños,
 ## Setup
 Ver `README.md` → *Setup reproducible*. Los tests corren **sin datos reales ni API keys**.
 
+## Dependencias fijadas y guardia de CI (#17, #36)
+- `pyproject.toml` declara cotas; las versiones **exactas y con hash** viven en `requirements/api.lock` (imagen
+  Docker: extras `api,ml`) y `requirements/ci.lock` (CI y deploy: `dev,api,ml`). Se instalan con
+  `pip install --require-hashes -r requirements/ci.lock && pip install --no-deps -e .`.
+- **Si cambias dependencias en `pyproject.toml`** (o un PR de Dependabot lo hace): `pip install uv && bash scripts/lock.sh`
+  y commitea los dos locks. Para subir todo a lo último compatible: `bash scripts/lock.sh --upgrade`.
+  `tests/test_supply_chain.py` falla si un lock no cubre una dependencia declarada o le falta un hash.
+- Las acciones de GitHub se fijan por **SHA completo** con el tag en comentario (`actions/checkout@<sha> # v4.4.0`);
+  Dependabot (`.github/dependabot.yml`) propone cada semana las subidas de pip, npm (`web/`) y acciones.
+- Antes de abrir un PR que toque el agente: `python scripts/ci_guard.py` (lo mismo que el job `guard` de la CI, ~30 s):
+  escenarios de la demo del fixture, 0 resultados inseguros, 100 % de handoffs completos y piso de exactitud, con los
+  routers `rules` y `embeddings`. Si mejoras el agente, sube el piso en `MIN_CORRECT`.
+
 ## Demo web (`web/` + `src/bankagent/api/`)
 ```bash
 pip install -e ".[dev,api]"          # FastAPI, uvicorn, httpx (TestClient)
