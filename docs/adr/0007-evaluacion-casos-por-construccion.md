@@ -1,4 +1,4 @@
-# 0004 · Evaluación con casos generados por construcción, divididos por cliente y por redacción
+# 0007 · Evaluación con casos generados por construcción, divididos por cliente y por redacción
 
 - **Estado:** aceptada
 - **Fecha:** 2026-09-28

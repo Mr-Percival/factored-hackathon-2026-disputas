@@ -1,7 +1,7 @@
 {
   "generator": "bankagent.evals.cases",
   "seed": 20261005,
-  "policy_version": "2026-09-28.1",
+  "policy_version": "2026-09-29.1",
   "as_of": "2026-06-17",
   "dev_share_pct": 30,
   "requested": {
@@ -27,7 +27,8 @@
     "tool_failure_transient": 2,
     "tool_failure_unverified": 2,
     "missing_vague": 4,
-    "missing_details": 8
+    "missing_details": 8,
+    "security_lockout": 4
   },
   "fairness_groups": 16,
   "shortfall": {},
@@ -36,12 +37,12 @@
     "discarded": 0
   },
   "n": {
-    "dev": 76,
-    "test": 160
+    "dev": 81,
+    "test": 159
   },
   "provenance": "Casos y etiquetas generados por el equipo por construcción sobre datos sintéticos del organizador; no son tráfico real ni anotación humana independiente.",
   "sha256": {
-    "dev.jsonl": "ec80094d4a09f6287dd967ad193f9f87d03215e15ece68ba1ad0f3dcf1d0017d",
-    "test.jsonl": "0c92a07767ff05e25f6824c7382e21ecc33789bd0cc750f14e120ebf53e6f3da"
+    "dev.jsonl": "b6b239c2d825b1e445f822377619f89967bbe6aecc95bd7c69c1990e885f77fc",
+    "test.jsonl": "424d0f78dc21efdf2e659db03876f1717fa9419dacff9c1acd2cf09d1a89040b"
   }
 }

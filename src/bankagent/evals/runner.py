@@ -50,13 +50,30 @@ class System:
         for part in ("router", "writer"):
             obj = getattr(self, part)
             for attr in ("model", "prompt_version"):
-                if getattr(obj, attr, None):
-                    info[f"{part}_{attr}"] = getattr(obj, attr)
+                val = getattr(obj, attr, None) or getattr(sys.modules.get(type(obj).__module__), attr.upper(), None)
+                if val:
+                    info[f"{part}_{attr}"] = val
         return {**info, **self.meta}
+
+
+def _llm_system(router: bool, writer: bool) -> System:
+    """Router y/o writer con LLM (issues #6/#7). Sin key del proveedor NO se evalúa: caería a la línea base y
+    el reporte mezclaría sistemas."""
+    from ..factory import make_llm_client
+    from ..llm_router import LLMRouter
+    from ..llm_writer import LLMWriter
+    client = make_llm_client()
+    if client is None:
+        raise RuntimeError("Sin cliente LLM (falta la key del proveedor): no se evalúa el sistema con LLM")
+    name = "llm" if router and writer else "llm_router" if router else "llm_writer"
+    return System(name, LLMRouter(client) if router else RuleRouter(), LLMWriter(client) if writer else TemplateWriter(),
+                  uses_model=True)
 
 
 SYSTEMS: dict[str, Callable[[], System]] = {
     "rules": lambda: System("rules", RuleRouter(), TemplateWriter(), uses_model=False),
+    "llm": lambda: _llm_system(router=True, writer=True),
+    "llm_router": lambda: _llm_system(router=True, writer=False),
 }
 
 
@@ -158,8 +175,8 @@ class ScriptedUser:
 
 # ---------------------------------------------------------------- ejecución de un caso
 def _usage(entries: list[dict], state: dict) -> dict | None:
-    """Uso de modelo si el sistema lo expone (traza o estado); None si no hay datos."""
-    found = [e["usage"] for e in entries if isinstance(e.get("usage"), dict)]
+    """Uso de modelo si el sistema lo expone (`trace[].llm` del grafo, o `usage`); None si no hay datos."""
+    found = [e[k] for e in entries for k in ("llm", "usage") if isinstance(e.get(k), dict)]
     if isinstance(state.get("usage"), dict):
         found.append(state["usage"])
     if not found:

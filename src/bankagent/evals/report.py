@@ -79,6 +79,7 @@ def render(ctx: dict) -> str:
         ("Transferencias faltantes", lambda a: _frac(a["missed_transfers"], a["should_escalate"])),
         ("Transferencias innecesarias", lambda a: _frac(a["unnecessary_transfers"], a["not_should_escalate"])),
         ("Casos con resultado inseguro (cota sup. 95%)", lambda a: f"{_frac(a['unsafe_any'], a['n'])} (≤ {_p(a['unsafe_upper95'])})"),
+        ("Casos con alguna respuesta en otro idioma", lambda a: _frac(a["wrong_language_cases"], a["n"])),
         ("Latencia por caso p50 / p95", lambda a: f"{_ms(a['latency_case_p50'])} / {_ms(a['latency_case_p95'])}"),
         ("Costo por caso procesado", lambda a: _usd(a["cost_per_case_usd"], a["cost_measured"])),
         ("Costo por resolución automática segura", lambda a: _usd(a["cost_per_sar_usd"], a["cost_measured"])),
@@ -222,13 +223,13 @@ def render(ctx: dict) -> str:
         for field, label in FIELDS:
             w(f"**{label}** · `{s}`")
             w("")
-            w("| Grupo | n | Correctos (IC 95%) | RAS / en alcance | Contención | Transf. faltantes | Transf. innecesarias | Inseguros |")
-            w("|---|---|---|---|---|---|---|---|")
+            w("| Grupo | n | Correctos (IC 95%) | RAS / en alcance | Contención | Transf. faltantes | Transf. innecesarias | Inseguros | Respuesta en otro idioma |")
+            w("|---|---|---|---|---|---|---|---|---|")
             for r in M.breakdown(cases, sc, field):
                 lo, hi = r["correct_ci"]
                 w(f"| {r['group']}{' ⚠' if r['small_n'] else ''} | {r['n']} | {_p(r['correct_rate'])} ({_p(lo, 0)}–{_p(hi, 0)}) | "
                   f"{_frac(r['sar'], r['in_scope'])} | {_frac(r['contained'], r['n'])} | {r['missed_transfers']}/{r['should_escalate']} | "
-                  f"{r['unnecessary_transfers']}/{r['not_should_escalate']} | {r['unsafe_any']} |")
+                  f"{r['unnecessary_transfers']}/{r['not_should_escalate']} | {r['unsafe_any']} | {r['wrong_language_cases']} |")
             w("")
         w(f"**Disparidades (brecha ≥ 10 pp en correctos) · `{s}`**")
         w("")

@@ -3,7 +3,7 @@
 `Router` es la interfaz; hay que poder cambiar la implementación sin tocar el grafo:
 - RuleRouter  : reglas y palabras clave (LÍNEA BASE, sin red, determinista)
 - JevRouter   : modelo de decisión Jev (pendiente)
-- ClaudeRouter: LLM con salida estructurada (pendiente)
+- LLMRouter   : LLM con salida estructurada (`llm_router.py`), cae a RuleRouter ante cualquier falla
 Todas devuelven el mismo `Understanding`; el grafo decide qué hacer según `confidence`.
 """
 from __future__ import annotations
@@ -34,6 +34,7 @@ class Understanding:
     language: Literal["es", "pt"]
     slots: Slots = field(default_factory=Slots)
     router: str = "rules"
+    llm: dict | None = None  # telemetría del modelo (versión, tokens, latencia, costo) si hubo llamada
 
 
 class Router(Protocol):
@@ -179,7 +180,10 @@ class RuleRouter:
             o = next((v for k, v in ORDINALS.items() if _has(t, k)), None)
             if o and len(t) <= 40:
                 return Understanding("select_option", 0.9, lang, Slots(option=o))
-        if awaiting == "confirmation":
+        # "no reconozco otro cargo de 50" no es un "no": es un pedido nuevo que descarta la acción pendiente.
+        words = len(re.findall(r"[a-z0-9]+", t))
+        new_request = words > 3 and any(_has(t, k) for k in KEYWORDS["dispute_charge"] + KEYWORDS["block_card"])
+        if awaiting == "confirmation" and not new_request:
             if any(_has(t, k) for k in KEYWORDS["deny"]) and not any(_has(t, k) for k in ("si", "sim")):
                 return Understanding("deny", 0.9, lang)
             if any(_has(t, k) for k in KEYWORDS["confirm"]):

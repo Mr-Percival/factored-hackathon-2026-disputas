@@ -140,6 +140,15 @@ def test_fairness_agreement_and_variability():
     assert v["unstable_cases"] == ["F3"] and v["correct"]["min"] == 3 and v["correct"]["max"] == 4
 
 
+def test_reply_language_detector_on_every_template_and_metric():
+    from bankagent.responses import T
+    assert all(M.reply_language(v) == lang for lang in ("es", "pt") for v in T[lang].values())
+    res = _resolved()
+    res["turns"][0]["reply"] = T["es"]["confirm_dispute"]  # cliente pt, respuesta es
+    s = M.score_case(_case(dialect="pt-BR"), res)
+    assert s["wrong_language_turns"] == 1 and M.aggregate([s])["wrong_language_cases"] == 1
+
+
 # ---------------------------------------------------------------- formatos del lexicón
 def test_local_amount_and_date_formats():
     rng = random.Random(0)

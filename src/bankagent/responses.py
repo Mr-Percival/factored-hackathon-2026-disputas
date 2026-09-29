@@ -1,10 +1,25 @@
 """Redacción de respuestas.
 
 `TemplateWriter` (línea base) arma el texto solo con hechos del estado: no puede inventar cifras.
-Un `LLMWriter` futuro podrá mejorar el tono (y adaptar dialecto), pero su salida pasará por un
-verificador que compare cifras/fechas/IDs contra los hechos antes de enviarla.
+`LLMWriter` (`llm_writer.py`) mejora el tono y adapta el dialecto; su salida pasa por un verificador
+determinista que compara cifras/fechas/IDs contra los hechos y, si falla, se usa la plantilla.
 """
 from __future__ import annotations
+
+from typing import Callable, Protocol
+
+Country = Callable[[], "str | None"] | str | None
+
+
+class Writer(Protocol):
+    def write(self, key: str, lang: str, **facts) -> str: ...
+
+    def rule_text(self, rule_id: str, explain_es: str, lang: str) -> str: ...
+
+    def compose(self, key: str, lang: str, facts: dict, country: Country = None) -> tuple[str, dict | None]:
+        """Texto final + telemetría del modelo (None si no hubo modelo). `country` puede ser una función
+        (se evalúa solo si hace falta, para no consultar el perfil en cada turno)."""
+        ...
 
 T = {
     "es": {
@@ -25,6 +40,7 @@ T = {
         "tool_failure": "Tengo un problema técnico para consultar tus movimientos. Para no hacerte esperar, te comunico con un asesor.",
         "block_confirm": "¿Confirmas que quieres bloquear la tarjeta {card}? (sí / no)",
         "block_done": "Listo, la tarjeta {card} quedó bloqueada.",
+        "security_lockout": "Por seguridad pausé esta conversación y no puedo procesar más solicitudes por aquí. Un asesor revisará tu caso y te contactará por un canal seguro.",
     },
     "pt": {
         "session_missing": "Por segurança, preciso que você faça login no app antes de continuar.",
@@ -44,6 +60,7 @@ T = {
         "tool_failure": "Estou com um problema técnico para consultar suas movimentações. Para você não esperar, vou transferir para um atendente.",
         "block_confirm": "Confirma que deseja bloquear o cartão {card}? (sim / não)",
         "block_done": "Pronto, o cartão {card} foi bloqueado.",
+        "security_lockout": "Por segurança, pausei esta conversa e não posso processar mais solicitações por aqui. Um atendente vai revisar seu caso e entrará em contato por um canal seguro.",
     },
 }
 
@@ -80,6 +97,9 @@ class TemplateWriter:
 
     def write(self, key: str, lang: str, **facts) -> str:
         return T[lang][key].format(**facts)
+
+    def compose(self, key: str, lang: str, facts: dict, country: Country = None) -> tuple[str, dict | None]:
+        return self.write(key, lang, **facts), None
 
     def rule_text(self, rule_id: str, explain_es: str, lang: str) -> str:
         return RULE_PT.get(rule_id, explain_es) if lang == "pt" else explain_es
