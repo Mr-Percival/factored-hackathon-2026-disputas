@@ -1,0 +1,59 @@
+# POLÍTICA SINTÉTICA — creada por el equipo para el hackathon. NO es la política de ningún banco real.
+# El modelo de lenguaje nunca decide elegibilidad: solo este archivo, evaluado por bankagent/policy.py.
+version: "2026-09-28.1"
+
+# Fecha "hoy" del sandbox: los datos terminan el 2026-06-17.
+as_of: "2026-06-17"
+
+dispute:
+  # Reglas evaluadas en orden. La primera regla de tipo 'reject' o 'handoff' que se cumpla decide;
+  # si ninguna se cumple, la disputa puede abrirse de forma automática PREVIA confirmación del cliente.
+  rules:
+    - id: D01_already_disputed
+      outcome: inform
+      when: "txn_already_disputed"
+      explain: "Ya existe una disputa abierta para esta transacción."
+    - id: D02_declined_not_charged
+      outcome: reject
+      when: "txn.transaction_status == 'Declined'"
+      explain: "La transacción fue rechazada: no generó cargo, no hay nada que disputar."
+    - id: D03_already_reversed
+      outcome: reject
+      when: "txn.transaction_status == 'Reversed'"
+      explain: "La transacción ya fue reversada."
+    - id: D04_pending
+      outcome: reject
+      when: "txn.transaction_status == 'Pending'"
+      explain: "La transacción está pendiente; se puede disputar cuando se asiente."
+    - id: D05_too_old
+      outcome: reject
+      when: "txn_age_days > 120"
+      explain: "Supera el plazo de 120 días para disputar."
+    - id: H01_customer_not_active
+      outcome: handoff
+      when: "customer.customer_status != 'Active'"
+      explain: "Cliente no activo: requiere revisión humana."
+    - id: H02_high_amount
+      outcome: handoff
+      when: "txn.amount >= high_amount[txn.currency]"
+      explain: "Monto alto: un analista debe revisar la disputa."
+    - id: H03_fraud_signal
+      outcome: handoff
+      # Umbral provisional. Se calibra con la curva precisión/recall de fraud_score (split temporal).
+      when: "txn.fraud_score is not None and txn.fraud_score >= 60"
+      explain: "Señal de fraude alta: se transfiere a un analista de fraude."
+    - id: H04_repeat_complainer
+      outcome: handoff
+      when: "history.is_repeat_complainer"
+      explain: "Cliente con reclamos recientes: requiere revisión humana."
+
+  high_amount:  # por moneda, en unidades locales
+    USD: 1000
+    MXN: 20000
+    COP: 4000000
+    ARS: 1000000
+
+# Acciones permitidas y si requieren confirmación explícita del cliente.
+actions:
+  open_dispute: {requires_confirmation: true}
+  block_card: {requires_confirmation: true}

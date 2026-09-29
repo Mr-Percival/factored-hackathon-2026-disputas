@@ -1,0 +1,720 @@
+
+### Filas y duplicados
+                       table    rows  cols  dup_pk  dup_full_row  pct_dup_pk
+                raw_branches     350    22     0.0             0         0.0
+raw_call_center_interactions  686296    21     0.0             0         0.0
+        raw_call_transcripts  171321    18     0.0             0         0.0
+          raw_campaign_sends   46218    22     0.0             0         0.0
+              raw_complaints   67095    27     0.0             0         0.0
+               raw_customers  150000    27     0.0             0         0.0
+    raw_daily_exchange_rates   13164     7     NaN             0         0.0
+          raw_digital_events  473982    26     0.0             0         0.0
+     raw_marketing_campaigns     200    13     0.0             0         0.0
+                raw_products  400000    17     0.0             0         0.0
+    raw_satisfaction_surveys  212759    20     0.0             0         0.0
+          raw_service_agents    1200    18     0.0             0         0.0
+            raw_transactions 4425008    22     0.0             0         0.0
+
+### % nulos raw_call_center_interactions
+                  column  pct_null
+          interaction_id       0.0
+        interaction_date       0.0
+            process_date       0.0
+             customer_id       0.0
+                agent_id       0.0
+        interaction_type       0.0
+                 channel       0.0
+          contact_reason       0.0
+         reason_category       0.0
+        duration_seconds      14.0
+       wait_time_seconds      30.0
+            was_resolved       0.0
+       requires_followup       0.0
+      detected_sentiment       0.0
+         sentiment_score       0.0
+customer_detected_accent      29.8
+       agent_used_accent      29.8
+           was_escalated       0.0
+      mentioned_products      60.0
+          has_transcript       0.0
+           has_recording       0.0
+
+### % nulos raw_call_transcripts
+             column  pct_null
+      transcript_id       0.0
+     interaction_id       0.0
+       process_date       0.0
+        customer_id       0.0
+           agent_id       0.0
+          full_text       0.0
+      customer_text       0.0
+         agent_text       0.0
+  detected_language       0.0
+    detected_accent      36.8
+  accent_confidence      10.0
+  detected_keywords       5.1
+ mentioned_entities      10.0
+   detected_intents       4.9
+        main_topics       0.0
+transcription_model       0.0
+      audio_quality       5.0
+   duration_seconds      14.0
+
+### % nulos raw_complaints
+                 column  pct_null
+           complaint_id       0.0
+          creation_date       0.0
+           process_date       0.0
+            customer_id       0.0
+              case_type       0.0
+               category       0.0
+            subcategory      10.0
+      reception_channel       0.0
+    affected_product_id      33.6
+      related_branch_id      71.4
+  origin_interaction_id     100.0
+            description       0.0
+         claimed_amount      67.6
+               currency      67.5
+               priority       0.0
+                 status       0.0
+      assigned_agent_id      34.5
+        assignment_date      34.5
+    first_response_date      39.1
+        resolution_date      77.1
+           closing_date      96.3
+           sla_breached       0.0
+        resolution_days      77.1
+             resolution      77.2
+   compensation_granted      93.1
+resolution_satisfaction      96.3
+   is_repeat_complainer       0.0
+
+### % nulos raw_transactions
+              column  pct_null
+      transaction_id       0.0
+    transaction_date       0.0
+        process_date       0.0
+          product_id       0.0
+         customer_id       0.0
+    transaction_type       0.0
+transaction_category      60.9
+              amount       0.0
+            currency       0.0
+          amount_usd      57.3
+             channel       0.0
+           branch_id      68.6
+       merchant_name      76.7
+   merchant_category      76.8
+ transaction_country       0.0
+    transaction_city      10.0
+  transaction_status       0.0
+       response_code       5.0
+            is_fraud       0.0
+         fraud_score      20.0
+            latitude      80.6
+           longitude      80.6
+
+### % nulos raw_customers
+                  column  pct_null
+             customer_id       0.0
+         document_number       0.0
+           document_type       0.0
+              first_name       0.0
+               last_name       0.0
+           date_of_birth       0.0
+                  gender       0.0
+                   email       2.0
+            mobile_phone       3.1
+          landline_phone      50.0
+                 address       4.9
+                    city       0.0
+                   state       0.0
+                 country       0.0
+             postal_code      10.0
+         detected_accent      29.9
+                 segment       0.0
+            credit_score      15.0
+estimated_monthly_income      20.0
+              occupation      10.0
+          marital_status       8.0
+         education_level      12.0
+       registration_date       0.0
+  registration_branch_id       0.0
+         customer_status       0.0
+            last_updated       0.0
+       accepts_marketing       0.0
+
+### % nulos raw_products
+               column  pct_null
+           product_id       0.0
+          customer_id       0.0
+         product_type       0.0
+       product_number       0.0
+             currency       0.0
+      current_balance       0.0
+         credit_limit      68.7
+        interest_rate      10.0
+         opening_date       0.0
+      expiration_date      66.7
+    opening_branch_id       0.0
+       product_status       0.0
+      opening_channel       0.0
+       has_linked_app       0.0
+        days_past_due      68.7
+last_transaction_date      23.6
+         last_updated       0.0
+
+### % nulos raw_satisfaction_surveys
+                column  pct_null
+             survey_id       0.0
+           survey_date       0.0
+          process_date       0.0
+        interaction_id       0.0
+           customer_id       0.0
+              agent_id       0.0
+           survey_type       0.0
+          send_channel       0.0
+            main_score       0.0
+          nps_category      71.6
+       question_1_text      43.0
+   question_1_response      43.0
+       question_2_text      61.8
+   question_2_response      61.7
+       question_3_text      81.1
+   question_3_response      81.2
+         open_comments      52.4
+     comment_sentiment      52.4
+   response_time_hours       0.0
+campaign_response_rate      15.1
+
+### Huérfanos FK
+                              fk  orphans       n
+        interactions.customer_id        0  686296
+        transactions.customer_id        0 4425008
+         transactions.product_id        0 4425008
+      transcripts.interaction_id        0  171321
+  complaints.affected_product_id        0   44570
+complaints.origin_interaction_id        0       0
+            products.customer_id        0  400000
+
+### Llegadas tardías (process_date - fecha evento, días)
+           t  lag_days       n
+  complaints        -1   22585
+  complaints         0   44510
+interactions        -1  228318
+interactions         0  457978
+transactions        -1 1106307
+transactions         0 3318701
+
+### Valores de reason_category / contact_reason
+reason_category contact_reason      n
+  Transaccional  Transaccional 240056
+       Producto       Producto 150863
+          Queja          Queja 117021
+        Técnico        Técnico 102899
+      Comercial      Comercial  54879
+      Retención      Retención  20578
+
+### KPIs por categoría de motivo
+reason_category      n  pct  fcr_pct  escal_pct  followup_pct  med_dur_s  med_wait_s  avg_sent
+  Transaccional 240056 35.0     91.5        9.9          22.1      205.0       119.0     -0.00
+       Producto 150863 22.0     89.6       10.0          23.8      263.0       119.0     -0.04
+          Queja 117021 17.1     43.6       10.0          63.0      431.0       120.0     -0.07
+        Técnico 102899 15.0     69.9       10.1          40.6      360.0       119.0     -0.07
+      Comercial  54879  8.0     65.2        9.8          44.5      540.0       120.0     -0.07
+      Retención  20578  3.0     60.2        9.8          49.1      478.0       120.0     -0.07
+
+### Canal y tipo de interacción
+ channel interaction_type      n
+   Phone     Inbound Call 480678
+   Phone    Outbound Call 102572
+   Email            Email  27543
+     App             Chat  22947
+WhatsApp             Chat  22888
+Web Chat             Chat  22856
+     App            Video   3417
+     Web            Video   3395
+
+### Volumen mensual por categoría
+     ym reason_category    n
+2023-06       Comercial  670
+2023-06        Producto 1967
+2023-06           Queja 1607
+2023-06       Retención  307
+2023-06   Transaccional 3111
+2023-06         Técnico 1350
+2023-07       Comercial 1510
+2023-07        Producto 4232
+2023-07           Queja 3296
+2023-07       Retención  581
+2023-07   Transaccional 6703
+2023-07         Técnico 2939
+2023-08       Comercial 1557
+2023-08        Producto 4326
+2023-08           Queja 3309
+2023-08       Retención  589
+2023-08   Transaccional 6995
+2023-08         Técnico 2953
+2023-09       Comercial 1517
+2023-09        Producto 4017
+2023-09           Queja 3222
+2023-09       Retención  540
+2023-09   Transaccional 6341
+2023-09         Técnico 2712
+2023-10       Comercial 1513
+2023-10        Producto 4214
+2023-10           Queja 3252
+2023-10       Retención  604
+2023-10   Transaccional 6740
+2023-10         Técnico 2845
+2023-11       Comercial 1488
+2023-11        Producto 4042
+2023-11           Queja 3173
+2023-11       Retención  596
+2023-11   Transaccional 6652
+2023-11         Técnico 2783
+2023-12       Comercial 1590
+2023-12        Producto 4178
+2023-12           Queja 3216
+2023-12       Retención  563
+2023-12   Transaccional 6712
+2023-12         Técnico 2882
+2024-01       Comercial 1528
+2024-01        Producto 4165
+2024-01           Queja 3223
+2024-01       Retención  563
+2024-01   Transaccional 6675
+2024-01         Técnico 2793
+2024-02       Comercial 1464
+2024-02        Producto 4125
+2024-02           Queja 3149
+2024-02       Retención  546
+2024-02   Transaccional 6384
+2024-02         Técnico 2806
+2024-03       Comercial 1537
+2024-03        Producto 4131
+2024-03           Queja 3221
+2024-03       Retención  585
+2024-03   Transaccional 6720
+2024-03         Técnico 2758
+2024-04       Comercial 1596
+2024-04        Producto 4360
+2024-04           Queja 3316
+2024-04       Retención  569
+2024-04   Transaccional 6925
+2024-04         Técnico 2964
+2024-05       Comercial 1592
+2024-05        Producto 4183
+2024-05           Queja 3230
+2024-05       Retención  597
+2024-05   Transaccional 6667
+2024-05         Técnico 2886
+2024-06       Comercial 1429
+2024-06        Producto 3979
+2024-06           Queja 3119
+2024-06       Retención  570
+2024-06   Transaccional 6417
+2024-06         Técnico 2741
+2024-07       Comercial 1571
+2024-07        Producto 4304
+2024-07           Queja 3362
+2024-07       Retención  569
+2024-07   Transaccional 6830
+2024-07         Técnico 2940
+2024-08       Comercial 1554
+2024-08        Producto 4446
+2024-08           Queja 3321
+2024-08       Retención  619
+2024-08   Transaccional 7030
+2024-08         Técnico 2946
+2024-09       Comercial 1493
+2024-09        Producto 4202
+2024-09           Queja 3296
+2024-09       Retención  545
+2024-09   Transaccional 6579
+2024-09         Técnico 2725
+2024-10       Comercial 1541
+2024-10        Producto 4275
+2024-10           Queja 3330
+2024-10       Retención  527
+2024-10   Transaccional 6903
+2024-10         Técnico 3022
+2024-11       Comercial 1361
+2024-11        Producto 3911
+2024-11           Queja 2957
+2024-11       Retención  518
+2024-11   Transaccional 6238
+2024-11         Técnico 2706
+2024-12       Comercial 1499
+2024-12        Producto 4179
+2024-12           Queja 3306
+2024-12       Retención  562
+2024-12   Transaccional 6580
+2024-12         Técnico 2866
+2025-01       Comercial 1498
+2025-01        Producto 4304
+2025-01           Queja 3359
+2025-01       Retención  546
+2025-01   Transaccional 6831
+2025-01         Técnico 2975
+2025-02       Comercial 1366
+2025-02        Producto 3795
+2025-02           Queja 2918
+2025-02       Retención  488
+2025-02   Transaccional 6040
+2025-02         Técnico 2564
+2025-03       Comercial 1558
+2025-03        Producto 4283
+2025-03           Queja 3353
+2025-03       Retención  549
+2025-03   Transaccional 6884
+2025-03         Técnico 2896
+2025-04       Comercial 1581
+2025-04        Producto 4188
+2025-04           Queja 3213
+2025-04       Retención  624
+2025-04   Transaccional 6705
+2025-04         Técnico 2849
+2025-05       Comercial 1557
+2025-05        Producto 4351
+2025-05           Queja 3348
+2025-05       Retención  629
+2025-05   Transaccional 6891
+2025-05         Técnico 2969
+2025-06       Comercial 1482
+2025-06        Producto 4079
+2025-06           Queja 3095
+2025-06       Retención  572
+2025-06   Transaccional 6217
+2025-06         Técnico 2714
+2025-07       Comercial 1601
+2025-07        Producto 4300
+2025-07           Queja 3437
+2025-07       Retención  619
+2025-07   Transaccional 6739
+2025-07         Técnico 3020
+2025-08       Comercial 1501
+2025-08        Producto 4189
+2025-08           Queja 3335
+2025-08       Retención  555
+2025-08   Transaccional 6628
+2025-08         Técnico 2869
+2025-09       Comercial 1565
+2025-09        Producto 4161
+2025-09           Queja 3318
+2025-09       Retención  612
+2025-09   Transaccional 6787
+2025-09         Técnico 2874
+2025-10       Comercial 1540
+2025-10        Producto 4183
+2025-10           Queja 3241
+2025-10       Retención  554
+2025-10   Transaccional 6647
+2025-10         Técnico 2867
+2025-11       Comercial 1535
+2025-11        Producto 4155
+2025-11           Queja 3248
+2025-11       Retención  596
+2025-11   Transaccional 6595
+2025-11         Técnico 2878
+2025-12       Comercial 1623
+2025-12        Producto 4220
+2025-12           Queja 3352
+2025-12       Retención  502
+2025-12   Transaccional 6961
+2025-12         Técnico 2948
+2026-01       Comercial 1512
+2026-01        Producto 4242
+2026-01           Queja 3259
+2026-01       Retención  576
+2026-01   Transaccional 6470
+2026-01         Técnico 2772
+2026-02       Comercial 1437
+2026-02        Producto 3973
+2026-02           Queja 3035
+2026-02       Retención  535
+2026-02   Transaccional 6150
+2026-02         Técnico 2646
+2026-03       Comercial 1602
+2026-03        Producto 4489
+2026-03           Queja 3432
+2026-03       Retención  610
+2026-03   Transaccional 7172
+2026-03         Técnico 3101
+2026-04       Comercial 1533
+2026-04        Producto 4084
+2026-04           Queja 3091
+2026-04       Retención  558
+2026-04   Transaccional 6701
+2026-04         Técnico 2853
+2026-05       Comercial 1498
+2026-05        Producto 4162
+2026-05           Queja 3112
+2026-05       Retención  554
+2026-05   Transaccional 6621
+2026-05         Técnico 2827
+2026-06       Comercial  880
+2026-06        Producto 2469
+2026-06           Queja 1970
+2026-06       Retención  349
+2026-06   Transaccional 3815
+2026-06         Técnico 1660
+
+### Hora del día
+ h     n
+ 0 28527
+ 1 28541
+ 2 28270
+ 3 28878
+ 4 28465
+ 5 28699
+ 6 28516
+ 7 28415
+ 8 28625
+ 9 28573
+10 28664
+11 28614
+12 28634
+13 28632
+14 28542
+15 28401
+16 28644
+17 29081
+18 28545
+19 28679
+20 28767
+21 28444
+22 28310
+23 28830
+
+### Intenciones detectadas (top)
+          intent      n
+consulta_general 162864
+
+### Temas principales (top)
+        topic     n
+Transaccional 59786
+     Producto 37658
+        Queja 29198
+      Técnico 25691
+    Comercial 13808
+    Retención  5180
+
+### Idioma / acento / calidad
+detected_language detected_accent audio_quality     n
+               es             NaN          High 42159
+               es         mexican          High 36119
+               es       colombian          High 21709
+               es             NaN        Medium 14918
+               es       argentine          High 14384
+               es         mexican        Medium 12742
+               es       colombian        Medium  7434
+               es       argentine        Medium  5256
+               es             NaN           NaN  3085
+               es             NaN           Low  2921
+               es         mexican           NaN  2792
+               es         mexican           Low  2499
+               es       colombian           NaN  1628
+               es       colombian           Low  1513
+               es       argentine           NaN  1133
+               es       argentine           Low  1029
+
+### Intención vs categoría de la interacción
+reason_category           intent     n
+  Transaccional consulta_general 56787
+       Producto consulta_general 35863
+          Queja consulta_general 27793
+        Técnico consulta_general 24412
+      Comercial consulta_general 13103
+      Retención consulta_general  4906
+
+### Diversidad de textos (¿plantillas?)
+     n  distinct_full  distinct_cust  avg_len
+171321            546             42    278.0
+
+### Muestras de transcripciones
+detected_intents                                                                                                                                          customer_text
+consulta_general   Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta de ahorros. Muy bien, ¿hay algo más que deba saber? Entiendo, muchas gracias.
+consulta_general                                                                                   Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.
+consulta_general                                                                                   Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.
+consulta_general                             Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta de ahorros. Muy bien, ¿hay algo más que deba saber?
+             NaN                                                                                   Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.
+consulta_general   Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. Muy bien, ¿hay algo más que deba saber? Muy bien, ¿hay algo más que deba saber?
+consulta_general                                                                     Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta de ahorros.
+consulta_general Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta de ahorros. ¿Y eso cuánto tiempo tarda? Muy bien, ¿hay algo más que deba saber?
+
+### Quejas por tipo/categoría
+ case_type     category    n  sla_breach_pct  med_res_days  escal_pct
+ Complaint Transactions 8239            20.0          16.0        5.0
+ Complaint         Fees 8171            20.1          16.0        5.1
+ Complaint    Technical 8120            20.0          16.0        4.8
+ Complaint       Branch 7969            20.4          16.0        4.5
+ Complaint      Service 7953            19.9          16.0        5.2
+     Claim         Fees 3357            19.1          16.0        5.7
+     Claim       Branch 3355            19.9          16.0        4.6
+     Claim Transactions 3335            20.9          15.0        5.0
+     Claim    Technical 3312            19.2          15.0        5.2
+     Claim      Service 3239            20.6          16.0        5.3
+   Request       Branch 1372            20.0          15.0        4.7
+   Request         Fees 1367            20.4          15.0        4.4
+   Request      Service 1358            21.2          16.0        4.9
+   Request    Technical 1335            20.4          16.0        4.1
+   Request Transactions 1329            19.2          15.0        4.7
+Suggestion Transactions  677            20.2          16.0        5.6
+Suggestion       Branch  665            23.6          15.0        3.6
+Suggestion         Fees  658            18.5          15.5        5.3
+Suggestion      Service  644            20.7          18.0        5.4
+Suggestion    Technical  640            23.6          15.0        6.1
+
+### Subcategorías (top)
+    category          subcategory     n
+Transactions  Cargo no reconocido 12297
+        Fees       Cobro indebido 12194
+   Technical     Problema con app 12128
+      Branch Atención en sucursal 11892
+     Service  Calidad de servicio 11886
+      Branch                  NaN  1469
+        Fees                  NaN  1359
+     Service                  NaN  1308
+Transactions                  NaN  1283
+   Technical                  NaN  1279
+
+### Estado, prioridad, canal
+    status priority     n
+In Process   Medium 13337
+      Open   Medium 10010
+In Process      Low  8152
+  Resolved   Medium  6795
+      Open      Low  6180
+  Resolved      Low  4050
+In Process     High  3991
+      Open     High  2931
+  Resolved     High  2005
+ Escalated   Medium  1679
+In Process Critical  1343
+    Closed   Medium  1265
+ Escalated      Low  1008
+      Open Critical  1004
+    Closed      Low   802
+  Resolved Critical   662
+ Escalated     High   451
+    Closed     High   411
+  Rejected   Medium   353
+  Rejected      Low   219
+ Escalated Critical   183
+    Closed Critical   131
+  Rejected     High   101
+  Rejected Critical    32
+
+### Muestras de descripción de queja
+category          subcategory claimed_amount currency                   description
+ Service  Calidad de servicio            NaN      NaN Queja relacionada con service
+ Service  Calidad de servicio            NaN      NaN Queja relacionada con service
+    Fees       Cobro indebido        3988.58      USD    Queja relacionada con fees
+    Fees       Cobro indebido         4744.3      ARS    Queja relacionada con fees
+ Service  Calidad de servicio            NaN      NaN Queja relacionada con service
+ Service  Calidad de servicio        4815.07      USD Queja relacionada con service
+  Branch Atención en sucursal            NaN      NaN  Queja relacionada con branch
+  Branch Atención en sucursal            NaN      NaN  Queja relacionada con branch
+
+### Transacciones: tipo/estado/fraude
+transaction_type transaction_status      n  fraud_pct  avg_score
+        Purchase           Approved 996168      0.101       15.0
+      Withdrawal           Approved 887765      0.100       15.0
+        Transfer           Approved 824676      0.089       15.0
+         Payment           Approved 679954      0.099       15.0
+         Deposit           Approved 560724      0.098       15.0
+      Adjustment           Approved 121394      0.108       15.0
+        Purchase           Declined  54565      0.103       15.1
+      Withdrawal           Declined  47911      0.088       15.0
+        Transfer           Declined  44979      0.087       15.0
+         Payment           Declined  36851      0.092       15.0
+         Deposit           Declined  30240      0.126       15.1
+        Purchase            Pending  21595      0.088       15.0
+      Withdrawal            Pending  19247      0.078       15.1
+        Transfer            Pending  17841      0.084       15.0
+         Payment            Pending  14684      0.082       14.9
+         Deposit            Pending  12268      0.098       15.0
+        Purchase           Reversed  11078      0.045       15.1
+      Withdrawal           Reversed   9750      0.092       15.0
+        Transfer           Reversed   8942      0.078       14.8
+         Payment           Reversed   7475      0.107       15.2
+      Adjustment           Declined   6688      0.090       15.1
+         Deposit           Reversed   6177      0.097       15.0
+      Adjustment            Pending   2708      0.222       15.2
+      Adjustment           Reversed   1328      0.075       15.4
+
+### Fraud score vs is_fraud
+is_fraud       n  avg_score  p90
+    True    4316       49.5 89.9
+   False 4420692       15.0 27.0
+
+### Monedas/canal
+currency  channel      n
+     USD      POS 853195
+     USD      ATM 731543
+     COP      POS 417817
+     USD      Web 365981
+     USD      App 364961
+     COP      ATM 358924
+     ARS      POS 277149
+     ARS      ATM 237867
+     COP      App 179194
+     COP      Web 178749
+     ARS      App 119259
+     ARS      Web 118715
+     USD   Branch  73086
+     USD Transfer  49213
+     COP   Branch  35684
+     COP Transfer  24076
+     ARS   Branch  23725
+     ARS Transfer  15870
+
+### Match de acento vs FCR / sentimiento
+ accent_match      n  fcr_pct  escal_pct  avg_sent
+         True 392039    76.68       9.97    -0.036
+        False  89507    76.59       9.94    -0.040
+
+### Match de acento vs CSAT
+ accent_match survey_type     n  avg_score
+        False         CES  2802      2.779
+         True         CES 12100      2.765
+        False        CSAT 16616      2.762
+         True        CSAT 73072      2.766
+        False         NPS  8409      5.292
+         True         NPS 36332      5.317
+
+### Acento cliente x acento agente
+customer_detected_accent agent_used_accent      n  fcr_pct
+               argentine         argentine  72809    76.61
+               argentine         colombian   8713    75.91
+               argentine           mexican  14638    76.67
+               colombian         argentine   8601    76.55
+               colombian         colombian 114024    76.82
+               colombian           mexican  22087    76.86
+                 mexican         argentine  13819    76.35
+                 mexican         colombian  21649    76.70
+                 mexican           mexican 205206    76.63
+                     NaN               NaN 204750    76.60
+
+### KPIs por país y segmento
+  country segment      n  fcr_pct  escal_pct
+Argentina   Basic  81945    76.57       9.97
+Argentina    Plus  33990    76.55       9.70
+Argentina Premium  13514    76.94       9.75
+Argentina Student   6868    76.19       9.23
+ Colombia   Basic 123918    76.68      10.21
+ Colombia    Plus  51739    76.45       9.93
+ Colombia Premium  20721    77.07       9.95
+ Colombia Student  10412    76.93       9.83
+   México   Basic 205112    76.63       9.87
+   México    Plus  86445    76.74       9.95
+   México Premium  34769    76.59      10.24
+   México Student  16863    76.67      10.04
+
+### Valores de país (limpieza)
+  country     n
+   México 74907
+ Colombia 45251
+Argentina 29842

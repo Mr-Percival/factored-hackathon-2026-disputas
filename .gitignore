@@ -1,0 +1,24 @@
+# Secretos: NUNCA al repo
+.env
+*.pem
+*.key
+
+# Material del organizador: el diccionario de datos incluye credenciales de AWS.
+# Ningún PDF entra al repo; se comparte por el Drive del hackathon.
+*.pdf
+
+# Datos (se regeneran con scripts/s3_download.py + bankagent.pipeline)
+data/
+*.duckdb
+*.duckdb.wal
+
+# Entorno y artefactos
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+*.log
+.DS_Store
+.vscode/
+.idea/

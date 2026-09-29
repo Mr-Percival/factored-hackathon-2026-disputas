@@ -1,0 +1,79 @@
+# Contratos de datos: raw (CSV de S3) -> serving (DuckDB que consultan las herramientas).
+# Solo se proyectan las columnas que el flujo de disputas necesita (minimización de datos):
+# no se cargan documento, email, teléfono, dirección, ingresos ni coordenadas.
+#
+# type:      tipo destino en DuckDB (el cast que falle cuenta como violación)
+# required:  NOT NULL
+# allowed:   dominio cerrado de valores
+# fk:        tabla.columna que debe existir
+# Filas que violan un check 'error' van a quarantine_<tabla>; los 'warn' solo se reportan.
+
+customers:
+  source: customers.csv
+  primary_key: customer_id
+  updated_at: last_updated
+  columns:
+    customer_id: {type: VARCHAR, required: true}
+    first_name: {type: VARCHAR, required: true}
+    country: {type: VARCHAR, required: true, allowed: [México, Colombia, Argentina]}
+    segment: {type: VARCHAR, required: true, allowed: [Premium, Plus, Basic, Student]}
+    customer_status: {type: VARCHAR, required: true, allowed: [Active, Inactive, Suspended, Closed]}
+    last_updated: {type: TIMESTAMP, required: true}
+
+products:
+  source: products.csv
+  primary_key: product_id
+  updated_at: last_updated
+  columns:
+    product_id: {type: VARCHAR, required: true}
+    customer_id: {type: VARCHAR, required: true, fk: customers.customer_id}
+    product_type: {type: VARCHAR, required: true}
+    product_number: {type: VARCHAR, required: true, mask_last: 4}
+    currency: {type: VARCHAR, required: true, allowed: [MXN, COP, ARS, USD]}
+    product_status: {type: VARCHAR, required: true, allowed: [Active, Blocked, Closed, Suspended]}
+    last_updated: {type: TIMESTAMP, required: true}
+
+transactions:
+  source: transactions/**/*.csv
+  primary_key: transaction_id
+  partition_key: process_date
+  columns:
+    transaction_id: {type: VARCHAR, required: true}
+    transaction_date: {type: TIMESTAMP, required: true}
+    process_date: {type: DATE, required: true}
+    product_id: {type: VARCHAR, required: true, fk: products.product_id}
+    customer_id: {type: VARCHAR, required: true, fk: customers.customer_id}
+    transaction_type: {type: VARCHAR, required: true, allowed: [Deposit, Withdrawal, Transfer, Payment, Purchase, Adjustment]}
+    amount: {type: "DECIMAL(15,2)", required: true}
+    currency: {type: VARCHAR, required: true, allowed: [MXN, COP, ARS, USD]}
+    channel: {type: VARCHAR, required: true}
+    merchant_name: {type: VARCHAR}
+    merchant_category: {type: VARCHAR}
+    transaction_country: {type: VARCHAR, required: true}
+    transaction_city: {type: VARCHAR}
+    transaction_status: {type: VARCHAR, required: true, allowed: [Approved, Declined, Pending, Reversed]}
+    fraud_score: {type: "DECIMAL(5,2)"}
+  warnings:
+    # Hallazgo del EDA: México no tiene transacciones en MXN. Se reporta, no se "corrige".
+    - name: mexico_without_mxn
+      sql: "transaction_country = 'México' AND currency <> 'MXN'"
+
+complaints:
+  source: complaints/**/*.csv
+  primary_key: complaint_id
+  partition_key: process_date
+  columns:
+    complaint_id: {type: VARCHAR, required: true}
+    creation_date: {type: TIMESTAMP, required: true}
+    process_date: {type: DATE, required: true}
+    customer_id: {type: VARCHAR, required: true, fk: customers.customer_id}
+    case_type: {type: VARCHAR, required: true, allowed: [Complaint, Claim, Request, Suggestion]}
+    category: {type: VARCHAR, required: true}
+    subcategory: {type: VARCHAR}
+    affected_product_id: {type: VARCHAR}
+    status: {type: VARCHAR, required: true, allowed: [Open, In Process, Escalated, Resolved, Closed, Rejected]}
+    is_repeat_complainer: {type: BOOLEAN, required: true}
+
+# Normalizaciones explícitas (lineage: cada una queda registrada en el manifiesto)
+normalize:
+  country_aliases: {Mexico: México}

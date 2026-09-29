@@ -1,0 +1,157 @@
+
+### Texto cliente vs categoría (top textos)
+                                                                    txt reason_category     n
+  Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.   Transaccional 17894
+  Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.        Producto 11167
+  Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.           Queja  8914
+  Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.         Técnico  7829
+  Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.       Comercial  4191
+  Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito.       Retención  1560
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. E   Transaccional  3031
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. E        Producto  1970
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. E           Queja  1450
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. E         Técnico  1289
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. E       Comercial   719
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. E       Retención   265
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. M   Transaccional  3020
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. M        Producto  1816
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. M           Queja  1421
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. M         Técnico  1211
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. M       Comercial   653
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. M       Retención   273
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. P   Transaccional  3081
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. P        Producto  1835
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. P           Queja  1461
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. P         Técnico  1258
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. P       Comercial   760
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. P       Retención   275
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. ¿   Transaccional  2910
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. ¿        Producto  1897
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. ¿           Queja  1476
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. ¿         Técnico  1306
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. ¿       Comercial   720
+Buenas tardes, necesito consultar el saldo de mi tarjeta de crédito. ¿       Retención   258
+Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta   Transaccional 29850
+Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta        Producto 18973
+Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta           Queja 14476
+Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta         Técnico 12798
+Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta       Comercial  6765
+Hola, buenos días. Quisiera saber cuál es mi saldo actual en mi cuenta       Retención  2549
+
+### Moneda por país de transacción
+ transaction_country currency       n
+          Argentina      ARS  752794
+          Argentina      USD  102708
+          Argentina      COP   12059
+             Brazil      USD   20726
+             Brazil      COP   11887
+             Brazil      ARS    7859
+           Colombia      COP 1134801
+           Colombia      USD  146719
+           Colombia      ARS    7983
+             Mexico      USD   20615
+             Mexico      COP   11905
+             Mexico      ARS    7995
+             México      USD 2105794
+              Spain      USD   20829
+              Spain      COP   11790
+              Spain      ARS    7923
+                USA      USD   20588
+                USA      COP   12002
+                USA      ARS    8031
+
+### Moneda productos por país cliente
+   country currency      n
+Argentina      ARS  71524
+Argentina      USD   7918
+ Colombia      COP 107975
+ Colombia      USD  12185
+   México      USD 200398
+
+### Fraude por canal
+  channel       n  fraud_pct
+  Branch  132495      0.108
+     ATM 1328334      0.100
+     Web  663445      0.099
+     App  663414      0.096
+Transfer   89159      0.095
+     POS 1548161      0.095
+
+### Fraude por país trx != país cliente
+  foreign_trx       n  fraud_pct
+       False 4203796      0.097
+        True  221212      0.108
+
+### Fraude por decil de monto
+  d        lo         hi      n  fraud_pct
+ 1       5.0      181.0 442501      0.103
+ 2     181.0      344.0 442501      0.102
+ 3     344.0      548.0 442501      0.103
+ 4     548.0     1799.0 442501      0.100
+ 5    1799.0     5398.0 442501      0.098
+ 6    5398.0    87569.0 442501      0.088
+ 7   87570.0   469313.0 442501      0.099
+ 8  469313.0  1369669.0 442501      0.089
+ 9 1369669.0  4315226.0 442500      0.098
+10 4315227.0 39999828.0 442500      0.095
+
+### Fraude por hora
+  h  fraud_pct
+ 9      0.108
+ 7      0.108
+23      0.106
+ 0      0.106
+12      0.103
+ 6      0.103
+
+### AUC aprox de fraud_score (ranking)
+      auc  pos
+0.846842 3425
+
+### Casi-duplicados trx (mismo cliente, monto, timestamp)
+  near_dups       n
+         0 4425008
+
+### Casi-duplicados interacciones
+  near_dups      n
+         0 686296
+
+### Formatos de booleanos/fechas raros
+ was_resolved      n
+       False 160266
+        True 526030
+
+### Estado de clientes / productos
+ customer_status      n
+       Inactive  14914
+         Active 127700
+      Suspended   4407
+         Closed   2979
+
+### Tipos de producto
+         product_type product_status      n
+       Cuenta Ahorro         Active 102148
+     Tarjeta Crédito         Active  85090
+    Cuenta Corriente         Active  85079
+      Tarjeta Débito         Active  33749
+   Préstamo Personal         Active  16977
+Préstamo Hipotecario         Active  10157
+       Cuenta Ahorro         Closed   9716
+     Tarjeta Crédito         Closed   8053
+    Cuenta Corriente         Closed   7936
+       Cuenta Ahorro        Blocked   5923
+           Inversión         Active   5022
+    Cuenta Corriente        Blocked   4962
+     Tarjeta Crédito        Blocked   4932
+      Tarjeta Débito         Closed   3244
+       Cuenta Ahorro      Suspended   2416
+      Tarjeta Débito        Blocked   2112
+     Tarjeta Crédito      Suspended   2027
+    Cuenta Corriente      Suspended   2002
+              Seguro         Active   1743
+   Préstamo Personal         Closed   1585
+   Préstamo Personal        Blocked   1010
+Préstamo Hipotecario         Closed    912
+      Tarjeta Débito      Suspended    833
+Préstamo Hipotecario        Blocked    612
+           Inversión         Closed    434

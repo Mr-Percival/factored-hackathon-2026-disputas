@@ -1,0 +1,85 @@
+"""Redacción de respuestas.
+
+`TemplateWriter` (línea base) arma el texto solo con hechos del estado: no puede inventar cifras.
+Un `LLMWriter` futuro podrá mejorar el tono (y adaptar dialecto), pero su salida pasará por un
+verificador que compare cifras/fechas/IDs contra los hechos antes de enviarla.
+"""
+from __future__ import annotations
+
+T = {
+    "es": {
+        "session_missing": "Por seguridad necesito que inicies sesión en la app antes de continuar.",
+        "session_expired": "Tu sesión expiró. Vuelve a autenticarte en la app y retomamos desde aquí.",
+        "forbidden": "No puedo mostrar ni operar sobre información que no pertenece a tu sesión.",
+        "blocked_input": "No puedo procesar esa solicitud. Si necesitas ayuda con un cargo que no reconoces, cuéntame el monto o la fecha.",
+        "unknown": "Puedo ayudarte con cargos que no reconoces y con el bloqueo de tu tarjeta. ¿Qué cargo quieres revisar? Dime el monto, la fecha o el país.",
+        "out_of_scope": "Ese tema no lo puedo resolver por este canal (solo atiendo cargos no reconocidos y bloqueo de tarjetas). Te comunico con un asesor.",
+        "no_match": "No encontré movimientos con esos datos. ¿Me das el monto aproximado o la fecha del cargo?",
+        "choose": "Encontré varios movimientos posibles. ¿Cuál es?\n{options}\nResponde con el número.",
+        "confirm_dispute": "Encontré el cargo: {txn}.\nPuedo abrir una disputa y bloquear preventivamente la tarjeta {card}. ¿Confirmas? (sí / no)",
+        "done_dispute": "Listo. Abrí la disputa {case_id} para el cargo {txn}{block}. Te contactaremos por la app con el resultado.",
+        "block_suffix": " y bloqueé la tarjeta {card}",
+        "cancelled": "Entendido, no hice ningún cambio. ¿Te ayudo con algo más?",
+        "rule": "Revisé el cargo {txn}: {explain}",
+        "handoff": "Revisé el cargo {txn}. {explain} Ya le pasé tu caso a un asesor con toda la información, no tendrás que repetirla.",
+        "tool_failure": "Tengo un problema técnico para consultar tus movimientos. Para no hacerte esperar, te comunico con un asesor.",
+        "block_confirm": "¿Confirmas que quieres bloquear la tarjeta {card}? (sí / no)",
+        "block_done": "Listo, la tarjeta {card} quedó bloqueada.",
+    },
+    "pt": {
+        "session_missing": "Por segurança, preciso que você faça login no app antes de continuar.",
+        "session_expired": "Sua sessão expirou. Faça login novamente no app e continuamos daqui.",
+        "forbidden": "Não posso mostrar nem operar informações que não pertencem à sua sessão.",
+        "blocked_input": "Não posso processar essa solicitação. Se precisar de ajuda com uma cobrança que não reconhece, me diga o valor ou a data.",
+        "unknown": "Posso ajudar com cobranças que você não reconhece e com o bloqueio do seu cartão. Qual cobrança quer verificar? Diga o valor, a data ou o país.",
+        "out_of_scope": "Não consigo resolver esse assunto por aqui (atendo apenas cobranças não reconhecidas e bloqueio de cartões). Vou transferir para um atendente.",
+        "no_match": "Não encontrei movimentações com esses dados. Pode me dizer o valor aproximado ou a data da cobrança?",
+        "choose": "Encontrei várias movimentações possíveis. Qual é?\n{options}\nResponda com o número.",
+        "confirm_dispute": "Encontrei a cobrança: {txn}.\nPosso abrir uma contestação e bloquear preventivamente o cartão {card}. Confirma? (sim / não)",
+        "done_dispute": "Pronto. Abri a contestação {case_id} para a cobrança {txn}{block}. Avisaremos o resultado pelo app.",
+        "block_suffix": " e bloqueei o cartão {card}",
+        "cancelled": "Entendido, não fiz nenhuma alteração. Posso ajudar em algo mais?",
+        "rule": "Verifiquei a cobrança {txn}: {explain}",
+        "handoff": "Verifiquei a cobrança {txn}. {explain} Já passei seu caso para um atendente com todas as informações, você não precisará repetir.",
+        "tool_failure": "Estou com um problema técnico para consultar suas movimentações. Para você não esperar, vou transferir para um atendente.",
+        "block_confirm": "Confirma que deseja bloquear o cartão {card}? (sim / não)",
+        "block_done": "Pronto, o cartão {card} foi bloqueado.",
+    },
+}
+
+# Explicaciones de reglas de política traducidas (la fuente de verdad es el id de regla)
+RULE_PT = {
+    "D01_already_disputed": "Já existe uma contestação aberta para esta transação.",
+    "D02_declined_not_charged": "A transação foi recusada: não gerou cobrança.",
+    "D03_already_reversed": "A transação já foi estornada.",
+    "D04_pending": "A transação está pendente; poderá ser contestada quando for lançada.",
+    "D05_too_old": "Passou o prazo de 120 dias para contestar.",
+    "H01_customer_not_active": "Sua conta precisa de revisão por um atendente.",
+    "H02_high_amount": "Por ser um valor alto, um analista precisa revisar a contestação.",
+    "H03_fraud_signal": "Há sinais de fraude; vou transferir para um analista de fraude.",
+    "H04_repeat_complainer": "Seu caso precisa de revisão por um atendente.",
+}
+
+
+def fmt_txn(t: dict) -> str:
+    d = t["transaction_date"]
+    date = d.strftime("%d/%m/%Y") if hasattr(d, "strftime") else str(d)[:10]
+    where = t.get("merchant_name") or t.get("channel")
+    place = f", {t['transaction_city']}" if t.get("transaction_city") else ""
+    return f"{date} · {float(t['amount']):,.2f} {t['currency']} · {where} ({t['transaction_country']}{place})"
+
+
+def fmt_option(c: dict) -> str:
+    if c.get("kind") == "card":
+        return f"{c['product_type']} {c['product_number']} ({c['currency']})"
+    return fmt_txn(c)
+
+
+class TemplateWriter:
+    name = "templates"
+
+    def write(self, key: str, lang: str, **facts) -> str:
+        return T[lang][key].format(**facts)
+
+    def rule_text(self, rule_id: str, explain_es: str, lang: str) -> str:
+        return RULE_PT.get(rule_id, explain_es) if lang == "pt" else explain_es
