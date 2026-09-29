@@ -10,6 +10,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
 - Evaluación offline (línea base, métricas de la rúbrica, equidad por dialecto): [`reports/eval.md`](reports/eval.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
+- Propiedades demostradas (I1–I8 con Hypothesis sobre conversaciones aleatorias + verificación estática de todos los caminos del grafo): [`docs/threat-model.md#propiedades-demostradas`](docs/threat-model.md#propiedades-demostradas) · caminos: [`docs/graph-paths.md`](docs/graph-paths.md)
 - Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
 - Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
 
@@ -55,6 +56,7 @@ src/bankagent/
   llm_writer.py         LLMWriter + verify_reply: tono/dialecto sin agregar datos, cae a plantillas
   factory.py            build_agent(db, router="rules|llm", writer="templates|llm")
   graph.py              grafo LangGraph con transiciones declaradas y traza
+  graph_check.py        verificación estática de EDGES: caminos, alcanzabilidad, predecesores de `act`
   chat.py               chat de consola
   evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
   evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
