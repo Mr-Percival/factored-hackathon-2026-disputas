@@ -142,4 +142,4 @@ def test_no_template_renders_a_dangling_card_dash(lang):
     for key, tmpl in T[lang].items():
         assert not re.search(r"(tarjeta|cart[aã]o)\s*-", tmpl), key
         if "{card}" in tmpl:
-            assert key in {"confirm_dispute", "block_suffix", "block_confirm", "block_done"}, key
+            assert key in {"confirm_dispute", "block_suffix", "block_confirm", "block_done", "account_takeover_block"}, key

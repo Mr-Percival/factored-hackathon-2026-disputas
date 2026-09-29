@@ -151,6 +151,15 @@ class BankTools:
             return {"complaints_last_90d": r[0] or 0, "is_repeat_complainer": bool(r[1]), "open_dispute_transactions": open_disputes}
         return self._run("dispute_history", {}, fn)
 
+    def list_disputes(self, token: str) -> list[dict]:
+        """Disputas abiertas por ESTE cliente (ops). Para "¿en qué va mi disputa?": nunca de otro cliente."""
+        def fn():
+            cid = self.identity.resolve(token).customer_id
+            cur = self._ops_c.execute("""SELECT case_id, transaction_id, status, created_at FROM disputes
+                WHERE customer_id = ? ORDER BY created_at DESC""", [cid])
+            return [dict(zip(("case_id", "transaction_id", "status", "created_at"), r)) for r in cur.fetchall()]
+        return self._run("list_disputes", {}, fn)
+
     # ------------------------------------------------------------------ acciones (requieren confirmación)
     def block_card(self, token: str, product_id: str, confirmed: bool) -> dict:
         def fn():

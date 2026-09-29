@@ -14,9 +14,12 @@ import unicodedata
 from dataclasses import dataclass, field
 from typing import Literal, Protocol
 
-Intent = Literal["dispute_charge", "block_card", "confirm", "deny", "unclear", "select_option", "out_of_scope", "unknown"]
-INTENTS: tuple[str, ...] = ("dispute_charge", "block_card", "confirm", "deny", "unclear", "select_option", "out_of_scope",
-                            "unknown")
+Intent = Literal["dispute_charge", "block_card", "confirm", "deny", "unclear", "select_option", "none_of_these",
+                 "human_request", "account_takeover", "dispute_status", "cancel_dispute", "closing", "out_of_scope",
+                 "unknown"]
+INTENTS: tuple[str, ...] = ("dispute_charge", "block_card", "confirm", "deny", "unclear", "select_option",
+                            "none_of_these", "human_request", "account_takeover", "dispute_status", "cancel_dispute",
+                            "closing", "out_of_scope", "unknown")
 # Sub-acciones que el cliente puede rechazar por separado dentro de una confirmación ("sí, pero no bloquees").
 SUB_ACTIONS: tuple[str, ...] = ("block_card",)
 
@@ -27,7 +30,8 @@ class Slots:
     date_from: dt.date | None = None
     date_to: dt.date | None = None
     country: str | None = None
-    option: int | None = None  # "la 2", "opção 1"
+    option: int | None = None  # "la 2", "opção 1"; -1 = "la última"
+    case_id: str | None = None  # "DSP-…" mencionado por el cliente (nunca se lee como monto)
 
 
 @dataclass
@@ -135,7 +139,11 @@ DENY = ["no", "nao", "nop", "nope", "nel", "cancelar", "cancela", "cancelalo", "
         "nao quero", "todavia no", "ainda nao", "dejalo", "deja asi", "olvidalo", "no gracias", "nao obrigado",
         "nao obrigada", "de jeito nenhum", "jamas", "nunca", "no hagas nada", "nao faca nada", "no la abras", "deja",
         "deixa", "deixa pra la",
-        "no abras", "nao abra", "ni loca", "ni loco", "ni en pedo", "ni a palos"]
+        "no abras", "nao abra", "ni loca", "ni loco", "ni en pedo", "ni a palos",
+        # "sí, la reconozco" = el cargo es suyo: nunca es un sí a la disputa
+        "la reconozco", "lo reconozco", "si la reconozco", "si lo reconozco", "ya la reconoci", "ya lo reconoci",
+        "reconheco sim", "eu reconheco", "ja reconheci", "era mia", "era mio", "era minha", "era meu", "fui yo",
+        "fui eu"]
 HEDGE = ["no se", "nose", "nao sei", "sei la", "creo", "creo que si", "tal vez", "talvez", "quizas", "quiza", "capaz",
          "puede ser", "pode ser", "no estoy seguro", "no estoy segura", "no estoy muy seguro", "nao tenho certeza",
          "nao estou seguro", "nao estou segura", "acho", "acho que sim", "sera", "mmm", "hmm", "mm", "depende",
@@ -321,6 +329,59 @@ def _is_new_request(t: str, slots: Slots, confirmation: str | None) -> bool:
     return has_data and confirmation not in ("confirm", "deny")
 
 
+# ---------------------------------------------------------------- intenciones de conversación (#40)
+# Se evalúan ANTES que el puntaje disputa/bloqueo/fuera de alcance, en este orden de prioridad:
+# seguridad (toma de cuenta) > pedido explícito de humano > seguimiento/cancelación de una disputa.
+# Por qué ese orden: "me hackearon, quiero hablar con alguien" es urgente para seguridad antes que para la cola
+# general; y un pedido de humano no debe perderse aunque el mensaje también mencione un cargo.
+ACCOUNT_TAKEOVER = [r"hacke\w*", r"jacke\w*", r"(me )?clonar\w*", r"clonad\w*", r"clonaram", r"invadi\w*",
+                    r"(entraron|entro|accedio|accedieron|se metio|se metieron)( alguien)? (a|en) mi (cuenta|app|banca)",
+                    r"(robaron|robo) (de )?(mi )?(cuenta|identidad|usuario|clave|contrasena)",
+                    r"suplant\w*", r"acceso no autorizado", r"acesso nao autorizado",
+                    r"(cambiaron|me cambiaron) (mi |la )?(clave|contrasena|correo|telefono)",
+                    r"(mudaram|trocaram) (minha |a )?(senha|email|telefone)",
+                    r"(roubaram|invadiram) (minha |a )?conta", r"tomaron (el )?control"]
+HUMAN_REQUEST = [r"asesor\w*", r"humano\w*", r"humana\w*", r"operador\w*", r"ejecutiv\w*", r"atendente\w*",
+                 r"representante\w*", r"supervisor\w*", r"gerente\w*", r"agente (real|de verdad|humano)",
+                 r"persona (real|de verdad|de carne)", r"pessoa (real|de verdade)",
+                 r"(hablar|comunicar\w*|pasar\w*|pasame|pasenme|contactar\w*) con (alguien|una persona|un\w* agente)",
+                 r"falar com (alguem|uma pessoa|um agente)", r"atendimento humano", r"quiero una persona",
+                 r"quero uma pessoa", r"(llamen|me llame|me liguem|ligar) "]
+CASE_ID = re.compile(r"\bdsp-?[a-z0-9]{3,}\b")
+DISPUTE_REF = r"(disputa|reclamo|reclamacion|caso|contestacao|queja|dsp-?[a-z0-9]{3,})"
+DISPUTE_STATUS = [rf"(en que va|como va|estado|estatus|status|seguimiento|novedad\w*|avance|andamento|como esta|"
+                  rf"que paso con|cuando (me )?(responden|resuelven)|ya (se )?resolvi\w*) .*{DISPUTE_REF}",
+                  rf"{DISPUTE_REF}.* (en que va|como va|estado|status|andamento|como esta)"]
+CANCEL_DISPUTE = [rf"(cancel\w*|retir\w*|anul\w*|desist\w*|quitar|borrar) (la |mi |a |minha |el |o )?{DISPUTE_REF}",
+                  r"ya (lo )?reconoci", r"ja reconheci", r"si (lo|la) reconozco", r"era mia", r"era meu", r"era minha"]
+CLOSING = ["gracias", "muchas gracias", "mil gracias", "obrigado", "obrigada", "valeu", "eso es todo", "es todo",
+           "eso seria todo", "nada mas", "era eso", "era isso", "so isso", "e so isso", "chau", "chao", "adios",
+           "tchau", "hasta luego", "ate logo", "ate mais", "perfecto gracias", "listo gracias", "genial gracias",
+           "buenisimo", "joya", "de nada", "nada mais"]
+NONE_OF_THESE = ["ninguna", "ninguno", "ninguna de esas", "ninguno de esos", "no es ninguna", "no es ninguno",
+                 "ninguna de las", "nenhuma", "nenhum", "nenhuma delas", "nao e nenhuma", "nao esta", "no esta",
+                 "no aparece", "nao aparece", "ninguna es", "no es ninguna de esas", "none"]
+
+
+def _any(t: str, patterns: list[str]) -> bool:
+    return any(re.search(rf"(?<![a-z]){p}", t) for p in patterns)
+
+
+def conversation_intent(t: str, awaiting: str | None, has_request: bool) -> str | None:
+    """Intenciones que no son disputa/bloqueo. `has_request` = el mensaje también nombra un cargo o un bloqueo."""
+    if _any(t, ACCOUNT_TAKEOVER):
+        return "account_takeover"
+    if _any(t, HUMAN_REQUEST):
+        return "human_request"
+    if _any(t, CANCEL_DISPUTE):
+        return "cancel_dispute"
+    if _any(t, DISPUTE_STATUS) or (CASE_ID.search(t) and not has_request):
+        return "dispute_status"
+    if not has_request and any(_has(t, k) for k in CLOSING):
+        return "closing"
+    return None
+
+
 class RuleRouter:
     """Línea base: palabras clave es/pt + expresiones regulares. Confianza = claridad de la coincidencia."""
 
@@ -332,6 +393,8 @@ class RuleRouter:
         slots = Slots()
         # Respuestas cortas a una pregunta pendiente del agente
         if awaiting == "option":
+            if any(_has(t, k) for k in NONE_OF_THESE) and len(t) <= 60:  # antes que los dígitos: "ninguna de las 3"
+                return Understanding("none_of_these", 0.9, lang)
             m = re.search(r"\b([1-9])\b", t)
             if m and len(t) <= 40:
                 return Understanding("select_option", 0.95, lang, Slots(option=int(m.group(1))))
@@ -339,7 +402,10 @@ class RuleRouter:
             if o and len(t) <= 40:
                 return Understanding("select_option", 0.9, lang, Slots(option=o))
         # "no reconozco otro cargo de 50" no es un "no": es un pedido nuevo que descarta la acción pendiente.
-        slots.amount = parse_amount(re.sub(r"\b\d{1,2}[/-]\d{1,2}([/-]\d{2,4})?\b", " ", t))
+        m = CASE_ID.search(t)
+        slots.case_id = m.group(0).upper() if m else None
+        no_ids = re.sub(r"\b(dsp|trx|cli|hnd)-?[a-z0-9]{3,}\b", " ", t)  # un ID nunca es un monto
+        slots.amount = parse_amount(re.sub(r"\b\d{1,2}[/-]\d{1,2}([/-]\d{2,4})?\b", " ", no_ids))
         slots.date_from, slots.date_to = parse_dates(t, today)
         slots.country = next((v for k, v in COUNTRIES.items() if _has(t, k)), None)
         if awaiting == "confirmation":
@@ -349,6 +415,12 @@ class RuleRouter:
 
         scored = PRODUCT_NAMES.sub(" ", t)
         scores = {i: sum(_has(scored, k) for k in KEYWORDS[i]) for i in ("dispute_charge", "block_card", "out_of_scope")}
+        convo = conversation_intent(t, awaiting, scores["dispute_charge"] + scores["block_card"] > 0)
+        if convo:
+            return Understanding(convo, 0.85, lang, slots)
+        if scores["out_of_scope"] and scores["dispute_charge"]:
+            # "me cobraron algo raro en el seguro de la tarjeta": hay un cargo concreto -> es una disputa
+            scores["out_of_scope"] = 0
         best = max(scores, key=scores.get)
         if scores[best] == 0:
             return Understanding("unknown", 0.2, lang, slots)

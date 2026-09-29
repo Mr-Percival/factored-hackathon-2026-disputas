@@ -75,12 +75,17 @@ flowchart TD
     understand -->|elige opción| select_option
     understand -->|disputa| find_transaction
     understand -->|bloqueo| find_card
-    understand -->|fuera de alcance| handoff
-    understand -->|poca confianza| respond
+    understand -->|fuera de alcance · pide humano · toma de cuenta · cancelar disputa| handoff
+    understand -->|"¿en qué va mi disputa?"| check_dispute
+    understand -->|poca confianza · "gracias" · "ninguna de esas"| respond
+    understand -->|3 aclaraciones seguidas| handoff
     find_transaction -->|1 candidata| decide
     find_transaction -->|0 o varias: pregunta| respond
-    find_transaction -->|herramienta caída| handoff
+    find_transaction -->|herramienta caída · 3 aclaraciones| handoff
     select_option --> decide
+    select_option -->|3 aclaraciones| handoff
+    check_dispute -->|disputa verificada del cliente| respond
+    check_dispute -->|no encontrada| handoff
     find_card --> respond
     decide -->|regla handoff| handoff
     decide -->|rechazo / pedir confirmación| respond
@@ -92,6 +97,8 @@ flowchart TD
 ```
 
 El estado persiste entre turnos (checkpointer por conversación). Así funcionan las aclaraciones ("¿cuál de estas?") y las confirmaciones ("¿confirmas?"). Dos reglas acotan ese estado (#31): una confirmación solo vale en el turno **inmediatamente** posterior a la pregunta (si en medio hubo otro turno, se descarta), y la conversación queda atada al cliente de su primer turno autenticado (la sesión de otro cliente recibe `forbidden`). Todos los caminos posibles del grafo están en [`graph-paths.md`](graph-paths.md).
+
+**Conversación libre (#38–#40).** Cada acción tiene su consentimiento (disputa y bloqueo por separado); una respuesta ambigua se re-pregunta una vez y luego pasa a un humano (`consent_unclear`). El cliente puede pedir un humano en cualquier momento (`customer_request`); "me hackearon" / "me clonaron la tarjeta" va con prioridad a seguridad (`account_takeover`) y ofrece el bloqueo; tres aclaraciones seguidas sin avanzar pasan a un humano (`clarification_exhausted`, umbral en `policy.yaml`); "gracias" cierra (`closed`). El idioma de la sesión es pegajoso: "ok" o "1" no cambian una conversación en portugués a español.
 
 ## 4. Una disputa de punta a punta
 

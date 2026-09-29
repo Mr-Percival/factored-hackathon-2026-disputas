@@ -3,7 +3,7 @@
 > Generado por `python -m bankagent.graph_check --write` desde `graph.EDGES`. No editar a mano:
 > `tests/test_graph_paths.py` falla si este archivo no coincide con el grafo.
 
-- Nodos: 10 · aristas: 24 · caminos START→END: 16 · largo máximo: 6 nodos
+- Nodos: 11 · aristas: 28 · caminos START→END: 19 · largo máximo: 6 nodos
 - Acíclico: sí
 - Predecesores de `act`: understand
 - Nodos inalcanzables desde START: ninguno
@@ -21,10 +21,13 @@
 | 7 | START → guard → understand → select_option → decide → respond → END |
 | 8 | START → guard → understand → select_option → decide → handoff → respond → END |
 | 9 | START → guard → understand → select_option → respond → END |
-| 10 | START → guard → understand → act → respond → END |
-| 11 | START → guard → understand → act → handoff → respond → END |
-| 12 | START → guard → understand → cancel → respond → END |
-| 13 | START → guard → understand → handoff → respond → END |
-| 14 | START → guard → understand → respond → END |
-| 15 | START → guard → respond → END |
-| 16 | START → guard → handoff → respond → END |
+| 10 | START → guard → understand → select_option → handoff → respond → END |
+| 11 | START → guard → understand → check_dispute → respond → END |
+| 12 | START → guard → understand → check_dispute → handoff → respond → END |
+| 13 | START → guard → understand → act → respond → END |
+| 14 | START → guard → understand → act → handoff → respond → END |
+| 15 | START → guard → understand → cancel → respond → END |
+| 16 | START → guard → understand → handoff → respond → END |
+| 17 | START → guard → understand → respond → END |
+| 18 | START → guard → respond → END |
+| 19 | START → guard → handoff → respond → END |

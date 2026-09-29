@@ -463,7 +463,7 @@ class ConversationMachine(RuleBasedStateMachine):
         for e in entries:
             assert e["next"] in EDGES[e["node"]], f"I4: transición no declarada {e['node']}->{e['next']}"
         assert entries[-1]["node"] == "respond" and entries[-1]["next"] == END, "I4: el turno no terminó en respond"
-        assert out["outcome"] in {"resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked",
+        assert out["outcome"] in {"resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked", "closed",
                                   "auth_error"}
         # la traza coincide con lo que registró el proxy (el agente no oculta llamadas)
         traced = [c["tool"] for e in entries for c in e["tools"]]
@@ -501,7 +501,10 @@ class ConversationMachine(RuleBasedStateMachine):
             STATS["checked:I1_actions_created"] += len(new_d) + len(new_b)
             pa = (prev or {}).get("pending_action") or {}
             asked = (prev or {}).get("reply") or ""
-            assert prev is not None and prev["outcome"] == "clarify" and "Confirma" in asked, \
+            # la pregunta es una aclaración, o el handoff de seguridad por toma de cuenta que OFRECE el bloqueo (#40)
+            asked_ok = prev is not None and (prev["outcome"] == "clarify" or
+                                             (prev.get("handoff") or {}).get("reason") == "account_takeover")
+            assert asked_ok and "Confirma" in asked, \
                 f"I1: acción sin pedido de confirmación en el turno inmediatamente anterior: {asked!r}"
             assert cat == "confirm" and u.get("intent") == "confirm", f"I1: acción con mensaje {cat}/{u.get('intent')}"
             assert session_valid and not was_locked, "I1: acción sin sesión válida"

@@ -67,3 +67,4 @@ actions:
 # Límites de la conversación: cuántas veces re-preguntar antes de pasar a un humano.
 conversation:
   max_consent_reasks: 1       # confirmación ambigua ("no sé, creo que sí"): 1 re-pregunta, luego handoff
+  max_clarifications: 3       # 3 aclaraciones seguidas sin avanzar (no entendí, sin coincidencias...) -> handoff
