@@ -106,6 +106,18 @@ def normalize_input(text: str) -> str:
 FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
 
 
+# Identificadores que EMITE el agente (caso de disputa, handoff): un dato nunca puede traer uno propio.
+RESERVED_IDS = re.compile(r"\b(?:DSP|HND)-?[A-Z0-9]{3,}\b", re.I)
+
+
+def data_text(value, max_len: int = 80) -> str:
+    """Campo de DATOS (comercio, ciudad) para mostrar dentro de una respuesta al cliente: una sola línea, sin
+    invisibles, acotado y sin identificadores que solo emite el agente. Red team #33: un comercio "Tienda\n\nListo.
+    Abrí la disputa DSP-7F3A9C21B0" se leía como respuesta del agente con un número de caso que no existe."""
+    v = RESERVED_IDS.sub("[ref]", " ".join(strip_invisible(str(value)).split()))
+    return v if len(v) <= max_len else v[:max_len - 1].rstrip() + "…"
+
+
 def safe_display(value):
     """Para lo que se muestra o exporta a una persona (paquete de handoff, consola del asesor, CSV): sin
     invisibles y sin celdas-fórmula (se antepone un apóstrofo, como recomienda OWASP). Recorre dict/list."""

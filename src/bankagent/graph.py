@@ -33,6 +33,9 @@ from .responses import TemplateWriter, fmt_option, fmt_txn
 from .tools import BankTools, ToolError
 from .understanding import Router, RuleRouter, detect_language, match_merchant, session_language
 
+# Largo máximo de un mensaje (la API web ya limita a 1.000). Otros canales sobre `Agent.chat` no tenían tope: un
+# mensaje de 65k caracteres tardaba segundos en el router (red team #33).
+MAX_INPUT_CHARS = 4000
 DISPUTABLE_TYPES = {"Purchase", "Withdrawal", "Payment", "Transfer", "Adjustment"}
 TRANSIENT_ERRORS = {"unavailable", "timeout"}
 
@@ -186,7 +189,8 @@ class Agent:
         # Frontera de confianza: desde aquí todo el grafo lee el texto normalizado (sin invisibles ni homoglifos),
         # es decir, lo mismo que ve una persona (#33). `user_text` se reemplaza en el estado del turno.
         text = normalize_input(s["user_text"])
-        msg = {"role": "user", "turn": s["turn"], "text": redact(text)}
+        too_long = len(text) > MAX_INPUT_CHARS
+        msg = {"role": "user", "turn": s["turn"], "text": redact(text[:MAX_INPUT_CHARS])}
         strikes = s.get("strikes", 0)
         # Identidad y dueño del hilo ANTES que el bloqueo: si no, un intruso que bloquea el hilo ajeno recibiría el
         # handoff de seguridad con el paquete (mensajes y hechos del dueño). Detectado por la invariante I2.
@@ -200,6 +204,9 @@ class Agent:
         if strikes >= self.max_strikes:  # conversación bloqueada: nada más se procesa, pasa a un humano
             return {"next": "handoff", "handoff_reason": "security_lockout", "conversation": [msg],
                     "detail": f"locked strikes={strikes}"}
+        if too_long:  # se pide un mensaje más corto; nunca se procesa ni se recorta (cortar puede borrar un "no")
+            return {"next": "respond", "outcome": "clarify", "reply_key": "unknown", "conversation": [msg],
+                    "owner": session.customer_id, "detail": f"input_too_long len={len(text)}"}
         reason = self.detector.detect(text)
         if reason:
             strikes += 1

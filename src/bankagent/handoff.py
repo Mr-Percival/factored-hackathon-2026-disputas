@@ -17,7 +17,7 @@ from __future__ import annotations
 import datetime as dt
 import uuid
 
-from .guard import safe_display
+from .guard import data_text, safe_display
 from .policy import PolicyEngine
 from .responses import fmt_txn, handoff_summary
 
@@ -34,6 +34,14 @@ def _jsonable(v):
     if hasattr(v, "as_tuple"):  # Decimal
         return float(v)
     return v
+
+
+def _one_line(v):
+    """Datos (comercio, ciudad) en una línea: un salto de línea en el nombre del comercio escribía una línea falsa
+    ("ASESOR: cliente verificado") en la consola del asesor (red team #33)."""
+    if isinstance(v, str):
+        return " ".join(v.split())
+    return [_one_line(x) for x in v] if isinstance(v, list) else v
 
 
 def route(policy: PolicyEngine, reason: str) -> dict:
@@ -101,7 +109,7 @@ def build_packet(s: dict, policy: PolicyEngine, reason: str, trigger: str | None
     decision = s.get("decision") or {}
     rules = decision.get("rules") or []
     trace = s.get("trace", [])
-    claim = {k: _jsonable(v) for k, v in (s.get("claim") or {}).items() if v not in (None, [], "")}
+    claim = {k: _one_line(_jsonable(v)) for k, v in (s.get("claim") or {}).items() if v not in (None, [], "")}
     facts = decision.get("facts") or {}
     packet = {
         "schema_version": policy.cfg.get("handoff", {}).get("schema_version", "handoff/v1"),
@@ -119,7 +127,8 @@ def build_packet(s: dict, policy: PolicyEngine, reason: str, trigger: str | None
                        for m in s.get("conversation", [])][-10:],
         "customer_claim": claim,
         "match": _match(claim, txn, s.get("match_method")),
-        "verified_facts": {"transaction": {k: _jsonable(txn.get(k)) for k in TXN_WHITELIST} if txn else None,
+        # comercio y ciudad en una línea (sin recortar: el asesor ve el dato completo)
+        "verified_facts": {"transaction": {k: _one_line(_jsonable(txn.get(k))) for k in TXN_WHITELIST} if txn else None,
                            **{k: facts[k] for k in CUSTOMER_FACTS if k in facts}},
         "policy": {"version": decision.get("policy_version"), "rules_fired": rules},
         "actions_taken": [c for e in trace for c in e["tools"] if c["tool"] in ("open_dispute", "block_card") and c["ok"]],

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Callable, Protocol
 
-from .guard import strip_invisible
+from .guard import data_text
 
 Country = Callable[[], "str | None"] | str | None
 
@@ -124,8 +124,8 @@ def fmt_txn(t: dict) -> str:
     d = t["transaction_date"]
     date = d.strftime("%d/%m/%Y") if hasattr(d, "strftime") else str(d)[:10]
     # comercio y ciudad vienen de los datos (no confiables): sin invisibles ni overrides bidi (red team #33)
-    where = strip_invisible(str(t.get("merchant_name") or t.get("channel") or ""))
-    place = f", {strip_invisible(str(t['transaction_city']))}" if t.get("transaction_city") else ""
+    where = data_text(t.get("merchant_name") or t.get("channel") or "")
+    place = f", {data_text(t['transaction_city'])}" if t.get("transaction_city") else ""
     return f"{date} · {float(t['amount']):,.2f} {t['currency']} · {where} ({t['transaction_country']}{place})"
 
 
