@@ -55,12 +55,12 @@ Diagrama: guard → entender (LLM) → buscar → decidir (policy.yaml) → actu
 
 | Pregunta | Resultado | Contexto | Cómo se mide |
 |---|---|---|---|
-| Agente vs línea base | **[[PENDIENTE: reports/eval.md]]** | línea base: [[PENDIENTE: reports/eval.md]] | Éxito de tarea en casos reservados · [[PENDIENTE: reports/eval.md]] |
-| Inyección: detección | **[[PENDIENTE: reports/injection_eval.md]]** | falsos positivos: [[PENDIENTE: reports/injection_eval.md]] | Datasets públicos etiquetados (split de prueba) + muestra en pt generada por el equipo |
-| Inyección: daño | **[[PENDIENTE: reports/injection_eval.md]]** | medido aparte de la detección | Aunque el guard falle, el cliente sale del token y toda acción se confirma |
-| Equidad por dialecto | **[[PENDIENTE: reports/eval.md]]** | misma decisión MX · CO · AR · pt-BR | No enrutamos por acento: el EDA no muestra efecto (FCR 76.7% vs 76.6%) |
+| Agente vs línea base | **86% resolución segura (49/57) · 0/115 inseguros** | línea base: sin política: 82/115 inseguros · deriva todo: 0/57 resueltos | Éxito de tarea en casos reservados · 115 casos + 44 variantes de dialecto, 3 corridas |
+| Inyección: detección | **regex AUC 0.55 · clasificador AUC 0.97** | falsos positivos: regex 0/58 · clasificador 20/58 en mensajes bancarios | Datasets públicos etiquetados (split de prueba) + muestra en pt generada por el equipo |
+| Inyección: daño | **0/2.531 ataques con daño, incluso con el guard apagado** | medido aparte de la detección | Aunque el guard falle, el cliente sale del token y toda acción se confirma |
+| Equidad por dialecto | **10/11 grupos con la misma decisión** | misma decisión MX · CO · AR · pt-BR | No enrutamos por acento: el EDA no muestra efecto (FCR 76.7% vs 76.6%) |
 
-<sub>80 tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, acceso ajeno, inyección directa e indirecta, cliente señuelo</sub>
+<sub>528 tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, acceso ajeno, inyección directa e indirecta, cliente señuelo</sub>
 
 **Notas del orador:** No entrenamos sobre las transcripciones del dataset: solo hay 42 textos de cliente distintos, así que cualquier métrica sería inválida. Evaluamos donde hay etiquetas válidas. Uno: el agente contra la línea base de reglas en casos reservados, generados por el equipo y declarados como tales. Dos: la detección de inyección con datasets públicos, y por separado el daño, porque aunque el detector falle el ataque no tiene con qué dañar. Tres: equidad; el mismo caso escrito en dialectos distintos debe dar la misma decisión.
 
@@ -116,13 +116,3 @@ Respaldo: _Los datos tienen límites reales; cada uno cambió una decisión de d
 ## Pendientes
 
 - [[PENDIENTE: URL de la demo desplegada — deploy (#15)]]
-- [[PENDIENTE: éxito de tarea del agente (LLM) en casos reservados — reports/eval.md (#12)]]
-- [[PENDIENTE: éxito de tarea de la línea base (reglas + plantillas) — reports/eval.md (#12)]]
-- [[PENDIENTE: n.º de casos reservados y cómo se generaron — reports/eval.md (#12)]]
-- [[PENDIENTE: recall de detección de inyección (clasificador vs patrones) — reports/injection_eval.md (#8/#9)]]
-- [[PENDIENTE: falsos positivos sobre mensajes legítimos — reports/injection_eval.md (#8/#9)]]
-- [[PENDIENTE: daño: fugas del señuelo / acciones no confirmadas — reports/injection_eval.md (#8)]]
-- [[PENDIENTE: misma decisión entre variantes MX/CO/AR/pt-BR — reports/eval.md (#13)]]
-- [[PENDIENTE: captura escena 1 — docs/pitch/screens/escena1.png (UI #14)]]
-- [[PENDIENTE: captura escena 2 — docs/pitch/screens/escena2.png (UI #14)]]
-- [[PENDIENTE: captura escena 3 — docs/pitch/screens/escena3.png (UI #14)]]
