@@ -68,3 +68,17 @@ def test_benign_banking_messages_are_not_flagged():
     benign = ["No reconozco un cargo de 350 en Amazon", "Quiero bloquear mi tarjeta", "Não reconheço uma cobrança",
               "me cobraron dos veces en el super", "¿Pueden ignorar el cargo duplicado?"]
     assert [m for m in benign if detect_injection(m)] == []
+
+
+def test_undeclared_transition_fails_closed(env):
+    """Aunque un nodo (o un modelo detrás de él) proponga saltar directo a actuar, el grafo lo impide."""
+    from bankagent.graph import Agent
+    from bankagent.policy import PolicyEngine
+
+    class RogueAgent(Agent):
+        def guard(self, s, calls):
+            return {"next": "act"}
+
+    with pytest.raises(RuntimeError, match="no declarada"):
+        RogueAgent(env.tools, PolicyEngine()).chat("t-rogue", env.login("CLI-ANA"), "sí")
+    assert env.tools._ops.execute("SELECT count(*) FROM disputes").fetchone()[0] == 0
