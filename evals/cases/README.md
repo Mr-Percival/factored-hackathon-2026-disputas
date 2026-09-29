@@ -26,7 +26,7 @@ python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 -
 ## Cómo se construye un caso
 1. **Cliente y transacción reales.** Para cada tipo de caso se eligen clientes y, si aplica, una transacción objetivo
    por sus atributos crudos. Ejemplos: `Declined` → D02, más de 150 días → D05, monto ≥ umbral por moneda → H02,
-   `fraud_score ≥ 60` → H03, cliente no activo → H01, reclamante recurrente → H04. Para el caso normal: aprobada,
+   `fraud_score` ≥ umbral de H03 (30, leído de `config/policy.yaml`) → H03, cliente no activo → H01, reclamante recurrente → H04. Para el caso normal: aprobada,
    reciente, bajo el umbral, sin señal de fraude, cliente activo y sin reclamos.
 2. **Etiqueta desde la especificación.** El resultado, la regla y las acciones esperadas salen de `config/policy.yaml`
    aplicada a esos atributos. Además, cada candidato se verifica con el motor de política; si no coinciden, se

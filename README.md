@@ -71,6 +71,7 @@ Las sesiones de demo duran 15 minutos y viven en memoria: un reinicio del servid
 ## Pitch
 - Deck (6 slides con notas del orador): [`docs/pitch/deck.pdf`](docs/pitch/deck.pdf) · [`deck.pptx`](docs/pitch/deck.pptx) · fuente revisable [`docs/pitch/deck.md`](docs/pitch/deck.md)
 - Guion del video (3:50, es + pt) con lista de tomas y checklist de grabación: [`docs/pitch/video_script.md`](docs/pitch/video_script.md)
+- Preguntas del jurado (44, con evidencia, límite y repregunta): [`docs/pitch/qa.md`](docs/pitch/qa.md) · hoja de una página (12 números, pitch, plan B de la demo): [`docs/pitch/cheatsheet.md`](docs/pitch/cheatsheet.md)
 - Gráficos: [`docs/pitch/charts/`](docs/pitch/charts/) · métricas del deck, cada una con su fuente: [`docs/pitch/metrics.yaml`](docs/pitch/metrics.yaml)
 
 ```bash
