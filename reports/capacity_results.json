@@ -1,0 +1,2835 @@
+[
+ {
+  "label": "A_main_shared_connection_no_index",
+  "mode": "threads",
+  "db": "serving.duckdb",
+  "at": "2026-09-28T21:41:21",
+  "machine": {
+   "platform": "Windows-11-10.0.26200-SP0",
+   "python": "3.12.2",
+   "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+   "logical_cpus": 8,
+   "duckdb": "1.5.6"
+  },
+  "results": [
+   {
+    "concurrency": 1,
+    "seconds": 21.07,
+    "conversations": 47,
+    "turns": 84,
+    "turns_per_s": 4.0,
+    "turn_ms": {
+     "n": 84,
+     "p50": 270.1,
+     "p95": 559.32,
+     "p99": 672.11,
+     "mean": 250.08
+    },
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 37,
+     "informed": 7,
+     "handoff": 26,
+     "resolved": 12,
+     "rejected": 2
+    },
+    "scenarios": {
+     "dispute_amount": 21,
+     "dispute_ambiguous": 9,
+     "out_of_scope": 11,
+     "block_card": 6
+    },
+    "node_ms": {
+     "act": {
+      "n": 12,
+      "p50": 18.41,
+      "p95": 19.49,
+      "p99": 20.77,
+      "mean": 13.73
+     },
+     "decide": {
+      "n": 30,
+      "p50": 13.78,
+      "p95": 62.41,
+      "p99": 71.48,
+      "mean": 20.7
+     },
+     "find_card": {
+      "n": 6,
+      "p50": 12.79,
+      "p95": 20.65,
+      "p99": 20.65,
+      "mean": 14.1
+     },
+     "find_transaction": {
+      "n": 30,
+      "p50": 83.42,
+      "p95": 149.78,
+      "p99": 150.54,
+      "mean": 88.1
+     },
+     "guard": {
+      "n": 84,
+      "p50": 0.1,
+      "p95": 0.15,
+      "p99": 0.22,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 26,
+      "p50": 0.05,
+      "p95": 0.09,
+      "p99": 0.15,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 84,
+      "p50": 0.08,
+      "p95": 0.32,
+      "p99": 0.57,
+      "mean": 0.1
+     },
+     "select_option": {
+      "n": 25,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 84,
+      "p50": 0.3,
+      "p95": 0.55,
+      "p99": 0.84,
+      "mean": 0.28
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 8,
+      "p50": 13.34,
+      "p95": 19.01,
+      "p99": 19.01,
+      "mean": 14.55
+     },
+     "dispute_history": {
+      "n": 30,
+      "p50": 7.15,
+      "p95": 9.94,
+      "p99": 10.75,
+      "mean": 7.58
+     },
+     "get_profile": {
+      "n": 30,
+      "p50": 1.29,
+      "p95": 2.64,
+      "p99": 3.27,
+      "mean": 1.44
+     },
+     "get_transaction": {
+      "n": 30,
+      "p50": 2.82,
+      "p95": 5.72,
+      "p99": 8.41,
+      "mean": 3.18
+     },
+     "list_cards": {
+      "n": 14,
+      "p50": 12.76,
+      "p95": 52.23,
+      "p99": 60.87,
+      "mean": 23.88
+     },
+     "open_dispute": {
+      "n": 8,
+      "p50": 6.1,
+      "p95": 6.78,
+      "p99": 6.78,
+      "mean": 5.98
+     },
+     "search_transactions": {
+      "n": 30,
+      "p50": 83.39,
+      "p95": 149.74,
+      "p99": 150.49,
+      "mean": 88.04
+     }
+    },
+    "peak_rss_mb": 440.2
+   },
+   {
+    "concurrency": 4,
+    "seconds": 20.28,
+    "conversations": 80,
+    "turns": 113,
+    "turns_per_s": 5.6,
+    "turn_ms": {
+     "n": 113,
+     "p50": 614.08,
+     "p95": 977.39,
+     "p99": 1083.14,
+     "mean": 626.86
+    },
+    "error_rate": 0.1102,
+    "errors": {
+     "KeyError: 'product_status'": 6,
+     "AttributeError: 'types.SimpleNamespace' object has no attribute 'customer_status'": 4,
+     "KeyError: 'customer_id'": 2,
+     "KeyError: 'transaction_type'": 2
+    },
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 52,
+     "informed": 3,
+     "handoff": 45,
+     "auth_error": 9,
+     "resolved": 4
+    },
+    "scenarios": {
+     "dispute_amount": 31,
+     "dispute_ambiguous": 24,
+     "out_of_scope": 25,
+     "block_card": 14
+    },
+    "node_ms": {
+     "act": {
+      "n": 9,
+      "p50": 13.05,
+      "p95": 81.33,
+      "p99": 81.33,
+      "mean": 25.03
+     },
+     "decide": {
+      "n": 25,
+      "p50": 12.69,
+      "p95": 142.83,
+      "p99": 225.0,
+      "mean": 39.44
+     },
+     "find_card": {
+      "n": 8,
+      "p50": 43.99,
+      "p95": 151.9,
+      "p99": 151.9,
+      "mean": 53.78
+     },
+     "find_transaction": {
+      "n": 52,
+      "p50": 130.75,
+      "p95": 351.17,
+      "p99": 394.39,
+      "mean": 165.13
+     },
+     "guard": {
+      "n": 113,
+      "p50": 0.08,
+      "p95": 0.11,
+      "p99": 0.13,
+      "mean": 0.08
+     },
+     "handoff": {
+      "n": 45,
+      "p50": 0.02,
+      "p95": 0.07,
+      "p99": 0.09,
+      "mean": 0.03
+     },
+     "respond": {
+      "n": 113,
+      "p50": 0.02,
+      "p95": 0.13,
+      "p99": 0.15,
+      "mean": 0.05
+     },
+     "select_option": {
+      "n": 19,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.01,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 113,
+      "p50": 0.33,
+      "p95": 0.41,
+      "p99": 0.54,
+      "mean": 0.28
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 3,
+      "p50": 13.05,
+      "p95": 14.6,
+      "p99": 14.6,
+      "mean": 13.56
+     },
+     "dispute_history": {
+      "n": 10,
+      "p50": 6.56,
+      "p95": 93.38,
+      "p99": 93.38,
+      "mean": 15.13
+     },
+     "get_profile": {
+      "n": 10,
+      "p50": 1.32,
+      "p95": 3.95,
+      "p99": 3.95,
+      "mean": 1.64
+     },
+     "get_transaction": {
+      "n": 10,
+      "p50": 3.99,
+      "p95": 8.17,
+      "p99": 8.17,
+      "mean": 4.56
+     },
+     "list_cards": {
+      "n": 12,
+      "p50": 14.3,
+      "p95": 116.2,
+      "p99": 151.88,
+      "mean": 39.29
+     },
+     "open_dispute": {
+      "n": 2,
+      "p50": 4.82,
+      "p95": 7.59,
+      "p99": 7.59,
+      "mean": 6.21
+     },
+     "search_transactions": {
+      "n": 52,
+      "p50": 130.72,
+      "p95": 351.13,
+      "p99": 394.37,
+      "mean": 165.1
+     }
+    },
+    "peak_rss_mb": 515.9
+   },
+   {
+    "concurrency": 8,
+    "seconds": 20.42,
+    "conversations": 142,
+    "turns": 203,
+    "turns_per_s": 9.9,
+    "turn_ms": {
+     "n": 203,
+     "p50": 632.18,
+     "p95": 1601.63,
+     "p99": 1908.4,
+     "mean": 737.12
+    },
+    "error_rate": 0.0688,
+    "errors": {
+     "KeyError: 'transaction_type'": 6,
+     "KeyError: 'product_status'": 4,
+     "KeyError: 'product_type'": 2,
+     "TypeError: 'NoneType' object is not subscriptable": 1,
+     "IndexError: tuple index out of range": 1
+    },
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 96,
+     "informed": 2,
+     "handoff": 78,
+     "auth_error": 16,
+     "resolved": 10,
+     "rejected": 1
+    },
+    "scenarios": {
+     "dispute_amount": 55,
+     "dispute_ambiguous": 41,
+     "out_of_scope": 31,
+     "block_card": 30
+    },
+    "node_ms": {
+     "act": {
+      "n": 16,
+      "p50": 17.26,
+      "p95": 82.35,
+      "p99": 96.55,
+      "mean": 26.92
+     },
+     "decide": {
+      "n": 48,
+      "p50": 20.36,
+      "p95": 245.89,
+      "p99": 308.8,
+      "mean": 42.69
+     },
+     "find_card": {
+      "n": 26,
+      "p50": 16.42,
+      "p95": 193.1,
+      "p99": 289.2,
+      "mean": 57.63
+     },
+     "find_transaction": {
+      "n": 89,
+      "p50": 121.77,
+      "p95": 419.59,
+      "p99": 434.88,
+      "mean": 168.18
+     },
+     "guard": {
+      "n": 203,
+      "p50": 0.09,
+      "p95": 0.13,
+      "p99": 0.2,
+      "mean": 0.09
+     },
+     "handoff": {
+      "n": 78,
+      "p50": 0.04,
+      "p95": 0.08,
+      "p99": 0.14,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 203,
+      "p50": 0.03,
+      "p95": 0.16,
+      "p99": 0.2,
+      "mean": 0.06
+     },
+     "select_option": {
+      "n": 41,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 203,
+      "p50": 0.35,
+      "p95": 0.5,
+      "p99": 0.65,
+      "mean": 0.3
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 7,
+      "p50": 16.48,
+      "p95": 23.01,
+      "p99": 23.01,
+      "mean": 17.92
+     },
+     "dispute_history": {
+      "n": 22,
+      "p50": 7.02,
+      "p95": 25.34,
+      "p99": 75.47,
+      "mean": 11.68
+     },
+     "get_profile": {
+      "n": 22,
+      "p50": 1.86,
+      "p95": 8.29,
+      "p99": 9.09,
+      "mean": 3.1
+     },
+     "get_transaction": {
+      "n": 23,
+      "p50": 4.53,
+      "p95": 9.17,
+      "p99": 14.56,
+      "mean": 4.94
+     },
+     "list_cards": {
+      "n": 32,
+      "p50": 13.81,
+      "p95": 189.21,
+      "p99": 289.18,
+      "mean": 48.89
+     },
+     "open_dispute": {
+      "n": 4,
+      "p50": 9.93,
+      "p95": 14.98,
+      "p99": 14.98,
+      "mean": 9.8
+     },
+     "search_transactions": {
+      "n": 89,
+      "p50": 121.58,
+      "p95": 419.56,
+      "p99": 434.86,
+      "mean": 168.13
+     }
+    },
+    "peak_rss_mb": 564.4
+   },
+   {
+    "concurrency": 16,
+    "seconds": 21.15,
+    "conversations": 119,
+    "turns": 175,
+    "turns_per_s": 8.3,
+    "turn_ms": {
+     "n": 175,
+     "p50": 1638.14,
+     "p95": 3062.78,
+     "p99": 3514.4,
+     "mean": 1753.18
+    },
+    "error_rate": 0.0885,
+    "errors": {
+     "KeyError: 'product_status'": 5,
+     "KeyError: 'transaction_type'": 4,
+     "KeyError: 'product_type'": 3,
+     "KeyError: 'customer_id'": 3,
+     "KeyError: 'product_id'": 1
+    },
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 82,
+     "handoff": 74,
+     "informed": 2,
+     "resolved": 8,
+     "auth_error": 9
+    },
+    "scenarios": {
+     "dispute_amount": 48,
+     "dispute_ambiguous": 32,
+     "out_of_scope": 28,
+     "block_card": 28
+    },
+    "node_ms": {
+     "act": {
+      "n": 13,
+      "p50": 17.9,
+      "p95": 34.06,
+      "p99": 151.24,
+      "mean": 27.92
+     },
+     "decide": {
+      "n": 46,
+      "p50": 22.52,
+      "p95": 291.51,
+      "p99": 481.92,
+      "mean": 67.86
+     },
+     "find_card": {
+      "n": 22,
+      "p50": 18.03,
+      "p95": 136.2,
+      "p99": 477.78,
+      "mean": 57.62
+     },
+     "find_transaction": {
+      "n": 76,
+      "p50": 116.49,
+      "p95": 466.6,
+      "p99": 554.67,
+      "mean": 168.55
+     },
+     "guard": {
+      "n": 175,
+      "p50": 0.09,
+      "p95": 0.14,
+      "p99": 0.17,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 74,
+      "p50": 0.04,
+      "p95": 0.08,
+      "p99": 0.13,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 175,
+      "p50": 0.05,
+      "p95": 0.15,
+      "p99": 0.26,
+      "mean": 0.06
+     },
+     "select_option": {
+      "n": 36,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.04,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 175,
+      "p50": 0.35,
+      "p95": 0.46,
+      "p99": 0.54,
+      "mean": 0.3
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 6,
+      "p50": 14.58,
+      "p95": 19.66,
+      "p99": 19.66,
+      "mean": 15.35
+     },
+     "dispute_history": {
+      "n": 19,
+      "p50": 7.3,
+      "p95": 8.71,
+      "p99": 10.72,
+      "mean": 7.45
+     },
+     "get_profile": {
+      "n": 19,
+      "p50": 1.44,
+      "p95": 3.75,
+      "p99": 9.48,
+      "mean": 2.14
+     },
+     "get_transaction": {
+      "n": 21,
+      "p50": 4.33,
+      "p95": 89.02,
+      "p99": 120.95,
+      "mean": 14.41
+     },
+     "list_cards": {
+      "n": 31,
+      "p50": 14.97,
+      "p95": 102.96,
+      "p99": 477.76,
+      "mean": 45.11
+     },
+     "open_dispute": {
+      "n": 6,
+      "p50": 6.75,
+      "p95": 10.82,
+      "p99": 10.82,
+      "mean": 7.3
+     },
+     "search_transactions": {
+      "n": 76,
+      "p50": 116.4,
+      "p95": 466.58,
+      "p99": 554.65,
+      "mean": 168.51
+     }
+    },
+    "peak_rss_mb": 588.8
+   },
+   {
+    "concurrency": 32,
+    "seconds": 21.57,
+    "conversations": 189,
+    "turns": 243,
+    "turns_per_s": 11.3,
+    "turn_ms": {
+     "n": 243,
+     "p50": 2591.33,
+     "p95": 3574.55,
+     "p99": 4121.78,
+     "mean": 2551.55
+    },
+    "error_rate": 0.0795,
+    "errors": {
+     "KeyError: 'customer_id'": 6,
+     "KeyError: 'product_status'": 6,
+     "KeyError: 'transaction_type'": 5,
+     "AttributeError: 'types.SimpleNamespace' object has no attribute 'customer_status'": 2,
+     "KeyError: 'product_type'": 1
+    },
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 133,
+     "handoff": 95,
+     "auth_error": 11,
+     "resolved": 4
+    },
+    "scenarios": {
+     "dispute_amount": 89,
+     "dispute_ambiguous": 48,
+     "out_of_scope": 32,
+     "block_card": 41
+    },
+    "node_ms": {
+     "act": {
+      "n": 9,
+      "p50": 38.83,
+      "p95": 739.94,
+      "p99": 739.94,
+      "mean": 202.6
+     },
+     "decide": {
+      "n": 41,
+      "p50": 97.64,
+      "p95": 443.7,
+      "p99": 837.75,
+      "mean": 155.99
+     },
+     "find_card": {
+      "n": 34,
+      "p50": 112.23,
+      "p95": 827.45,
+      "p99": 949.18,
+      "mean": 210.28
+     },
+     "find_transaction": {
+      "n": 130,
+      "p50": 226.72,
+      "p95": 1284.73,
+      "p99": 1343.92,
+      "mean": 391.59
+     },
+     "guard": {
+      "n": 243,
+      "p50": 0.1,
+      "p95": 0.17,
+      "p99": 0.21,
+      "mean": 0.11
+     },
+     "handoff": {
+      "n": 95,
+      "p50": 0.04,
+      "p95": 0.1,
+      "p99": 0.14,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 243,
+      "p50": 0.02,
+      "p95": 0.16,
+      "p99": 0.21,
+      "mean": 0.05
+     },
+     "select_option": {
+      "n": 38,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 243,
+      "p50": 0.38,
+      "p95": 0.53,
+      "p99": 0.68,
+      "mean": 0.35
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 4,
+      "p50": 18.28,
+      "p95": 38.8,
+      "p99": 38.8,
+      "mean": 21.44
+     },
+     "dispute_history": {
+      "n": 9,
+      "p50": 7.88,
+      "p95": 85.29,
+      "p99": 85.29,
+      "mean": 26.44
+     },
+     "get_profile": {
+      "n": 9,
+      "p50": 3.79,
+      "p95": 11.76,
+      "p99": 11.76,
+      "mean": 4.44
+     },
+     "get_transaction": {
+      "n": 11,
+      "p50": 5.39,
+      "p95": 82.43,
+      "p99": 82.43,
+      "mean": 17.64
+     },
+     "list_cards": {
+      "n": 35,
+      "p50": 112.22,
+      "p95": 827.43,
+      "p99": 949.14,
+      "mean": 204.6
+     },
+     "open_dispute": {
+      "n": 1,
+      "p50": 9.53,
+      "p95": 9.53,
+      "p99": 9.53,
+      "mean": 9.53
+     },
+     "search_transactions": {
+      "n": 130,
+      "p50": 226.69,
+      "p95": 1284.71,
+      "p99": 1343.87,
+      "mean": 391.55
+     }
+    },
+    "peak_rss_mb": 621.6
+   }
+  ]
+ },
+ {
+  "label": "B_final_code_no_index",
+  "mode": "threads",
+  "db": "serving.duckdb",
+  "at": "2026-09-28T21:52:37",
+  "machine": {
+   "platform": "Windows-11-10.0.26200-SP0",
+   "python": "3.12.2",
+   "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+   "logical_cpus": 8,
+   "duckdb": "1.5.6"
+  },
+  "results": [
+   {
+    "concurrency": 1,
+    "seconds": 20.15,
+    "conversations": 141,
+    "turns": 288,
+    "turns_per_s": 14.3,
+    "turn_ms": {
+     "n": 288,
+     "p50": 57.61,
+     "p95": 163.85,
+     "p99": 242.47,
+     "mean": 69.13
+    },
+    "overhead_ms": {
+     "n": 288,
+     "p50": 23.36,
+     "p95": 101.37,
+     "p99": 190.64,
+     "mean": 35.83
+    },
+    "cpu_ms_per_turn": 136.56,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 147,
+     "informed": 4,
+     "handoff": 63,
+     "resolved": 65,
+     "rejected": 9
+    },
+    "scenarios": {
+     "dispute_amount": 63,
+     "dispute_ambiguous": 30,
+     "out_of_scope": 24,
+     "block_card": 24
+    },
+    "node_ms": {
+     "act": {
+      "n": 65,
+      "p50": 11.02,
+      "p95": 22.32,
+      "p99": 24.92,
+      "mean": 12.85
+     },
+     "decide": {
+      "n": 93,
+      "p50": 24.26,
+      "p95": 40.18,
+      "p99": 51.04,
+      "mean": 23.96
+     },
+     "find_card": {
+      "n": 24,
+      "p50": 14.23,
+      "p95": 20.93,
+      "p99": 44.13,
+      "mean": 15.99
+     },
+     "find_transaction": {
+      "n": 93,
+      "p50": 60.78,
+      "p95": 88.03,
+      "p99": 119.29,
+      "mean": 64.37
+     },
+     "guard": {
+      "n": 288,
+      "p50": 0.11,
+      "p95": 0.2,
+      "p99": 0.34,
+      "mean": 0.12
+     },
+     "handoff": {
+      "n": 63,
+      "p50": 0.06,
+      "p95": 0.12,
+      "p99": 0.13,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 288,
+      "p50": 0.09,
+      "p95": 0.25,
+      "p99": 0.37,
+      "mean": 0.1
+     },
+     "select_option": {
+      "n": 82,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 288,
+      "p50": 0.26,
+      "p95": 0.63,
+      "p99": 0.91,
+      "mean": 0.3
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 40,
+      "p50": 9.28,
+      "p95": 12.79,
+      "p99": 25.32,
+      "mean": 10.12
+     },
+     "dispute_history": {
+      "n": 93,
+      "p50": 9.02,
+      "p95": 12.26,
+      "p99": 19.0,
+      "mean": 9.6
+     },
+     "get_profile": {
+      "n": 93,
+      "p50": 1.94,
+      "p95": 3.85,
+      "p99": 6.83,
+      "mean": 2.15
+     },
+     "get_transaction": {
+      "n": 93,
+      "p50": 3.92,
+      "p95": 7.24,
+      "p99": 8.37,
+      "mean": 4.3
+     },
+     "list_cards": {
+      "n": 72,
+      "p50": 13.58,
+      "p95": 21.19,
+      "p99": 36.33,
+      "mean": 15.25
+     },
+     "open_dispute": {
+      "n": 48,
+      "p50": 8.83,
+      "p95": 13.31,
+      "p99": 14.19,
+      "mean": 8.89
+     },
+     "search_transactions": {
+      "n": 93,
+      "p50": 60.72,
+      "p95": 87.85,
+      "p99": 119.24,
+      "mean": 64.31
+     }
+    },
+    "peak_rss_mb": 570.6
+   },
+   {
+    "concurrency": 4,
+    "seconds": 20.73,
+    "conversations": 155,
+    "turns": 283,
+    "turns_per_s": 13.7,
+    "turn_ms": {
+     "n": 283,
+     "p50": 224.37,
+     "p95": 723.34,
+     "p99": 899.44,
+     "mean": 286.96
+    },
+    "overhead_ms": {
+     "n": 283,
+     "p50": 170.78,
+     "p95": 644.82,
+     "p99": 784.14,
+     "mean": 238.52
+    },
+    "cpu_ms_per_turn": 132.62,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 128,
+     "informed": 16,
+     "handoff": 82,
+     "resolved": 45,
+     "rejected": 12
+    },
+    "scenarios": {
+     "dispute_amount": 58,
+     "dispute_ambiguous": 38,
+     "out_of_scope": 36,
+     "block_card": 23
+    },
+    "node_ms": {
+     "act": {
+      "n": 45,
+      "p50": 13.99,
+      "p95": 37.93,
+      "p99": 45.5,
+      "mean": 17.56
+     },
+     "decide": {
+      "n": 96,
+      "p50": 25.47,
+      "p95": 81.62,
+      "p99": 95.09,
+      "mean": 31.17
+     },
+     "find_card": {
+      "n": 23,
+      "p50": 16.59,
+      "p95": 57.37,
+      "p99": 63.75,
+      "mean": 23.6
+     },
+     "find_transaction": {
+      "n": 96,
+      "p50": 80.66,
+      "p95": 164.7,
+      "p99": 199.99,
+      "mean": 96.15
+     },
+     "guard": {
+      "n": 283,
+      "p50": 0.1,
+      "p95": 0.2,
+      "p99": 0.23,
+      "mean": 0.11
+     },
+     "handoff": {
+      "n": 82,
+      "p50": 0.05,
+      "p95": 0.13,
+      "p99": 0.18,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 283,
+      "p50": 0.09,
+      "p95": 0.24,
+      "p99": 0.41,
+      "mean": 0.1
+     },
+     "select_option": {
+      "n": 83,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.04,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 283,
+      "p50": 0.35,
+      "p95": 0.61,
+      "p99": 1.02,
+      "mean": 0.32
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 27,
+      "p50": 12.11,
+      "p95": 29.31,
+      "p99": 45.47,
+      "mean": 14.41
+     },
+     "dispute_history": {
+      "n": 96,
+      "p50": 8.9,
+      "p95": 18.89,
+      "p99": 26.18,
+      "mean": 10.55
+     },
+     "get_profile": {
+      "n": 96,
+      "p50": 2.64,
+      "p95": 11.32,
+      "p99": 26.14,
+      "mean": 4.54
+     },
+     "get_transaction": {
+      "n": 96,
+      "p50": 6.15,
+      "p95": 12.19,
+      "p99": 15.82,
+      "mean": 6.86
+     },
+     "list_cards": {
+      "n": 53,
+      "p50": 16.96,
+      "p95": 63.72,
+      "p99": 69.71,
+      "mean": 26.63
+     },
+     "open_dispute": {
+      "n": 30,
+      "p50": 10.2,
+      "p95": 28.36,
+      "p99": 35.17,
+      "mean": 13.32
+     },
+     "search_transactions": {
+      "n": 96,
+      "p50": 80.63,
+      "p95": 164.66,
+      "p99": 199.89,
+      "mean": 96.1
+     }
+    },
+    "peak_rss_mb": 626.3
+   },
+   {
+    "concurrency": 8,
+    "seconds": 21.07,
+    "conversations": 95,
+    "turns": 167,
+    "turns_per_s": 7.9,
+    "turn_ms": {
+     "n": 167,
+     "p50": 943.76,
+     "p95": 1333.71,
+     "p99": 1548.09,
+     "mean": 961.1
+    },
+    "overhead_ms": {
+     "n": 167,
+     "p50": 891.57,
+     "p95": 1320.38,
+     "p99": 1454.12,
+     "mean": 907.48
+    },
+    "cpu_ms_per_turn": 130.8,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 72,
+     "informed": 20,
+     "handoff": 52,
+     "rejected": 5,
+     "resolved": 18
+    },
+    "scenarios": {
+     "dispute_amount": 30,
+     "dispute_ambiguous": 26,
+     "out_of_scope": 20,
+     "block_card": 19
+    },
+    "node_ms": {
+     "act": {
+      "n": 18,
+      "p50": 11.82,
+      "p95": 28.28,
+      "p99": 41.03,
+      "mean": 14.58
+     },
+     "decide": {
+      "n": 56,
+      "p50": 20.15,
+      "p95": 95.23,
+      "p99": 112.34,
+      "mean": 29.06
+     },
+     "find_card": {
+      "n": 19,
+      "p50": 14.64,
+      "p95": 95.57,
+      "p99": 111.13,
+      "mean": 28.31
+     },
+     "find_transaction": {
+      "n": 56,
+      "p50": 104.17,
+      "p95": 184.69,
+      "p99": 190.39,
+      "mean": 115.28
+     },
+     "guard": {
+      "n": 167,
+      "p50": 0.09,
+      "p95": 0.12,
+      "p99": 0.14,
+      "mean": 0.08
+     },
+     "handoff": {
+      "n": 52,
+      "p50": 0.03,
+      "p95": 0.07,
+      "p99": 0.07,
+      "mean": 0.04
+     },
+     "respond": {
+      "n": 167,
+      "p50": 0.07,
+      "p95": 0.14,
+      "p99": 0.15,
+      "mean": 0.07
+     },
+     "select_option": {
+      "n": 54,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.01,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 167,
+      "p50": 0.34,
+      "p95": 0.44,
+      "p99": 0.45,
+      "mean": 0.26
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 11,
+      "p50": 6.78,
+      "p95": 19.39,
+      "p99": 19.39,
+      "mean": 9.28
+     },
+     "dispute_history": {
+      "n": 56,
+      "p50": 7.67,
+      "p95": 20.07,
+      "p99": 41.84,
+      "mean": 10.74
+     },
+     "get_profile": {
+      "n": 56,
+      "p50": 2.34,
+      "p95": 7.22,
+      "p99": 9.19,
+      "mean": 3.4
+     },
+     "get_transaction": {
+      "n": 56,
+      "p50": 4.69,
+      "p95": 9.03,
+      "p99": 35.86,
+      "mean": 6.03
+     },
+     "list_cards": {
+      "n": 31,
+      "p50": 15.32,
+      "p95": 89.82,
+      "p99": 111.1,
+      "mean": 33.19
+     },
+     "open_dispute": {
+      "n": 12,
+      "p50": 10.9,
+      "p95": 20.19,
+      "p99": 41.0,
+      "mean": 13.31
+     },
+     "search_transactions": {
+      "n": 56,
+      "p50": 104.13,
+      "p95": 184.66,
+      "p99": 190.35,
+      "mean": 115.24
+     }
+    },
+    "peak_rss_mb": 649.8
+   },
+   {
+    "concurrency": 16,
+    "seconds": 21.02,
+    "conversations": 173,
+    "turns": 312,
+    "turns_per_s": 14.8,
+    "turn_ms": {
+     "n": 312,
+     "p50": 810.25,
+     "p95": 2228.87,
+     "p99": 2552.99,
+     "mean": 1005.74
+    },
+    "overhead_ms": {
+     "n": 312,
+     "p50": 494.47,
+     "p95": 2167.7,
+     "p99": 2491.84,
+     "mean": 785.8
+    },
+    "cpu_ms_per_turn": 128.41,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 139,
+     "informed": 35,
+     "handoff": 87,
+     "rejected": 9,
+     "resolved": 42
+    },
+    "scenarios": {
+     "dispute_amount": 63,
+     "dispute_ambiguous": 40,
+     "out_of_scope": 34,
+     "block_card": 36
+    },
+    "node_ms": {
+     "act": {
+      "n": 42,
+      "p50": 46.31,
+      "p95": 117.84,
+      "p99": 228.0,
+      "mean": 53.69
+     },
+     "decide": {
+      "n": 103,
+      "p50": 83.87,
+      "p95": 363.95,
+      "p99": 540.02,
+      "mean": 119.74
+     },
+     "find_card": {
+      "n": 36,
+      "p50": 113.85,
+      "p95": 204.49,
+      "p99": 498.77,
+      "mean": 115.32
+     },
+     "find_transaction": {
+      "n": 103,
+      "p50": 439.18,
+      "p95": 1169.79,
+      "p99": 1490.17,
+      "mean": 482.12
+     },
+     "guard": {
+      "n": 312,
+      "p50": 0.09,
+      "p95": 0.16,
+      "p99": 0.25,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 87,
+      "p50": 0.03,
+      "p95": 0.08,
+      "p99": 0.12,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 312,
+      "p50": 0.07,
+      "p95": 0.18,
+      "p99": 4.88,
+      "mean": 0.26
+     },
+     "select_option": {
+      "n": 97,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 312,
+      "p50": 0.35,
+      "p95": 0.47,
+      "p99": 4.49,
+      "mean": 0.35
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 29,
+      "p50": 29.04,
+      "p95": 87.78,
+      "p99": 117.8,
+      "mean": 40.4
+     },
+     "dispute_history": {
+      "n": 103,
+      "p50": 38.16,
+      "p95": 119.24,
+      "p99": 178.43,
+      "mean": 49.87
+     },
+     "get_profile": {
+      "n": 103,
+      "p50": 7.34,
+      "p95": 36.49,
+      "p99": 54.68,
+      "mean": 10.62
+     },
+     "get_transaction": {
+      "n": 103,
+      "p50": 18.53,
+      "p95": 55.71,
+      "p99": 72.77,
+      "mean": 21.7
+     },
+     "list_cards": {
+      "n": 61,
+      "p50": 116.35,
+      "p95": 311.83,
+      "p99": 423.92,
+      "mean": 131.04
+     },
+     "open_dispute": {
+      "n": 25,
+      "p50": 37.23,
+      "p95": 97.6,
+      "p99": 154.68,
+      "mean": 43.27
+     },
+     "search_transactions": {
+      "n": 103,
+      "p50": 439.15,
+      "p95": 1169.76,
+      "p99": 1490.14,
+      "mean": 481.97
+     }
+    },
+    "peak_rss_mb": 697.9
+   },
+   {
+    "concurrency": 32,
+    "seconds": 20.9,
+    "conversations": 194,
+    "turns": 343,
+    "turns_per_s": 16.4,
+    "turn_ms": {
+     "n": 343,
+     "p50": 1508.56,
+     "p95": 4835.35,
+     "p99": 5599.13,
+     "mean": 1917.56
+    },
+    "overhead_ms": {
+     "n": 343,
+     "p50": 1306.95,
+     "p95": 4805.02,
+     "p99": 5598.55,
+     "mean": 1692.37
+    },
+    "cpu_ms_per_turn": 141.72,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 149,
+     "informed": 44,
+     "handoff": 99,
+     "rejected": 10,
+     "resolved": 41
+    },
+    "scenarios": {
+     "dispute_amount": 82,
+     "dispute_ambiguous": 41,
+     "out_of_scope": 34,
+     "block_card": 37
+    },
+    "node_ms": {
+     "act": {
+      "n": 41,
+      "p50": 26.5,
+      "p95": 105.02,
+      "p99": 115.45,
+      "mean": 40.51
+     },
+     "decide": {
+      "n": 123,
+      "p50": 41.55,
+      "p95": 168.23,
+      "p99": 361.37,
+      "mean": 64.26
+     },
+     "find_card": {
+      "n": 37,
+      "p50": 62.44,
+      "p95": 265.25,
+      "p99": 376.39,
+      "mean": 95.21
+     },
+     "find_transaction": {
+      "n": 123,
+      "p50": 164.32,
+      "p95": 2055.14,
+      "p99": 2344.34,
+      "mean": 520.16
+     },
+     "guard": {
+      "n": 343,
+      "p50": 0.09,
+      "p95": 0.14,
+      "p99": 0.22,
+      "mean": 0.09
+     },
+     "handoff": {
+      "n": 99,
+      "p50": 0.04,
+      "p95": 0.08,
+      "p99": 0.14,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 343,
+      "p50": 0.08,
+      "p95": 0.17,
+      "p99": 0.23,
+      "mean": 0.08
+     },
+     "select_option": {
+      "n": 108,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 343,
+      "p50": 0.36,
+      "p95": 0.5,
+      "p99": 0.8,
+      "mean": 0.3
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 29,
+      "p50": 23.33,
+      "p95": 106.35,
+      "p99": 115.41,
+      "mean": 31.18
+     },
+     "dispute_history": {
+      "n": 123,
+      "p50": 18.08,
+      "p95": 80.01,
+      "p99": 121.89,
+      "mean": 27.04
+     },
+     "get_profile": {
+      "n": 123,
+      "p50": 3.83,
+      "p95": 23.64,
+      "p99": 33.26,
+      "mean": 6.38
+     },
+     "get_transaction": {
+      "n": 123,
+      "p50": 8.23,
+      "p95": 39.51,
+      "p99": 62.2,
+      "mean": 13.89
+     },
+     "list_cards": {
+      "n": 62,
+      "p50": 61.17,
+      "p95": 265.21,
+      "p99": 326.38,
+      "mean": 89.9
+     },
+     "open_dispute": {
+      "n": 25,
+      "p50": 23.94,
+      "p95": 92.31,
+      "p99": 98.3,
+      "mean": 30.21
+     },
+     "search_transactions": {
+      "n": 123,
+      "p50": 164.27,
+      "p95": 2055.11,
+      "p99": 2344.3,
+      "mean": 520.12
+     }
+    },
+    "peak_rss_mb": 737.3
+   }
+  ]
+ },
+ {
+  "label": "C_final_code_with_index",
+  "mode": "threads",
+  "db": "serving.duckdb + LOOKUP_INDEXES",
+  "at": "2026-09-28T21:54:36",
+  "machine": {
+   "platform": "Windows-11-10.0.26200-SP0",
+   "python": "3.12.2",
+   "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+   "logical_cpus": 8,
+   "duckdb": "1.5.6"
+  },
+  "results": [
+   {
+    "concurrency": 1,
+    "seconds": 20.11,
+    "conversations": 170,
+    "turns": 342,
+    "turns_per_s": 17.0,
+    "turn_ms": {
+     "n": 342,
+     "p50": 36.22,
+     "p95": 175.57,
+     "p99": 245.96,
+     "mean": 58.05
+    },
+    "overhead_ms": {
+     "n": 342,
+     "p50": 24.79,
+     "p95": 169.19,
+     "p99": 242.78,
+     "mean": 47.64
+    },
+    "cpu_ms_per_turn": 32.03,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 172,
+     "informed": 10,
+     "handoff": 76,
+     "resolved": 73,
+     "rejected": 11
+    },
+    "scenarios": {
+     "dispute_amount": 74,
+     "dispute_ambiguous": 38,
+     "out_of_scope": 27,
+     "block_card": 31
+    },
+    "node_ms": {
+     "act": {
+      "n": 73,
+      "p50": 8.06,
+      "p95": 18.18,
+      "p99": 27.47,
+      "mean": 10.14
+     },
+     "decide": {
+      "n": 112,
+      "p50": 10.79,
+      "p95": 19.18,
+      "p99": 23.57,
+      "mean": 11.38
+     },
+     "find_card": {
+      "n": 31,
+      "p50": 4.68,
+      "p95": 8.37,
+      "p99": 10.45,
+      "mean": 5.29
+     },
+     "find_transaction": {
+      "n": 112,
+      "p50": 10.34,
+      "p95": 17.24,
+      "p99": 20.29,
+      "mean": 10.81
+     },
+     "guard": {
+      "n": 342,
+      "p50": 0.1,
+      "p95": 0.17,
+      "p99": 0.24,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 76,
+      "p50": 0.06,
+      "p95": 0.12,
+      "p99": 0.14,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 342,
+      "p50": 0.08,
+      "p95": 0.18,
+      "p99": 0.4,
+      "mean": 0.09
+     },
+     "select_option": {
+      "n": 99,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 342,
+      "p50": 0.26,
+      "p95": 0.55,
+      "p99": 0.75,
+      "mean": 0.29
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 46,
+      "p50": 7.1,
+      "p95": 12.23,
+      "p99": 32.35,
+      "mean": 8.1
+     },
+     "dispute_history": {
+      "n": 112,
+      "p50": 3.34,
+      "p95": 6.54,
+      "p99": 13.96,
+      "mean": 3.85
+     },
+     "get_profile": {
+      "n": 112,
+      "p50": 1.41,
+      "p95": 2.92,
+      "p99": 3.77,
+      "mean": 1.59
+     },
+     "get_transaction": {
+      "n": 112,
+      "p50": 3.29,
+      "p95": 5.87,
+      "p99": 7.27,
+      "mean": 3.53
+     },
+     "list_cards": {
+      "n": 82,
+      "p50": 4.56,
+      "p95": 8.3,
+      "p99": 9.74,
+      "mean": 5.01
+     },
+     "open_dispute": {
+      "n": 51,
+      "p50": 6.62,
+      "p95": 10.69,
+      "p99": 17.52,
+      "mean": 7.14
+     },
+     "search_transactions": {
+      "n": 112,
+      "p50": 10.29,
+      "p95": 17.19,
+      "p99": 20.22,
+      "mean": 10.76
+     }
+    },
+    "peak_rss_mb": 650.0
+   },
+   {
+    "concurrency": 4,
+    "seconds": 20.21,
+    "conversations": 447,
+    "turns": 846,
+    "turns_per_s": 41.9,
+    "turn_ms": {
+     "n": 846,
+     "p50": 86.39,
+     "p95": 160.06,
+     "p99": 239.96,
+     "mean": 93.73
+    },
+    "overhead_ms": {
+     "n": 846,
+     "p50": 67.98,
+     "p95": 146.97,
+     "p99": 226.9,
+     "mean": 77.13
+    },
+    "cpu_ms_per_turn": 29.81,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 399,
+     "informed": 57,
+     "handoff": 211,
+     "rejected": 33,
+     "resolved": 146
+    },
+    "scenarios": {
+     "dispute_amount": 186,
+     "dispute_ambiguous": 107,
+     "out_of_scope": 74,
+     "block_card": 80
+    },
+    "node_ms": {
+     "act": {
+      "n": 146,
+      "p50": 16.99,
+      "p95": 37.64,
+      "p99": 47.52,
+      "mean": 19.59
+     },
+     "decide": {
+      "n": 293,
+      "p50": 19.27,
+      "p95": 33.52,
+      "p99": 40.56,
+      "mean": 19.98
+     },
+     "find_card": {
+      "n": 80,
+      "p50": 9.55,
+      "p95": 17.2,
+      "p99": 19.84,
+      "mean": 9.86
+     },
+     "find_transaction": {
+      "n": 293,
+      "p50": 13.23,
+      "p95": 22.31,
+      "p99": 26.21,
+      "mean": 13.9
+     },
+     "guard": {
+      "n": 846,
+      "p50": 0.11,
+      "p95": 0.2,
+      "p99": 0.37,
+      "mean": 0.11
+     },
+     "handoff": {
+      "n": 211,
+      "p50": 0.07,
+      "p95": 0.14,
+      "p99": 0.28,
+      "mean": 0.07
+     },
+     "respond": {
+      "n": 846,
+      "p50": 0.09,
+      "p95": 0.23,
+      "p99": 0.34,
+      "mean": 0.1
+     },
+     "select_option": {
+      "n": 253,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.03,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 846,
+      "p50": 0.35,
+      "p95": 0.63,
+      "p99": 0.92,
+      "mean": 0.32
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 101,
+      "p50": 14.47,
+      "p95": 23.89,
+      "p99": 26.25,
+      "mean": 14.51
+     },
+     "dispute_history": {
+      "n": 293,
+      "p50": 5.9,
+      "p95": 14.18,
+      "p99": 16.41,
+      "mean": 6.9
+     },
+     "get_profile": {
+      "n": 293,
+      "p50": 3.85,
+      "p95": 9.08,
+      "p99": 11.8,
+      "mean": 4.19
+     },
+     "get_transaction": {
+      "n": 293,
+      "p50": 5.66,
+      "p95": 11.07,
+      "p99": 14.31,
+      "mean": 6.12
+     },
+     "list_cards": {
+      "n": 172,
+      "p50": 7.82,
+      "p95": 16.25,
+      "p99": 19.8,
+      "mean": 8.97
+     },
+     "open_dispute": {
+      "n": 92,
+      "p50": 14.31,
+      "p95": 23.87,
+      "p99": 27.45,
+      "mean": 15.07
+     },
+     "search_transactions": {
+      "n": 293,
+      "p50": 13.19,
+      "p95": 22.26,
+      "p99": 26.17,
+      "mean": 13.85
+     }
+    },
+    "peak_rss_mb": 797.2
+   },
+   {
+    "concurrency": 8,
+    "seconds": 20.09,
+    "conversations": 690,
+    "turns": 1232,
+    "turns_per_s": 61.3,
+    "turn_ms": {
+     "n": 1232,
+     "p50": 117.19,
+     "p95": 233.42,
+     "p99": 304.95,
+     "mean": 129.48
+    },
+    "overhead_ms": {
+     "n": 1232,
+     "p50": 99.04,
+     "p95": 218.75,
+     "p99": 280.23,
+     "mean": 112.26
+    },
+    "cpu_ms_per_turn": 24.79,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 542,
+     "informed": 131,
+     "handoff": 361,
+     "rejected": 45,
+     "resolved": 153
+    },
+    "scenarios": {
+     "dispute_amount": 278,
+     "dispute_ambiguous": 161,
+     "out_of_scope": 114,
+     "block_card": 137
+    },
+    "node_ms": {
+     "act": {
+      "n": 153,
+      "p50": 18.8,
+      "p95": 38.27,
+      "p99": 39.77,
+      "mean": 21.67
+     },
+     "decide": {
+      "n": 439,
+      "p50": 20.47,
+      "p95": 36.11,
+      "p99": 44.78,
+      "mean": 22.42
+     },
+     "find_card": {
+      "n": 137,
+      "p50": 11.15,
+      "p95": 17.73,
+      "p99": 22.87,
+      "mean": 11.35
+     },
+     "find_transaction": {
+      "n": 439,
+      "p50": 12.95,
+      "p95": 21.45,
+      "p99": 23.42,
+      "mean": 13.51
+     },
+     "guard": {
+      "n": 1232,
+      "p50": 0.09,
+      "p95": 0.15,
+      "p99": 0.19,
+      "mean": 0.09
+     },
+     "handoff": {
+      "n": 361,
+      "p50": 0.04,
+      "p95": 0.1,
+      "p99": 0.15,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 1232,
+      "p50": 0.08,
+      "p95": 0.17,
+      "p99": 0.26,
+      "mean": 0.08
+     },
+     "select_option": {
+      "n": 389,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.03,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 1232,
+      "p50": 0.26,
+      "p95": 0.52,
+      "p99": 0.64,
+      "mean": 0.27
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 105,
+      "p50": 15.77,
+      "p95": 21.83,
+      "p99": 23.62,
+      "mean": 15.32
+     },
+     "dispute_history": {
+      "n": 439,
+      "p50": 8.21,
+      "p95": 15.08,
+      "p99": 17.65,
+      "mean": 8.68
+     },
+     "get_profile": {
+      "n": 439,
+      "p50": 4.58,
+      "p95": 10.02,
+      "p99": 13.01,
+      "mean": 5.35
+     },
+     "get_transaction": {
+      "n": 439,
+      "p50": 5.88,
+      "p95": 10.27,
+      "p99": 14.51,
+      "mean": 6.16
+     },
+     "list_cards": {
+      "n": 233,
+      "p50": 10.39,
+      "p95": 17.72,
+      "p99": 20.26,
+      "mean": 10.61
+     },
+     "open_dispute": {
+      "n": 96,
+      "p50": 18.03,
+      "p95": 23.53,
+      "p99": 24.81,
+      "mean": 17.73
+     },
+     "search_transactions": {
+      "n": 439,
+      "p50": 12.92,
+      "p95": 21.41,
+      "p99": 23.38,
+      "mean": 13.48
+     }
+    },
+    "peak_rss_mb": 903.2
+   },
+   {
+    "concurrency": 16,
+    "seconds": 20.44,
+    "conversations": 639,
+    "turns": 1111,
+    "turns_per_s": 54.4,
+    "turn_ms": {
+     "n": 1111,
+     "p50": 259.02,
+     "p95": 574.69,
+     "p99": 695.79,
+     "mean": 290.64
+    },
+    "overhead_ms": {
+     "n": 1111,
+     "p50": 235.7,
+     "p95": 554.56,
+     "p99": 672.8,
+     "mean": 272.09
+    },
+    "cpu_ms_per_turn": 26.05,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 472,
+     "informed": 142,
+     "handoff": 339,
+     "rejected": 43,
+     "resolved": 115
+    },
+    "scenarios": {
+     "dispute_amount": 267,
+     "dispute_ambiguous": 151,
+     "out_of_scope": 101,
+     "block_card": 120
+    },
+    "node_ms": {
+     "act": {
+      "n": 115,
+      "p50": 20.67,
+      "p95": 41.02,
+      "p99": 48.36,
+      "mean": 24.02
+     },
+     "decide": {
+      "n": 418,
+      "p50": 22.38,
+      "p95": 35.5,
+      "p99": 42.58,
+      "mean": 23.31
+     },
+     "find_card": {
+      "n": 120,
+      "p50": 11.01,
+      "p95": 18.06,
+      "p99": 38.18,
+      "mean": 12.36
+     },
+     "find_transaction": {
+      "n": 418,
+      "p50": 13.72,
+      "p95": 22.0,
+      "p99": 29.02,
+      "mean": 14.52
+     },
+     "guard": {
+      "n": 1111,
+      "p50": 0.09,
+      "p95": 0.16,
+      "p99": 0.2,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 339,
+      "p50": 0.05,
+      "p95": 0.1,
+      "p99": 0.12,
+      "mean": 0.05
+     },
+     "respond": {
+      "n": 1111,
+      "p50": 0.08,
+      "p95": 0.18,
+      "p99": 0.24,
+      "mean": 0.09
+     },
+     "select_option": {
+      "n": 357,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 1111,
+      "p50": 0.31,
+      "p95": 0.53,
+      "p99": 0.69,
+      "mean": 0.28
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 79,
+      "p50": 16.33,
+      "p95": 23.35,
+      "p99": 24.11,
+      "mean": 15.83
+     },
+     "dispute_history": {
+      "n": 418,
+      "p50": 8.88,
+      "p95": 15.14,
+      "p99": 18.5,
+      "mean": 8.88
+     },
+     "get_profile": {
+      "n": 418,
+      "p50": 4.99,
+      "p95": 11.26,
+      "p99": 14.43,
+      "mean": 5.48
+     },
+     "get_transaction": {
+      "n": 418,
+      "p50": 6.16,
+      "p95": 11.49,
+      "p99": 17.58,
+      "mean": 7.03
+     },
+     "list_cards": {
+      "n": 193,
+      "p50": 10.49,
+      "p95": 17.84,
+      "p99": 31.71,
+      "mean": 11.55
+     },
+     "open_dispute": {
+      "n": 73,
+      "p50": 19.86,
+      "p95": 28.27,
+      "p99": 30.84,
+      "mean": 20.66
+     },
+     "search_transactions": {
+      "n": 418,
+      "p50": 13.68,
+      "p95": 21.97,
+      "p99": 28.98,
+      "mean": 14.49
+     }
+    },
+    "peak_rss_mb": 976.6
+   },
+   {
+    "concurrency": 32,
+    "seconds": 21.46,
+    "conversations": 246,
+    "turns": 435,
+    "turns_per_s": 20.3,
+    "turn_ms": {
+     "n": 435,
+     "p50": 1443.21,
+     "p95": 2100.61,
+     "p99": 2415.99,
+     "mean": 1472.63
+    },
+    "overhead_ms": {
+     "n": 435,
+     "p50": 1424.76,
+     "p95": 2084.74,
+     "p99": 2394.05,
+     "mean": 1457.87
+    },
+    "cpu_ms_per_turn": 25.36,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "clarify": 189,
+     "informed": 57,
+     "handoff": 126,
+     "rejected": 15,
+     "resolved": 48
+    },
+    "scenarios": {
+     "dispute_amount": 102,
+     "dispute_ambiguous": 57,
+     "out_of_scope": 41,
+     "block_card": 46
+    },
+    "node_ms": {
+     "act": {
+      "n": 48,
+      "p50": 13.28,
+      "p95": 36.92,
+      "p99": 192.19,
+      "mean": 18.84
+     },
+     "decide": {
+      "n": 159,
+      "p50": 14.38,
+      "p95": 35.0,
+      "p99": 44.08,
+      "mean": 17.18
+     },
+     "find_card": {
+      "n": 46,
+      "p50": 9.12,
+      "p95": 22.58,
+      "p99": 31.47,
+      "mean": 10.48
+     },
+     "find_transaction": {
+      "n": 159,
+      "p50": 11.81,
+      "p95": 25.92,
+      "p99": 34.75,
+      "mean": 13.17
+     },
+     "guard": {
+      "n": 435,
+      "p50": 0.09,
+      "p95": 0.16,
+      "p99": 0.2,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 126,
+      "p50": 0.05,
+      "p95": 0.1,
+      "p99": 0.24,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 435,
+      "p50": 0.08,
+      "p95": 0.18,
+      "p99": 0.26,
+      "mean": 0.09
+     },
+     "select_option": {
+      "n": 141,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 435,
+      "p50": 0.32,
+      "p95": 0.5,
+      "p99": 0.63,
+      "mean": 0.28
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 32,
+      "p50": 9.03,
+      "p95": 17.05,
+      "p99": 26.05,
+      "mean": 10.32
+     },
+     "dispute_history": {
+      "n": 159,
+      "p50": 3.56,
+      "p95": 15.43,
+      "p99": 21.78,
+      "mean": 5.66
+     },
+     "get_profile": {
+      "n": 159,
+      "p50": 2.4,
+      "p95": 9.68,
+      "p99": 16.76,
+      "mean": 3.66
+     },
+     "get_transaction": {
+      "n": 159,
+      "p50": 5.24,
+      "p95": 16.61,
+      "p99": 31.23,
+      "mean": 6.73
+     },
+     "list_cards": {
+      "n": 77,
+      "p50": 6.09,
+      "p95": 17.94,
+      "p99": 24.55,
+      "mean": 8.33
+     },
+     "open_dispute": {
+      "n": 31,
+      "p50": 10.82,
+      "p95": 31.03,
+      "p99": 192.17,
+      "mean": 18.47
+     },
+     "search_transactions": {
+      "n": 159,
+      "p50": 11.79,
+      "p95": 25.88,
+      "p99": 34.72,
+      "mean": 13.13
+     }
+    },
+    "peak_rss_mb": 1016.2
+   }
+  ]
+ },
+ {
+  "label": "D_processes_with_index",
+  "mode": "processes",
+  "db": "serving.duckdb + LOOKUP_INDEXES",
+  "at": "2026-09-28T21:56:10",
+  "machine": {
+   "platform": "Windows-11-10.0.26200-SP0",
+   "python": "3.12.2",
+   "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+   "logical_cpus": 8,
+   "duckdb": "1.5.6"
+  },
+  "results": [
+   {
+    "concurrency": 1,
+    "seconds": 20,
+    "conversations": 300,
+    "turns": 631,
+    "turns_per_s": 31.6,
+    "turn_ms": {
+     "n": 631,
+     "p50": 25.07,
+     "p95": 74.52,
+     "p99": 114.54,
+     "mean": 31.25
+    },
+    "overhead_ms": {
+     "n": 631,
+     "p50": 13.9,
+     "p95": 63.91,
+     "p99": 107.39,
+     "mean": 20.77
+    },
+    "cpu_ms_per_turn": 30.31,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "handoff": 131,
+     "clarify": 331,
+     "resolved": 151,
+     "rejected": 14,
+     "informed": 4
+    },
+    "scenarios": {
+     "block_card": 64,
+     "out_of_scope": 41,
+     "dispute_ambiguous": 71,
+     "dispute_amount": 124
+    },
+    "node_ms": {
+     "act": {
+      "n": 151,
+      "p50": 8.16,
+      "p95": 16.83,
+      "p99": 21.65,
+      "mean": 10.18
+     },
+     "decide": {
+      "n": 195,
+      "p50": 10.51,
+      "p95": 15.84,
+      "p99": 18.76,
+      "mean": 10.85
+     },
+     "find_card": {
+      "n": 64,
+      "p50": 4.72,
+      "p95": 8.04,
+      "p99": 8.72,
+      "mean": 5.14
+     },
+     "find_transaction": {
+      "n": 195,
+      "p50": 11.1,
+      "p95": 18.6,
+      "p99": 39.33,
+      "mean": 12.08
+     },
+     "guard": {
+      "n": 631,
+      "p50": 0.09,
+      "p95": 0.15,
+      "p99": 0.2,
+      "mean": 0.09
+     },
+     "handoff": {
+      "n": 131,
+      "p50": 0.06,
+      "p95": 0.11,
+      "p99": 0.13,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 631,
+      "p50": 0.08,
+      "p95": 0.17,
+      "p99": 0.22,
+      "mean": 0.08
+     },
+     "select_option": {
+      "n": 180,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 631,
+      "p50": 0.18,
+      "p95": 0.5,
+      "p99": 0.59,
+      "mean": 0.25
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 100,
+      "p50": 7.69,
+      "p95": 10.41,
+      "p99": 13.72,
+      "mean": 8.34
+     },
+     "dispute_history": {
+      "n": 195,
+      "p50": 3.41,
+      "p95": 5.05,
+      "p99": 6.77,
+      "mean": 3.58
+     },
+     "get_profile": {
+      "n": 195,
+      "p50": 1.45,
+      "p95": 2.31,
+      "p99": 2.58,
+      "mean": 1.53
+     },
+     "get_transaction": {
+      "n": 195,
+      "p50": 3.08,
+      "p95": 4.59,
+      "p99": 5.66,
+      "mean": 3.15
+     },
+     "list_cards": {
+      "n": 163,
+      "p50": 4.56,
+      "p95": 7.77,
+      "p99": 8.68,
+      "mean": 4.89
+     },
+     "open_dispute": {
+      "n": 99,
+      "p50": 6.8,
+      "p95": 9.5,
+      "p99": 11.27,
+      "mean": 7.03
+     },
+     "search_transactions": {
+      "n": 195,
+      "p50": 11.06,
+      "p95": 18.56,
+      "p99": 39.27,
+      "mean": 12.03
+     }
+    },
+    "peak_rss_mb": 718.2
+   },
+   {
+    "concurrency": 4,
+    "seconds": 20,
+    "conversations": 459,
+    "turns": 928,
+    "turns_per_s": 46.4,
+    "turn_ms": {
+     "n": 928,
+     "p50": 77.9,
+     "p95": 164.65,
+     "p99": 221.05,
+     "mean": 85.97
+    },
+    "overhead_ms": {
+     "n": 928,
+     "p50": 65.08,
+     "p95": 147.02,
+     "p99": 199.04,
+     "mean": 73.19
+    },
+    "cpu_ms_per_turn": 31.38,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "handoff": 237,
+     "clarify": 469,
+     "resolved": 198,
+     "rejected": 22,
+     "informed": 2
+    },
+    "scenarios": {
+     "block_card": 82,
+     "out_of_scope": 75,
+     "dispute_ambiguous": 109,
+     "dispute_amount": 193
+    },
+    "node_ms": {
+     "act": {
+      "n": 198,
+      "p50": 9.31,
+      "p95": 20.24,
+      "p99": 31.26,
+      "mean": 11.62
+     },
+     "decide": {
+      "n": 302,
+      "p50": 11.46,
+      "p95": 21.86,
+      "p99": 41.87,
+      "mean": 12.63
+     },
+     "find_card": {
+      "n": 82,
+      "p50": 4.89,
+      "p95": 9.42,
+      "p99": 14.1,
+      "mean": 5.73
+     },
+     "find_transaction": {
+      "n": 302,
+      "p50": 11.62,
+      "p95": 42.51,
+      "p99": 77.51,
+      "mean": 15.81
+     },
+     "guard": {
+      "n": 928,
+      "p50": 0.1,
+      "p95": 0.16,
+      "p99": 0.29,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 237,
+      "p50": 0.06,
+      "p95": 0.11,
+      "p99": 0.21,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 928,
+      "p50": 0.08,
+      "p95": 0.19,
+      "p99": 0.37,
+      "mean": 0.14
+     },
+     "select_option": {
+      "n": 271,
+      "p50": 0.01,
+      "p95": 0.02,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 928,
+      "p50": 0.32,
+      "p95": 0.54,
+      "p99": 0.75,
+      "mean": 0.28
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 134,
+      "p50": 8.06,
+      "p95": 12.75,
+      "p99": 31.23,
+      "mean": 8.93
+     },
+     "dispute_history": {
+      "n": 302,
+      "p50": 3.35,
+      "p95": 6.32,
+      "p99": 17.47,
+      "mean": 3.9
+     },
+     "get_profile": {
+      "n": 302,
+      "p50": 1.57,
+      "p95": 3.19,
+      "p99": 5.16,
+      "mean": 1.91
+     },
+     "get_transaction": {
+      "n": 302,
+      "p50": 3.44,
+      "p95": 5.97,
+      "p99": 10.25,
+      "mean": 3.76
+     },
+     "list_cards": {
+      "n": 227,
+      "p50": 4.81,
+      "p95": 11.33,
+      "p99": 30.71,
+      "mean": 5.91
+     },
+     "open_dispute": {
+      "n": 145,
+      "p50": 6.83,
+      "p95": 11.74,
+      "p99": 17.88,
+      "mean": 7.56
+     },
+     "search_transactions": {
+      "n": 302,
+      "p50": 11.59,
+      "p95": 42.47,
+      "p99": 77.47,
+      "mean": 15.77
+     }
+    },
+    "peak_rss_mb": 2434.9
+   },
+   {
+    "concurrency": 8,
+    "seconds": 20,
+    "conversations": 948,
+    "turns": 1951,
+    "turns_per_s": 97.5,
+    "turn_ms": {
+     "n": 1951,
+     "p50": 72.24,
+     "p95": 158.18,
+     "p99": 229.2,
+     "mean": 81.54
+    },
+    "overhead_ms": {
+     "n": 1951,
+     "p50": 59.95,
+     "p95": 134.69,
+     "p99": 190.61,
+     "mean": 68.67
+    },
+    "cpu_ms_per_turn": 31.3,
+    "error_rate": 0.0,
+    "errors": {},
+    "tool_retries": 0,
+    "outcomes": {
+     "handoff": 457,
+     "clarify": 1003,
+     "resolved": 437,
+     "rejected": 50,
+     "informed": 4
+    },
+    "scenarios": {
+     "block_card": 176,
+     "out_of_scope": 155,
+     "dispute_ambiguous": 234,
+     "dispute_amount": 383
+    },
+    "node_ms": {
+     "act": {
+      "n": 437,
+      "p50": 10.26,
+      "p95": 22.04,
+      "p99": 29.75,
+      "mean": 11.47
+     },
+     "decide": {
+      "n": 617,
+      "p50": 11.47,
+      "p95": 21.13,
+      "p99": 30.23,
+      "mean": 12.19
+     },
+     "find_card": {
+      "n": 176,
+      "p50": 4.65,
+      "p95": 9.64,
+      "p99": 16.23,
+      "mean": 5.36
+     },
+     "find_transaction": {
+      "n": 617,
+      "p50": 11.94,
+      "p95": 43.05,
+      "p99": 140.79,
+      "mean": 17.28
+     },
+     "guard": {
+      "n": 1951,
+      "p50": 0.09,
+      "p95": 0.14,
+      "p99": 0.19,
+      "mean": 0.1
+     },
+     "handoff": {
+      "n": 457,
+      "p50": 0.06,
+      "p95": 0.09,
+      "p99": 0.12,
+      "mean": 0.06
+     },
+     "respond": {
+      "n": 1951,
+      "p50": 0.07,
+      "p95": 0.17,
+      "p99": 0.28,
+      "mean": 0.1
+     },
+     "select_option": {
+      "n": 566,
+      "p50": 0.01,
+      "p95": 0.01,
+      "p99": 0.02,
+      "mean": 0.01
+     },
+     "understand": {
+      "n": 1951,
+      "p50": 0.2,
+      "p95": 0.49,
+      "p99": 0.83,
+      "mean": 0.28
+     }
+    },
+    "tool_ms": {
+     "block_card": {
+      "n": 304,
+      "p50": 7.6,
+      "p95": 14.97,
+      "p99": 21.5,
+      "mean": 8.66
+     },
+     "dispute_history": {
+      "n": 617,
+      "p50": 3.21,
+      "p95": 7.18,
+      "p99": 12.25,
+      "mean": 3.75
+     },
+     "get_profile": {
+      "n": 617,
+      "p50": 1.44,
+      "p95": 2.97,
+      "p99": 8.62,
+      "mean": 1.76
+     },
+     "get_transaction": {
+      "n": 617,
+      "p50": 3.35,
+      "p95": 5.86,
+      "p99": 9.73,
+      "mean": 3.73
+     },
+     "list_cards": {
+      "n": 493,
+      "p50": 4.65,
+      "p95": 9.97,
+      "p99": 15.47,
+      "mean": 5.32
+     },
+     "open_dispute": {
+      "n": 317,
+      "p50": 6.39,
+      "p95": 15.37,
+      "p99": 20.24,
+      "mean": 7.43
+     },
+     "search_transactions": {
+      "n": 617,
+      "p50": 11.91,
+      "p95": 43.01,
+      "p99": 140.75,
+      "mean": 17.24
+     }
+    },
+    "peak_rss_mb": 4883.4
+   }
+  ]
+ }
+]
