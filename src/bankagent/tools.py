@@ -11,6 +11,7 @@ Reglas de esta capa (no negociables, no dependen del prompt):
 from __future__ import annotations
 
 import datetime as dt
+import threading
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -45,6 +46,7 @@ class BankTools:
     def __post_init__(self):
         self._ro = duckdb.connect(self.serving_db, read_only=True)
         self._ops = duckdb.connect(self.ops_db)
+        self._local = threading.local()
         self._ops.execute("""CREATE TABLE IF NOT EXISTS card_blocks (
             product_id VARCHAR PRIMARY KEY, customer_id VARCHAR, blocked_at TIMESTAMP, reason VARCHAR)""")
         self._ops.execute("""CREATE TABLE IF NOT EXISTS disputes (
@@ -52,6 +54,20 @@ class BankTools:
             reason VARCHAR, status VARCHAR, created_at TIMESTAMP)""")
 
     # ------------------------------------------------------------------ utilidades
+    # Un cursor por hilo. Una conexión DuckDB compartida entre hilos MEZCLA resultados: la prueba de carga
+    # (#19) mostró a un cliente recibiendo filas de otro. Ver tests/test_concurrency.py.
+    @property
+    def _ro_c(self) -> duckdb.DuckDBPyConnection:
+        if getattr(self._local, "ro", None) is None:
+            self._local.ro = self._ro.cursor()
+        return self._local.ro
+
+    @property
+    def _ops_c(self) -> duckdb.DuckDBPyConnection:
+        if getattr(self._local, "ops", None) is None:
+            self._local.ops = self._ops.cursor()
+        return self._local.ops
+
     def _run(self, tool: str, args: dict, fn):
         t0 = time.perf_counter()
         try:
@@ -63,7 +79,7 @@ class BankTools:
             raise
 
     def _rows(self, sql: str, params: list) -> list[dict]:
-        cur = self._ro.execute(sql, params)
+        cur = self._ro_c.execute(sql, params)
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]
 
@@ -80,9 +96,10 @@ class BankTools:
     def list_cards(self, token: str) -> list[dict]:
         def fn():
             cid = self.identity.resolve(token).customer_id
-            cards = self._rows(f"""SELECT product_id, product_type, product_number, currency, product_status
-                FROM products WHERE customer_id = ? AND product_type IN {CARD_TYPES} ORDER BY product_type""", [cid])
-            blocked = {r[0] for r in self._ops.execute("SELECT product_id FROM card_blocks WHERE customer_id = ?", [cid]).fetchall()}
+            cards = self._rows(f"""WITH own AS MATERIALIZED (SELECT product_id, product_type, product_number, currency,
+                    product_status FROM products WHERE customer_id = ?)
+                SELECT * FROM own WHERE product_type IN {CARD_TYPES} ORDER BY product_type""", [cid])
+            blocked = {r[0] for r in self._ops_c.execute("SELECT product_id FROM card_blocks WHERE customer_id = ?", [cid]).fetchall()}
             for c in cards:
                 if c["product_id"] in blocked:
                     c["product_status"] = "Blocked"
@@ -97,16 +114,20 @@ class BankTools:
 
         def fn():
             cid = self.identity.resolve(token).customer_id
-            where, params = ["customer_id = ?"], [cid]
+            where, params = [], [cid]
             if date_from: where.append("transaction_date >= ?"); params.append(date_from)
             if date_to: where.append("transaction_date < ? + INTERVAL 1 DAY"); params.append(date_to)
             if amount_min is not None: where.append("amount >= ?"); params.append(amount_min)
             if amount_max is not None: where.append("amount <= ?"); params.append(amount_max)
             if merchant: where.append("merchant_name ILIKE ?"); params.append(f"%{merchant}%")
             if country: where.append("transaction_country = ?"); params.append(country)
-            return self._rows(f"""SELECT transaction_id, transaction_date, product_id, transaction_type, amount, currency,
+            # CTE materializada: aísla `customer_id = ?` para que DuckDB use el índice (ver pipeline.LOOKUP_INDEXES);
+            # con los demás filtros y el ORDER BY ... LIMIT en la misma consulta, el optimizador recorre la tabla entera.
+            return self._rows(f"""WITH own AS MATERIALIZED (
+                    SELECT transaction_id, transaction_date, product_id, transaction_type, amount, currency,
                     channel, merchant_name, transaction_country, transaction_city, transaction_status
-                FROM transactions WHERE {' AND '.join(where)} ORDER BY transaction_date DESC LIMIT {int(limit)}""", params)
+                    FROM transactions WHERE customer_id = ?)
+                SELECT * FROM own WHERE {' AND '.join(where) or 'true'} ORDER BY transaction_date DESC LIMIT {int(limit)}""", params)
         return self._run("search_transactions", args, fn)
 
     def get_transaction(self, token: str, transaction_id: str) -> dict:
@@ -124,9 +145,9 @@ class BankTools:
         """Hechos para la política: reclamos previos y disputas abiertas en esta sesión."""
         def fn():
             cid = self.identity.resolve(token).customer_id
-            r = self._ro.execute("""SELECT count(*) FILTER (WHERE creation_date >= (SELECT max(creation_date) FROM complaints) - INTERVAL 90 DAY),
+            r = self._ro_c.execute("""SELECT count(*) FILTER (WHERE creation_date >= (SELECT max(creation_date) FROM complaints) - INTERVAL 90 DAY),
                     bool_or(is_repeat_complainer) FROM complaints WHERE customer_id = ?""", [cid]).fetchone()
-            open_disputes = [x[0] for x in self._ops.execute("SELECT transaction_id FROM disputes WHERE customer_id = ?", [cid]).fetchall()]
+            open_disputes = [x[0] for x in self._ops_c.execute("SELECT transaction_id FROM disputes WHERE customer_id = ?", [cid]).fetchall()]
             return {"complaints_last_90d": r[0] or 0, "is_repeat_complainer": bool(r[1]), "open_dispute_transactions": open_disputes}
         return self._run("dispute_history", {}, fn)
 
@@ -136,11 +157,12 @@ class BankTools:
             cid = self.identity.resolve(token).customer_id
             if not confirmed:
                 raise ToolError("confirmation_required")
-            own = self._rows("SELECT product_type FROM products WHERE product_id = ? AND customer_id = ?", [product_id, cid])
+            own = self._rows("""WITH p AS MATERIALIZED (SELECT product_type, customer_id FROM products WHERE product_id = ?)
+                SELECT product_type FROM p WHERE customer_id = ?""", [product_id, cid])
             if not own or own[0]["product_type"] not in CARD_TYPES:
                 raise AuthError("forbidden")
-            self._ops.execute("INSERT OR IGNORE INTO card_blocks VALUES (?, ?, now(), 'customer_reported')", [product_id, cid])
-            verified = self._ops.execute("SELECT count(*) FROM card_blocks WHERE product_id = ?", [product_id]).fetchone()[0] == 1
+            self._ops_c.execute("INSERT OR IGNORE INTO card_blocks VALUES (?, ?, now(), 'customer_reported')", [product_id, cid])
+            verified = self._ops_c.execute("SELECT count(*) FROM card_blocks WHERE product_id = ?", [product_id]).fetchone()[0] == 1
             return {"product_id": product_id, "status": "Blocked" if verified else "Unknown", "verified": verified}
         return self._run("block_card", {"product_id": product_id, "confirmed": confirmed}, fn)
 
@@ -150,11 +172,11 @@ class BankTools:
             if not confirmed:
                 raise ToolError("confirmation_required")
             self.get_transaction(token, transaction_id)  # valida propiedad
-            existing = self._ops.execute("SELECT case_id FROM disputes WHERE transaction_id = ?", [transaction_id]).fetchone()
+            existing = self._ops_c.execute("SELECT case_id FROM disputes WHERE transaction_id = ?", [transaction_id]).fetchone()
             case_id = existing[0] if existing else "DSP-" + uuid.uuid4().hex[:10].upper()
             if not existing:  # idempotente: repetir la acción no abre dos casos
-                self._ops.execute("INSERT INTO disputes VALUES (?, ?, ?, ?, 'Open', now())", [case_id, cid, transaction_id, reason])
-            verified = self._ops.execute("SELECT count(*) FROM disputes WHERE case_id = ? AND customer_id = ?", [case_id, cid]).fetchone()[0] == 1
+                self._ops_c.execute("INSERT INTO disputes VALUES (?, ?, ?, ?, 'Open', now())", [case_id, cid, transaction_id, reason])
+            verified = self._ops_c.execute("SELECT count(*) FROM disputes WHERE case_id = ? AND customer_id = ?", [case_id, cid]).fetchone()[0] == 1
             return {"case_id": case_id, "transaction_id": transaction_id, "status": "Open", "verified": verified}
         return self._run("open_dispute", {"transaction_id": transaction_id, "confirmed": confirmed}, fn)
 

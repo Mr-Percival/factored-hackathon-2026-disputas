@@ -2,6 +2,8 @@
 
 > Un agente de disputas de cargos no reconocidos. **El modelo interpreta y redacta; el código decide y actúa.**
 
+> Cómo se operaría en producción (topología, capacidad, monitoreo, acceso, retención, runbook): [`operations.md`](operations.md).
+
 ## 1. Vista general: 4 capas
 
 ```mermaid
@@ -50,12 +52,12 @@ flowchart LR
 | Decisión | Responsable | Tipo |
 |---|---|---|
 | ¿La sesión es válida? ¿El dato es suyo? | `identity.py` + `tools.py` | Código |
-| ¿El mensaje es un ataque? | `guard.py` (`InjectionDetector`) | Patrones (default) · clasificador ONNX opt-in, evaluado en [ADR 0004](adr/0004-deteccion-inyeccion.md) |
+| ¿El mensaje es un ataque? | `guard.py` (`InjectionDetector`) | Patrones (default) · clasificador ONNX opt-in, evaluado en [ADR 0005](adr/0005-deteccion-inyeccion.md) |
 | ¿Qué quiere el cliente? | `Router` (interfaz) | Reglas (línea base) · LLM · otro modelo |
 | ¿Cuál es la transacción? | `search_transactions` + aclaración | Código; pregunta si hay más de una |
 | ¿Procede la disputa o va a un humano? | `policy.yaml` | Reglas con ID |
 | ¿Ejecutar la acción? | Cliente (confirmación) + `tools.py` (verificación) | Humano + código |
-| ¿Cómo se dice? | `Writer` | Plantillas (línea base) · LLM + verificador *(próximo)* |
+| ¿Cómo se dice? | `Writer` | Plantillas (línea base) · LLM + verificador determinista ([ADR 0004](adr/0004-llm-acotado-router-writer.md)) |
 
 ## 3. El grafo
 
@@ -65,6 +67,7 @@ Generado desde el código (`Agent.mermaid()`); cada nodo solo puede ir a los des
 flowchart TD
     START([inicio]) --> guard
     guard -->|sesión inválida / ataque| respond
+    guard -->|3 intentos bloqueados| handoff
     guard --> understand
     understand -->|"sí" a acción pendiente| act
     understand -->|"no"| cancel
@@ -152,3 +155,5 @@ flowchart LR
 ```
 
 **Defensa en profundidad:** aunque el guard no detecte un ataque, el ataque no tiene con qué hacer daño. El cliente sale del token y no del texto, cada acción requiere confirmación y se verifica, y la política no está en el prompt. Por eso reportamos por separado la **detección** (el guard) y el **daño** (registros señuelo): ver [`reports/injection_eval.md`](../reports/injection_eval.md).
+
+Amenazas, controles, tests y riesgo residual (OWASP Top 10 LLM 2025): [`threat-model.md`](threat-model.md).
