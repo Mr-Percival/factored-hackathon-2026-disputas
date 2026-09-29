@@ -1,6 +1,6 @@
 """Chat de consola para probar el agente a mano.
 
-    python -m bankagent.chat --customer CLI-XXXX [--db data/serving.duckdb]
+    python -m bankagent.chat --customer CLI-XXXX [--db data/serving.duckdb] [--audit data/audit.jsonl]
 
 Comandos: /trace (traza del último turno) · /handoff (paquete) · /expire (vence la sesión) · /salir
 """
@@ -11,6 +11,7 @@ import json
 import os
 import uuid
 
+from .audit import AuditLog
 from .graph import Agent
 from .identity import IdentityService
 from .pipeline import ROOT
@@ -22,9 +23,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--customer", required=True, help="cliente con el que se simula el login en la app")
     ap.add_argument("--db", default=os.path.join(ROOT, "data", "serving.duckdb"))
+    ap.add_argument("--audit", default=None, help="log de auditoría JSONL con cadena de hashes (opcional)")
     a = ap.parse_args()
     identity = IdentityService()
-    agent = Agent(BankTools(a.db, identity), PolicyEngine())
+    agent = Agent(BankTools(a.db, identity), PolicyEngine(), audit=AuditLog(a.audit) if a.audit else None)
     token, thread, last = identity.login(a.customer), uuid.uuid4().hex, {}
     print(f"Sesión simulada para {a.customer}. Escribe tu mensaje (es / pt).")
     while True:
