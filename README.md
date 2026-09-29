@@ -7,6 +7,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 
 - Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
+- Evaluación offline (línea base, métricas de la rúbrica, equidad por dialecto): [`reports/eval.md`](reports/eval.md)
 
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
@@ -26,7 +27,9 @@ src/bankagent/
   responses.py          redacción por plantillas es/pt (línea base)
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
-tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
+  evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
+evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
+tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
 scripts/                descarga S3 y EDA
 ```
 
@@ -43,6 +46,10 @@ python -m bankagent.pipeline                          # -> data/serving.duckdb +
 python -m bankagent.pipeline --sample-customers 500 --out data/demo.duckdb   # base liviana para el deploy
 
 python -m bankagent.chat --customer CLI-XXXXXXXX
+
+# Evaluación offline sobre el conjunto reservado -> reports/eval.md
+python -m bankagent.evals.cases --db data/serving.duckdb        # (re)genera evals/cases (determinista)
+python -m bankagent.evals.run --db data/serving.duckdb --system rules --repeats 3
 ```
 
 ## Qué es real, qué es sintético
@@ -52,13 +59,15 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 | `config/policy.yaml` | Sintético, creado por el equipo (no es la política de ningún banco) |
 | Identidad y herramientas | Sandbox simulado por el equipo |
 | `tests/fixture_data.py` | Fixture de prueba creado a mano por el equipo |
+| `evals/cases/*.jsonl` | Casos y etiquetas generados por el equipo por construcción; no son tráfico real |
 
 ## Estado
 - [x] EDA y elección del flujo
 - [x] Pipeline con contratos, cuarentena, upsert incremental y linaje
 - [x] Herramientas con permisos por sesión, política, guard, grafo, línea base es/pt
-- [x] 25 tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos
+- [x] Tests: flujos normal/ambiguo/handoff, sesión expirada, acceso ajeno, inyección directa e indirecta, señuelo, reintentos, métricas de evaluación, equidad por dialecto y evaluación de humo sobre el fixture
 - [ ] Router y writer con LLM, más un verificador de salida
-- [ ] Evaluación: línea base contra agente sobre casos reservados; inyección con datasets públicos
+- [x] Evaluación: casos reservados (dev/test por cliente y por redacción), runner con métricas de la rúbrica, equidad por dialecto
+- [ ] Evaluación: agente con LLM contra la línea base; inyección con datasets públicos
 - [ ] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [ ] Interfaz web, deploy, slides y video
