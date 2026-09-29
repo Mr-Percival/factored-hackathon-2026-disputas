@@ -1,0 +1,6 @@
+{
+ "01_demanda_quejas": "Las quejas son el 17% de los contactos y solo el 43.6% se resuelve al primer contacto",
+ "02_pqr_subcategorias": "Cargo no reconocido + cobro indebido = 36.5% de los PQR; 1 de cada 5 incumple el SLA",
+ "03_calidad_datos": "Los datos tienen límites reales; cada uno cambió una decisión de diseño",
+ "04_umbral_fraude": "Umbral 30 (no 60): recall 72% en test derivando solo el 0.08% de las transacciones"
+}

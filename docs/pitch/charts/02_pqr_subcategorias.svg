@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1152pt" height="504pt" viewBox="0 0 1152 504" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-28T21:41:16.930873</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 504 
+L 1152 504 
+L 1152 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 230.4 443.52 
+L 760.32 443.52 
+L 760.32 120.96 
+L 230.4 120.96 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 230.4 428.858182 
+L 461.311875 428.858182 
+L 461.311875 393.75242 
+L 230.4 393.75242 
+z
+" clip-path="url(#p72f81104ca)" style="fill: #c9c8c2; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 230.4 377.232061 
+L 640.166878 377.232061 
+L 640.166878 342.1263 
+L 230.4 342.1263 
+z
+" clip-path="url(#p72f81104ca)" style="fill: #c9c8c2; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 230.4 325.605941 
+L 640.373726 325.605941 
+L 640.373726 290.500179 
+L 230.4 290.500179 
+z
+" clip-path="url(#p72f81104ca)" style="fill: #c9c8c2; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 230.4 273.979821 
+L 648.509767 273.979821 
+L 648.509767 238.874059 
+L 230.4 238.874059 
+z
+" clip-path="url(#p72f81104ca)" style="fill: #c9c8c2; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 230.4 222.3537 
+L 650.785101 222.3537 
+L 650.785101 187.247939 
+L 230.4 187.247939 
+z
+" clip-path="url(#p72f81104ca)" style="fill: #2a78d6; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 230.4 170.72758 
+L 654.336 170.72758 
+L 654.336 135.621818 
+L 230.4 135.621818 
+z
+" clip-path="url(#p72f81104ca)" style="fill: #2a78d6; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="matplotlib.axis_1"/>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #52514e" x="226.9" y="416.037479" transform="rotate(-0 226.9 416.037479)">(sin subcategoría)</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #52514e" x="226.9" y="364.411358" transform="rotate(-0 226.9 364.411358)">Calidad de servicio</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_3"/>
+     <g id="text_3">
+      <text style="font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #52514e" x="226.9" y="312.785238" transform="rotate(-0 226.9 312.785238)">Atención en sucursal</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_4"/>
+     <g id="text_4">
+      <text style="font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #52514e" x="226.9" y="261.159118" transform="rotate(-0 226.9 261.159118)">Problema con app</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_5"/>
+     <g id="text_5">
+      <text style="font-weight: 700; font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #0b0b0b" x="226.9" y="209.532997" transform="rotate(-0 226.9 209.532997)">Cobro indebido</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_6"/>
+     <g id="text_6">
+      <text style="font-weight: 700; font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #0b0b0b" x="226.9" y="157.906877" transform="rotate(-0 226.9 157.906877)">Cargo no reconocido</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_9">
+    <path d="M 230.4 443.52 
+L 230.4 120.96 
+" style="fill: none; stroke: #e6e5e1; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #52514e" x="469.790595" y="414.410652" transform="rotate(-0 469.790595 414.410652)">10%  (6.698)</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #52514e" x="648.645598" y="362.784532" transform="rotate(-0 648.645598 362.784532)">18%  (11.886)</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #52514e" x="648.852446" y="311.158412" transform="rotate(-0 648.852446 311.158412)">18%  (11.892)</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #52514e" x="656.988487" y="259.532291" transform="rotate(-0 656.988487 259.532291)">18%  (12.128)</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #0b0b0b" x="659.263821" y="207.906171" transform="rotate(-0 659.263821 207.906171)">18%  (12.194)</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #0b0b0b" x="662.81472" y="156.280051" transform="rotate(-0 662.81472 156.280051)">18%  (12.297)</text>
+   </g>
+  </g>
+  <g id="text_13">
+   <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; fill: #0b0b0b" transform="translate(817.44 84.314648)">SLA</text>
+   <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; fill: #0b0b0b" transform="translate(797.444062 97.375195)">incumplido</text>
+  </g>
+  <g id="text_14">
+   <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; fill: #0b0b0b" transform="translate(932.15625 84.314414)">Mediana</text>
+   <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; fill: #0b0b0b" transform="translate(940.159688 97.374961)">(días)</text>
+  </g>
+  <g id="text_15">
+   <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; fill: #0b0b0b" transform="translate(1062.02625 84.314648)">Sin</text>
+   <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'DejaVu Sans'; fill: #0b0b0b" transform="translate(1041.0225 97.375195)">resolución</text>
+  </g>
+  <g id="text_16">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="829.44" y="414.540164" transform="rotate(-0 829.44 414.540164)">19%</text>
+  </g>
+  <g id="text_17">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="956.16" y="414.540164" transform="rotate(-0 956.16 414.540164)">16</text>
+  </g>
+  <g id="text_18">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="1071.36" y="414.540164" transform="rotate(-0 1071.36 414.540164)">77%</text>
+  </g>
+  <g id="text_19">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="829.44" y="362.914044" transform="rotate(-0 829.44 362.914044)">20%</text>
+  </g>
+  <g id="text_20">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="956.16" y="362.914044" transform="rotate(-0 956.16 362.914044)">16</text>
+  </g>
+  <g id="text_21">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="1071.36" y="362.914044" transform="rotate(-0 1071.36 362.914044)">77%</text>
+  </g>
+  <g id="text_22">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="829.44" y="311.287923" transform="rotate(-0 829.44 311.287923)">20%</text>
+  </g>
+  <g id="text_23">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="956.16" y="311.287923" transform="rotate(-0 956.16 311.287923)">16</text>
+  </g>
+  <g id="text_24">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="1071.36" y="311.287923" transform="rotate(-0 1071.36 311.287923)">77%</text>
+  </g>
+  <g id="text_25">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="829.44" y="259.661803" transform="rotate(-0 829.44 259.661803)">20%</text>
+  </g>
+  <g id="text_26">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="956.16" y="259.661803" transform="rotate(-0 956.16 259.661803)">16</text>
+  </g>
+  <g id="text_27">
+   <text style="font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #52514e" x="1071.36" y="259.661803" transform="rotate(-0 1071.36 259.661803)">77%</text>
+  </g>
+  <g id="text_28">
+   <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0b0b0b" x="829.44" y="208.035683" transform="rotate(-0 829.44 208.035683)">20%</text>
+  </g>
+  <g id="text_29">
+   <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0b0b0b" x="956.16" y="208.035683" transform="rotate(-0 956.16 208.035683)">16</text>
+  </g>
+  <g id="text_30">
+   <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0b0b0b" x="1071.36" y="208.035683" transform="rotate(-0 1071.36 208.035683)">77%</text>
+  </g>
+  <g id="text_31">
+   <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0b0b0b" x="829.44" y="156.409562" transform="rotate(-0 829.44 156.409562)">20%</text>
+  </g>
+  <g id="text_32">
+   <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0b0b0b" x="956.16" y="156.409562" transform="rotate(-0 956.16 156.409562)">15</text>
+  </g>
+  <g id="text_33">
+   <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0b0b0b" x="1071.36" y="156.409562" transform="rotate(-0 1071.36 156.409562)">77%</text>
+  </g>
+  <g id="text_34">
+   <text style="font-weight: 700; font-size: 19px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #0b0b0b" x="23.04" y="31.47252" transform="rotate(-0 23.04 31.47252)">Cargo no reconocido + cobro indebido = 36.5% de los PQR; 1 de cada 5 incumple el SLA</text>
+  </g>
+  <g id="text_35">
+   <text style="font-size: 13px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #52514e" x="23.04" y="57.344355" transform="rotate(-0 23.04 57.344355)">SLA y días de resolución son iguales en todas las subcategorías (dato sintético): el dolor está en el volumen, y es el flujo que se puede automatizar sin mover dinero</text>
+  </g>
+  <g id="text_36">
+   <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #8a8984" x="23.04" y="493.92" transform="rotate(-0 23.04 493.92)">Fuente: datos sintéticos del organizador (LATAM Bank) · 67.095 casos PQR · mediana sobre casos con resolución registrada</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p72f81104ca">
+   <rect x="230.4" y="120.96" width="529.92" height="322.56"/>
+  </clipPath>
+ </defs>
+</svg>

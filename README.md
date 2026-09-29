@@ -13,6 +13,17 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
 - En PQR, **"Cargo no reconocido" + "Cobro indebido" = 36%** de los casos; el 20% incumple SLA y la mediana de resolución es de 16 días.
 
+## Pitch
+- Presentación (6 slides, con notas del orador): [`docs/pitch/deck.pptx`](docs/pitch/deck.pptx) · versión para revisar: [`docs/pitch/deck.md`](docs/pitch/deck.md)
+- Guion del video (3:50, es + pt) con lista de tomas y checklist de grabación: [`docs/pitch/video_script.md`](docs/pitch/video_script.md)
+- Gráficos: [`docs/pitch/charts/`](docs/pitch/charts/)
+
+```bash
+pip install -e ".[pitch]"
+PYTHONPATH=src python scripts/make_charts.py            # agregados desde data/bank.duckdb (o --from-cache sin datos; --diagrams para los Mermaid)
+PYTHONPATH=src python scripts/make_deck.py              # deck.pptx + deck.md; lista las métricas [[PENDIENTE]] de docs/pitch/metrics.yaml
+```
+
 ## Estructura
 ```
 config/contracts.yaml   contratos de datos (tipos, dominios, FKs, advertencias)
