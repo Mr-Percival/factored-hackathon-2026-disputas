@@ -68,6 +68,8 @@ Qué mostrar en el **panel de handoff**:
 - `verified_facts.transaction`: 2,154,962.73 ARS, transferencia del 17/06/2026 en La Plata. Son hechos leídos de las
   herramientas, no del texto del cliente.
 - `request` (lo que dijo el cliente, con la PII enmascarada) y `unresolved_questions` (lo que le queda por decidir al asesor).
+- `summary`: una línea para el asesor con el motivo, la transacción, el estado del cliente y las acciones hechas. Se arma
+  de forma determinista con los campos del paquete, sin modelo.
 - La decisión la toma `policy.yaml` (ARS ≥ 1.000.000), no el modelo.
 
 ### Escena 4: portugués (pt-BR)

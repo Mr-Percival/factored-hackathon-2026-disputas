@@ -99,6 +99,42 @@ def fmt_txn(t: dict) -> str:
     return f"{date} · {float(t['amount']):,.2f} {t['currency']} · {where} ({t['transaction_country']}{place})"
 
 
+HANDOFF_LABELS = {  # motivos que no son reglas de política (las reglas traen su propio `explain`)
+    "out_of_scope": "Solicitud fuera del alcance del canal automático.",
+    "tool_failure": "Falla técnica persistente al consultar datos; no se pudo verificar.",
+    "action_not_verified": "La acción se ejecutó pero no se pudo verificar en el sistema.",
+    "security_lockout": "Conversación pausada por intentos bloqueados (seguridad).",
+    "no_active_card": "El cliente pidió un bloqueo pero no tiene tarjetas activas.",
+}
+
+
+def handoff_summary(packet: dict) -> str:
+    """Una línea para el asesor, armada SOLO con campos del paquete (determinista, sin modelo, en español).
+    Motivo · transacción verificada · estado del cliente · acciones ya hechas."""
+    reason = packet.get("reason") or "unspecified"
+    rules = (packet.get("policy") or {}).get("rules_fired") or []
+    hit = next((r for r in rules if r.get("id") == reason), None)
+    parts = [f"{reason}: {hit['explain'] if hit else HANDOFF_LABELS.get(reason, 'Motivo no especificado.')}"]
+    facts = packet.get("verified_facts") or {}
+    t = facts.get("transaction")
+    if t:
+        d = t.get("transaction_date")
+        date = d.strftime("%d/%m/%Y") if hasattr(d, "strftime") else "/".join(reversed(str(d)[:10].split("-")))
+        where = t.get("merchant_name") or t.get("channel") or "-"
+        place = ", ".join(x for x in (t.get("transaction_country"), t.get("transaction_city")) if x)
+        parts.append(f"Cargo {t.get('transaction_id')} del {date} por {float(t.get('amount') or 0):,.2f} {t.get('currency')}"
+                     f" ({t.get('transaction_type')}, {where}, {place}, estado {t.get('transaction_status')})")
+    else:
+        parts.append("Sin transacción identificada")
+    if facts.get("customer_status"):
+        rec = ", reclamante recurrente" if facts.get("is_repeat_complainer") else ""
+        parts.append(f"Cliente {facts['customer_status']}/{facts.get('segment')}, "
+                     f"{facts.get('complaints_last_90d', 0)} reclamos en 90 días{rec}")
+    acts = packet.get("actions_taken") or []
+    parts.append("Acciones: " + (", ".join(a["tool"] for a in acts) if acts else "ninguna"))
+    return " · ".join(parts) + "."
+
+
 def fmt_option(c: dict) -> str:
     if c.get("kind") == "card":
         return f"{c['product_type']} {c['product_number']} ({c['currency']})"
