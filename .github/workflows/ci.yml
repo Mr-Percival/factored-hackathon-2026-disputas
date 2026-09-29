@@ -24,6 +24,7 @@ jobs:
       # Dependencias exactas y con hash (#17); el paquete propio va aparte, sin resolver dependencias.
       - run: pip install --require-hashes -r requirements/ci.lock && pip install --no-deps -e .
       - run: pytest -q
+      - run: python scripts/check_docs.py   # enlaces y referencias a tests/archivos de la documentación (#45)
 
   # Guardia de regresión (#36) sobre el fixture etiquetado: escenarios de la demo, 0 inseguros, handoffs completos
   # y piso de exactitud, con el router de reglas y el aprendido lite. Sin datos del organizador ni API keys.
