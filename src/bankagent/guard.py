@@ -3,7 +3,7 @@
 - Detecta intentos de inyección / exfiltración (primera línea; no es la única defensa: aunque pasara,
   las herramientas solo devuelven datos del dueño de la sesión). `InjectionDetector` es la interfaz:
   `RegexDetector` (patrones, LÍNEA BASE y default) y `ClassifierDetector` (modelo preentrenado ONNX,
-  opt-in con BANKAGENT_INJECTION_DETECTOR). Decisión y métricas: docs/adr/0004-deteccion-inyeccion.md.
+  opt-in con BANKAGENT_INJECTION_DETECTOR). Decisión y métricas: docs/adr/0005-deteccion-inyeccion.md.
 - Enmascara PII (números de tarjeta/documento, emails, teléfonos) antes de que el texto llegue a un
   proveedor externo (LLM / Jev) o a los logs.
 """
@@ -89,7 +89,7 @@ class ModelSpec:
     tokenizer: str
     output: str     # "logits" (2 clases) | "margin" (logit inyección - logit benigno)
     license: str
-    threshold: float  # elegido en el split de desarrollo, nunca en test (ver ADR 0004)
+    threshold: float  # elegido en el split de desarrollo, nunca en test (ver ADR 0005)
     max_len: int = 512
 
 
