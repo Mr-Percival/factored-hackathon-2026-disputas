@@ -57,6 +57,66 @@ def _fold(text: str) -> str:
     return "".join(c for c in t if not unicodedata.combining(c))
 
 
+# ---------------------------------------------------------------- texto no confiable: normalización (#33)
+# Red team #33: un "no" con un carácter de cero ancho ("n​o bloquees") o con una "о" cirílica se VE igual para
+# el cliente pero el lector de consentimiento no lo reconocía, y se bloqueaba la tarjeta que el cliente había
+# rechazado. Lo mismo con overrides bidireccionales (RLO) que llegaban al paquete del asesor. Raíz: cada componente
+# leía el texto crudo. Ahora el texto del cliente se normaliza UNA vez, en la frontera (guard), y todo lo de abajo
+# (detector, router, conversación, handoff) ve lo mismo que ve una persona.
+_INVISIBLE_CATS = {"Cc", "Cf", "Cs", "Co", "Cn"}  # control, formato (cero ancho, bidi), surrogates, privados, sin asignar
+# Letras cirílicas y griegas que se ven idénticas a letras latinas (subconjunto de Unicode confusables, UTS #39).
+_CONFUSABLES = str.maketrans({
+    "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y", "х": "x", "і": "i", "ј": "j", "ѕ": "s", "ԁ": "d",
+    "һ": "h", "ӏ": "l", "ԛ": "q", "ԝ": "w", "ɑ": "a", "ο": "o", "α": "a", "ε": "e", "ν": "v", "ρ": "p", "τ": "t",
+    "ι": "i", "κ": "k", "υ": "u", "А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P",
+    "С": "C", "Т": "T", "Х": "X", "І": "I", "Ј": "J", "Ѕ": "S", "Α": "A", "Β": "B", "Ε": "E", "Ζ": "Z", "Η": "H",
+    "Ι": "I", "Κ": "K", "Μ": "M", "Ν": "N", "Ο": "O", "Ρ": "P", "Τ": "T", "Υ": "Y", "Χ": "X"})
+_WORD = re.compile(r"\w+")
+_LATIN = re.compile(r"[A-Za-zÀ-ɏ]")
+
+
+def strip_invisible(text: str) -> str:
+    """Quita caracteres que no se ven (cero ancho, marcas/overrides bidi, BOM, surrogates sueltos) y cambia los
+    controles por espacio. Conserva \\n y \\t. Se usa para el texto del cliente y para datos que se muestran."""
+    out = []
+    for ch in text:
+        cat = unicodedata.category(ch)
+        if ch in "\n\t" or cat not in _INVISIBLE_CATS:
+            out.append(ch)
+        elif cat == "Cc":
+            out.append(" ")
+    return "".join(out)
+
+
+def _unconfuse(m: re.Match) -> str:
+    w = m.group(0)
+    return w.translate(_CONFUSABLES) if _LATIN.search(w) else w  # solo palabras con escritura mezclada
+
+
+def normalize_input(text: str) -> str:
+    """Forma canónica del texto del cliente: NFKC (ancho completo -> ASCII), sin invisibles y sin homoglifos
+    cirílicos/griegos dentro de palabras latinas. Lo que el agente lee es lo que el cliente ve."""
+    t = strip_invisible(unicodedata.normalize("NFKC", text))
+    return _WORD.sub(_unconfuse, t)
+
+
+# Celdas que una hoja de cálculo interpreta como fórmula (OWASP "CSV Injection").
+FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
+
+
+def safe_display(value):
+    """Para lo que se muestra o exporta a una persona (paquete de handoff, consola del asesor, CSV): sin
+    invisibles y sin celdas-fórmula (se antepone un apóstrofo, como recomienda OWASP). Recorre dict/list."""
+    if isinstance(value, dict):
+        return {k: safe_display(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [safe_display(v) for v in value]
+    if isinstance(value, str):
+        v = strip_invisible(value)
+        return "'" + v if v.startswith(FORMULA_START) else v
+    return value
+
+
 # Letras sueltas separadas por espacios ("I g n o r a   t u s ..."): se juntan y se buscan estas raíces.
 SPACED_OUT = re.compile(r"(?:\b\w\b\s+){5,}\b\w\b")
 SPACED_ROOTS = ("ignor", "instruc", "system", "prompt", "admin", "olvida", "regla", "jailbreak", "esquec")
@@ -64,7 +124,7 @@ SPACED_ROOTS = ("ignor", "instruc", "system", "prompt", "admin", "olvida", "regl
 
 def detect_injection(text: str) -> str | None:
     """Devuelve el patrón que coincidió (para el registro) o None."""
-    folded = _fold(text)
+    folded = _fold(normalize_input(text))
     for p in INJECTION_PATTERNS:
         flags = 0 if p.startswith(r"\bCLI") or "[A-Z]" in p else re.IGNORECASE
         if re.search(p, folded, flags):

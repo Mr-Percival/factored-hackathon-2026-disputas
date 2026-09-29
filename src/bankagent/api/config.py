@@ -43,6 +43,9 @@ class Settings:
     max_body_bytes: int = 16 * 1024
     session_ttl_s: int = 30 * 60  # sesión del navegador (el token del agente dura 15 min); luego se libera todo
     max_sessions: int = 200  # cada sesión tiene su agente y su almacén ops; al tope, 429
+    # Red team #33: una sola IP llenaba el tope global y dejaba a todos los demás con 429. Cuota por IP: al pasarla,
+    # se libera la sesión más vieja de ESA IP (el atacante solo se desplaza a sí mismo).
+    max_sessions_per_ip: int = 10
     max_conversations_per_session: int = 50
     web_dist: str = DEFAULT_WEB_DIST
     docs: bool = True

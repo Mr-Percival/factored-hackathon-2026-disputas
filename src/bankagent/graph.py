@@ -24,7 +24,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
 from .audit import AuditLog
-from .guard import InjectionDetector, detector_from_env, redact
+from .guard import InjectionDetector, detector_from_env, normalize_input, redact
 from .identity import AuthError
 from .observability import emit as emit_trace
 from .policy import PolicyEngine
@@ -117,6 +117,8 @@ class Agent:
                 rec = self.audit.append(thread_id, e, out.get("outcome") if i == len(entries) - 1 else None)
                 if e["node"] == "handoff" and out.get("handoff"):  # el paquete apunta a su registro de auditoría
                     out["handoff"]["audit"] = {"thread": rec["thread"], "seq": rec["seq"], "hash": rec["hash"]}
+        if out.get("outcome") == "auth_error":
+            return _turn_only(out, turn)
         return out
 
     def mermaid(self) -> str:
@@ -181,7 +183,9 @@ class Agent:
 
     # ------------------------------------------------------------------ nodos
     def guard(self, s: State, calls) -> dict:
-        text = s["user_text"]
+        # Frontera de confianza: desde aquí todo el grafo lee el texto normalizado (sin invisibles ni homoglifos),
+        # es decir, lo mismo que ve una persona (#33). `user_text` se reemplaza en el estado del turno.
+        text = normalize_input(s["user_text"])
         msg = {"role": "user", "turn": s["turn"], "text": redact(text)}
         strikes = s.get("strikes", 0)
         # Identidad y dueño del hilo ANTES que el bloqueo: si no, un intruso que bloquea el hilo ajeno recibiría el
@@ -189,8 +193,10 @@ class Agent:
         session = self.tools.identity.resolve(s.get("token"))  # AuthError -> respuesta segura
         # El hilo queda atado al cliente de su primer turno autenticado: la sesión válida de OTRO cliente no puede
         # continuarlo (vería candidatos/confirmaciones ajenos guardados en el estado). Cuenta como acceso prohibido.
+        # Red team #33: estos intentos ya no suman al bloqueo del hilo: el que quedaba bloqueado era el DUEÑO (un intruso
+        # con 3 turnos dejaba en security_lockout la conversación ajena). Se responde igual que un acceso prohibido.
         if s.get("owner") and s["owner"] != session.customer_id:
-            raise AuthError("forbidden")
+            return {"next": "respond", "outcome": "auth_error", "reply_key": "forbidden", "detail": "foreign_thread"}
         if strikes >= self.max_strikes:  # conversación bloqueada: nada más se procesa, pasa a un humano
             return {"next": "handoff", "handoff_reason": "security_lockout", "conversation": [msg],
                     "detail": f"locked strikes={strikes}"}
@@ -203,7 +209,7 @@ class Agent:
             if strikes >= self.max_strikes:
                 out.update(next="handoff", handoff_reason="security_lockout")
             return out
-        return {"next": "understand", "conversation": [msg], "owner": session.customer_id}
+        return {"next": "understand", "conversation": [msg], "owner": session.customer_id, "user_text": text}
 
     def understand(self, s: State, calls) -> dict:
         today = self.policy.as_of
@@ -351,6 +357,15 @@ class Agent:
         cards = [c for c in self._call(calls, "list_cards", s["token"]) if c["product_status"] == "Active"]
         if not cards:
             return {"next": "handoff", "handoff_reason": "no_active_card", "detail": "0 active cards"}
+        # Red team #33: "bloquea la tarjeta ****9999 de mi mamá" + "sí" bloqueaba la tarjeta PROPIA (la única activa).
+        # Si el cliente nombró una tarjeta, solo se propone esa; si no es suya (o no se puede verificar), elige él.
+        hint = ((s.get("understanding") or {}).get("slots") or {}).get("card_hint")
+        named = [c for c in cards if hint and hint != "?" and str(c["product_number"]).endswith(hint)]
+        if hint and len(named) == 1:
+            cards = named
+        elif hint and len(cards) == 1:
+            return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "awaiting": "option",
+                    "candidates": [{"kind": "card", **cards[0]}], "detail": "card_hint_mismatch"}
         if len(cards) == 1:
             c = cards[0]
             return {"next": "respond", "outcome": "clarify", "reply_key": "block_confirm", "awaiting": "confirmation",
@@ -474,6 +489,21 @@ HANDOFF_REPLIES = {"tool_failure", "out_of_scope", "security_lockout", "consent_
 # Intenciones de conversación que siempre pasan a un humano, con su motivo de handoff (#40).
 CONVERSATION_HANDOFFS = {"human_request": "customer_request", "account_takeover": "account_takeover",
                          "cancel_dispute": "cancel_dispute"}
+
+
+# Estado del hilo que persiste entre turnos: no se devuelve a quien no está autorizado a verlo.
+THREAD_STATE = ("candidates", "txn", "pending_action", "claim", "dispute_found", "decision", "handoff",
+                "understanding", "action_result", "match_method")
+
+
+def _turn_only(out: dict, turn: int) -> dict:
+    """Resultado de un turno SIN sesión válida o de otro cliente: solo lo de este turno. Red team #33: `chat()`
+    devolvía el estado completo del hilo (transacción, acción pendiente, candidatos del dueño) a la sesión intrusa;
+    la API no lo exponía (conversación ajena = 404), pero cualquier otro canal sobre `Agent.chat` sí."""
+    return {**{k: v for k, v in out.items() if k not in THREAD_STATE},
+            **{k: None for k in THREAD_STATE}, "candidates": [], "awaiting": None,
+            "conversation": [m for m in out.get("conversation", []) if m.get("turn") == turn],
+            "trace": [e for e in out.get("trace", []) if e.get("turn") == turn]}
 
 
 def rank_candidates(found: list[dict], amount: float | None, as_of: dt.date, window_days: int) -> list[dict]:

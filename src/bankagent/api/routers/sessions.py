@@ -31,7 +31,7 @@ def create_session(body: SessionCreate, request: Request, response: Response, rt
         raise HTTPException(404, detail="customer_not_found")
     try:
         # una sesión por navegador: el login nuevo libera la anterior (agente, disputas y bloqueos de demo)
-        s = rt.login(body.customer_id, replaces=request.cookies.get(COOKIE))
+        s = rt.login(body.customer_id, replaces=request.cookies.get(COOKIE), ip=client_ip(request))
     except TooManySessions:
         raise HTTPException(429, detail="too_many_sessions") from None
     set_session_cookie(response, request, rt, s.sid)

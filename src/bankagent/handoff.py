@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime as dt
 import uuid
 
+from .guard import safe_display
 from .policy import PolicyEngine
 from .responses import fmt_txn, handoff_summary
 
@@ -113,4 +114,8 @@ def build_packet(s: dict, policy: PolicyEngine, reason: str) -> dict:
         "unresolved_questions": _questions(reason, r, txn, rules),
     }
     packet["summary"] = handoff_summary(packet)  # una línea determinista para el asesor (#32)
-    return packet
+    # Red team #33: el paquete lleva texto NO confiable (lo que escribió el cliente, nombre de comercio y ciudad de
+    # los datos). Se codifica para quien lo muestra o exporta: sin caracteres invisibles/bidi (un RLO invertía lo
+    # que leía el asesor) y sin celdas-fórmula (=HYPERLINK(...) en un CSV exportado). Se hace aquí, en la salida,
+    # para cubrir cualquier campo presente o futuro del paquete.
+    return safe_display(packet)

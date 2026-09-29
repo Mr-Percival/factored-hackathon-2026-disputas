@@ -54,6 +54,7 @@ class BrowserSession:
     token: str
     created_at: float
     agent: Agent
+    ip: str = ""
     conversations: list[str] = field(default_factory=list)  # en orden de creación
 
 
@@ -150,18 +151,22 @@ class Runtime:
     def customer_exists(self, customer_id: str) -> bool:
         return bool(self._scalar("SELECT count(*) FROM customers WHERE customer_id = ?", [customer_id]))
 
-    def login(self, customer_id: str, replaces: str | None = None) -> BrowserSession:
-        """Nueva sesión con agente y almacén ops propios. `replaces`: sesión anterior del mismo navegador."""
+    def login(self, customer_id: str, replaces: str | None = None, ip: str = "") -> BrowserSession:
+        """Nueva sesión con agente y almacén ops propios. `replaces`: sesión anterior del mismo navegador.
+        `ip`: cuota de sesiones vivas por IP (`max_sessions_per_ip`); al pasarla se libera la más vieja de esa IP."""
         with self._store_lock:
             if replaces:
                 self._drop(replaces)
             self._evict_expired()
+            same_ip = [k for k, x in self.sessions.items() if x.ip == ip]  # en orden de creación
+            for sid in same_ip[:max(0, len(same_ip) - self.settings.max_sessions_per_ip + 1)]:
+                self._drop(sid)
             if len(self.sessions) >= self.settings.max_sessions:
                 raise TooManySessions()
         agent = self._new_agent()  # fuera del lock: compila el grafo (~15 ms)
         with self._store_lock:
             token = self.identity.login(customer_id)
-            s = BrowserSession(secrets.token_urlsafe(32), customer_id, token, self.clock(), agent)
+            s = BrowserSession(secrets.token_urlsafe(32), customer_id, token, self.clock(), agent, ip)
             self.sessions[s.sid] = s
             return s
 
