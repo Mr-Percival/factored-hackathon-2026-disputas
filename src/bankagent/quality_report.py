@@ -76,7 +76,10 @@ def build(db: str) -> str:
                 out.append(f"| {r['run_id']} | {t} | {s['files_new']:,} | {s['rows_in']:,} | {s['rows_loaded']:,} | "
                            f"{s['rows_quarantined']:,} | {s.get('duplicates_in_batch', 0):,} |")
     if runs:
-        out += ["", f"Normalizaciones aplicadas: `{runs[-1].get('normalizations')}`"]
+        last = runs[-1]
+        out += ["", f"Normalizaciones aplicadas: `{last.get('normalizations')}`", "",
+                "Huella de la entrega en la última corrida (cambia si el organizador regenera los datos): " +
+                ", ".join(f"{t}=`{s.get('source_fingerprint', '-')}`" for t, s in last["tables"].items())]
     con.close()
     return "\n".join(out) + "\n"
 

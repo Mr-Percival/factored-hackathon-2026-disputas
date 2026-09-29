@@ -28,6 +28,9 @@ def _compile(expr: str):
     for node in ast.walk(tree):
         if not isinstance(node, _ALLOWED):
             raise ValueError(f"Expresión no permitida en política: {expr!r} ({type(node).__name__})")
+        # Bloquea la introspección (__class__, __globals__...), vía clásica para escapar de un eval restringido.
+        if isinstance(node, ast.Attribute) and node.attr.startswith("_"):
+            raise ValueError(f"Atributo privado no permitido en política: {node.attr!r}")
     return compile(tree, "<policy>", "eval")
 
 

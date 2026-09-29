@@ -1,6 +1,6 @@
 # POLÍTICA SINTÉTICA — creada por el equipo para el hackathon. NO es la política de ningún banco real.
 # El modelo de lenguaje nunca decide elegibilidad: solo este archivo, evaluado por bankagent/policy.py.
-version: "2026-09-28.1"
+version: "2026-09-29.1"
 
 # Fecha "hoy" del sandbox: los datos terminan el 2026-06-17.
 as_of: "2026-06-17"
@@ -39,8 +39,9 @@ dispute:
       explain: "Monto alto: un analista debe revisar la disputa."
     - id: H03_fraud_signal
       outcome: handoff
-      # Umbral provisional. Se calibra con la curva precisión/recall de fraud_score (split temporal).
-      when: "txn.fraud_score is not None and txn.fraud_score >= 60"
+      # Calibrado con split temporal (dev < 2026, test 2026): recall 72.4%, precisión 79.0%, 0.08% derivado.
+      # Ver reports/fraud_threshold.md y docs/adr/0006-umbral-fraude.md.
+      when: "txn.fraud_score is not None and txn.fraud_score >= 30"
       explain: "Señal de fraude alta: se transfiere a un analista de fraude."
     - id: H04_repeat_complainer
       outcome: handoff
