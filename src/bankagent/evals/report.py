@@ -191,8 +191,8 @@ def render_markdown(s: dict) -> str:
         w(table(["Motivo", "es", "pt-BR"], [[REASON_ES.get(k, k), num(nr.get("es", {}).get(k, 0)), num(nr.get("pt", {}).get(k, 0))]
                                             for k in reasons]))
         w("")
-        w("Al revisar las transcripciones de esos casos (`data/replay/cases.jsonl`) aparecen dos causas en el router de reglas "
-          "(`understanding.py`), que son hallazgos del replay y no se corrigen en este cambio: (1) la lista de palabras clave de "
+        w("Al revisar las transcripciones de esos casos (`data/replay/cases.jsonl`) aparecen dos causas del router de reglas "
+          "(`understanding.py`) que se combinan; son hallazgos del replay y no se corrigen en este cambio: (1) la lista de palabras clave de "
           "disputa tiene `\"no reconheco\"` en vez de `\"nao reconheco\"`, así que \"não reconheço\" no cuenta como pedido de "
           "disputa en portugués; (2) el comercio **\"Taxi Seguro\"** contiene `seguro`, palabra de *fuera de alcance*: si el "
           "mensaje tiene una sola palabra de disputa, empata, la confianza baja a 0,5 y el agente vuelve a preguntar.")
