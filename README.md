@@ -8,6 +8,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
+- Propiedades demostradas (I1–I8 con Hypothesis sobre conversaciones aleatorias + verificación estática de todos los caminos del grafo): [`docs/threat-model.md#propiedades-demostradas`](docs/threat-model.md#propiedades-demostradas) · caminos: [`docs/graph-paths.md`](docs/graph-paths.md)
 - Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
 - Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
 
@@ -44,6 +45,7 @@ src/bankagent/
   llm_writer.py         LLMWriter + verify_reply: tono/dialecto sin agregar datos, cae a plantillas
   factory.py            build_agent(db, router="rules|llm", writer="templates|llm")
   graph.py              grafo LangGraph con transiciones declaradas y traza
+  graph_check.py        verificación estática de EDGES: caminos, alcanzabilidad, predecesores de `act`
   chat.py               chat de consola
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
 scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)

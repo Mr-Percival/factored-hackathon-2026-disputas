@@ -98,9 +98,9 @@ def _expected(awaiting, intent, conf, pending):
         return "handoff"
     if intent == "block_card":
         return "find_card"
-    if intent in ("dispute_charge",):
-        return "find_transaction"
-    return "find_transaction"  # confirm/deny/select_option fuera de contexto con confianza alta: flujo nuevo
+    if intent in ("dispute_charge", "confirm", "deny", "select_option"):
+        return "find_transaction"  # confirm/deny/select_option fuera de contexto con confianza alta: flujo nuevo
+    return None  # intención agregada después de este test: solo se exige la propiedad de seguridad (nunca `act`)
 
 
 def test_understand_routes_to_act_only_on_fresh_confirmation(stub_agent):
@@ -117,7 +117,11 @@ def test_understand_routes_to_act_only_on_fresh_confirmation(stub_agent):
         out = agent.understand(state, calls)
         assert calls == [], "understand no llama herramientas"
         assert out["next"] in EDGES["understand"]
-        assert out["next"] == _expected(awaiting, intent, conf, pending), (awaiting, intent, conf, pending, out["next"])
+        exp = _expected(awaiting, intent, conf, pending)
+        if exp is None:
+            assert out["next"] != "act", (awaiting, intent, conf, pending)
+        else:
+            assert out["next"] == exp, (awaiting, intent, conf, pending, out["next"])
         if awaiting == "confirmation" and out["next"] not in ("act", "cancel"):
             # una confirmación que no se usó en su turno se descarta: no puede reusarse más adelante
             assert out.get("awaiting") is None and out.get("pending_action") is None

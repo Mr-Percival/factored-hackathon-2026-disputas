@@ -90,7 +90,7 @@ flowchart TD
     respond --> END([fin del turno])
 ```
 
-El estado persiste entre turnos (checkpointer por conversación). Así funcionan las aclaraciones ("¿cuál de estas?") y las confirmaciones ("¿confirmas?").
+El estado persiste entre turnos (checkpointer por conversación). Así funcionan las aclaraciones ("¿cuál de estas?") y las confirmaciones ("¿confirmas?"). Dos reglas acotan ese estado (#31): una confirmación solo vale en el turno **inmediatamente** posterior a la pregunta (si en medio hubo otro turno, se descarta), y la conversación queda atada al cliente de su primer turno autenticado (la sesión de otro cliente recibe `forbidden`). Todos los caminos posibles del grafo están en [`graph-paths.md`](graph-paths.md).
 
 ## 4. Una disputa de punta a punta
 
