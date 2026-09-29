@@ -30,7 +30,7 @@ import json
 import os
 import random
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
 
 import duckdb
 
@@ -309,29 +309,42 @@ def build(db: str, n: int = 30, seed: int = 11, n_controls: int = 5, out: str = 
     count: dict[str, int] = defaultdict(int)
     attempts: dict[str, int] = defaultdict(int)
     rejected: list[dict] = []
-    exhausted: set[str] = set()
     used_customers: set[str] = set()
-    for extra in (0, 2, target):  # 1ª pasada con cupo; si un motivo no tiene datos, los demás cubren el total
+    deferred: dict[str, deque] = defaultdict(deque)  # specs de clientes ya usados: solo si faltan casos
+
+    def next_case(reason: str, reuse: bool):
+        while True:
+            if reuse and deferred[reason]:
+                spec = deferred[reason].popleft()
+            else:
+                spec = next(gens[reason], None)
+                if spec is None:
+                    return None
+                if not reuse and spec["customer_id"] in used_customers and reason not in ("security_lockout", "out_of_scope"):
+                    deferred[reason].append(spec)
+                    continue
+            attempts[reason] += 1
+            p = run_case(db, spec)
+            if p:
+                return spec, p
+            rejected.append({"reason": reason, "customer_id": spec["customer_id"], "turns": spec["turns"]})
+
+    # 1ª pasada: cupo por motivo y un cliente por caso; después, si un motivo no tiene datos, los demás completan
+    for extra, reuse in ((0, False), (0, True), (2, True), (target, True)):
+        exhausted: set[str] = set()
         while len(accepted) < target:
             progress = False
             for reason in QUOTA:
                 if len(accepted) >= target or reason in exhausted or count[reason] >= quota[reason] + extra:
                     continue
-                for spec in gens[reason]:
-                    if spec["customer_id"] in used_customers and reason not in ("security_lockout", "out_of_scope"):
-                        continue
-                    p = run_case(db, spec)
-                    attempts[reason] += 1
-                    if not p:
-                        rejected.append({"reason": reason, "customer_id": spec["customer_id"], "turns": spec["turns"]})
-                    if p:
-                        accepted.append((spec, p))
-                        count[reason] += 1
-                        used_customers.add(spec["customer_id"])
-                        progress = True
-                        break
-                else:
+                got = next_case(reason, reuse)
+                if got is None:
                     exhausted.add(reason)
+                    continue
+                accepted.append(got)
+                count[reason] += 1
+                used_customers.add(got[0]["customer_id"])
+                progress = True
             if not progress:
                 break
     log(f"handoffs reales: {len(accepted)} " + str(dict(count)) + f" · intentos {dict(attempts)}")
@@ -345,7 +358,8 @@ def build(db: str, n: int = 30, seed: int = 11, n_controls: int = 5, out: str = 
         for it in real:
             by_reason[it["spec"]["reason"]].append(it)
         # base: del motivo preferido; si no alcanza, de cualquier motivo de política que conserve >= 2 paquetes reales
-        src = by_reason.get(pref) if len(by_reason.get(pref, [])) >= 2 else             [it for r in POLICY_REASONS if len(by_reason.get(r, [])) >= 2 for it in by_reason[r]]
+        src = by_reason.get(pref) if len(by_reason.get(pref, [])) >= 2 else             [it for r in POLICY_REASONS if len(by_reason.get(r, [])) >= 2 for it in by_reason[r]] or \
+            [it for r in POLICY_REASONS for it in by_reason.get(r, [])]
         if defect == "regla_equivocada":
             src = [it for it in src or [] if not it["packet"]["verified_facts"].get("is_repeat_complainer")] or src
         if not src:
@@ -382,7 +396,7 @@ def write_kit(items: list[dict], out: str, raters: tuple[str, ...], seed: int, p
         random.Random(f"{seed}:{rater}").shuffle(order)
         orders[rater] = order
         with open(os.path.join(sh_dir, f"rater_{rater}.csv"), "w", encoding="utf-8-sig", newline="") as f:
-            w = csv.writer(f)
+            w = csv.writer(f, lineterminator="\n")
             w.writerow(SHEET_COLUMNS)
             for k, pid in enumerate(order, 1):
                 w.writerow([rater, k, pid] + [""] * (len(SHEET_COLUMNS) - 3))
