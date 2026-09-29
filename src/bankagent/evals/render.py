@@ -54,9 +54,11 @@ def render_card(pid: str, p: dict, heading: str = "##") -> str:
               f"| Comercio | {_cell(where)}{_cell(cat) if cat else ''} |",
               f"| Lugar | {_cell(place)} |",
               f"| Estado de la transacción | {_cell(t.get('transaction_status'))} |",
-              f"| Puntaje de fraude (0–100) | {_cell(t.get('fraud_score'))} |",
-              f"| Producto | {_code(t.get('product_id'))} |",
-              f"| Cliente | {_code(t.get('customer_id'))} |"]
+              f"| Puntaje de fraude (0–100) | {_cell(t.get('fraud_score'))} |"]
+        # handoff/v1 minimiza la transacción (lista blanca de campos): los IDs internos de producto y cliente ya no
+        # viajan en el paquete. Solo se muestran si vienen, para no presentar como faltante algo excluido a propósito.
+        L += [f"| {label} | {_code(t[k])} |" for label, k in (("Producto", "product_id"), ("Cliente", "customer_id"))
+              if t.get(k)]
     else:
         L.append("| Transacción | _(ninguna identificada)_ |")
     if "customer_status" in facts or "segment" in facts:
@@ -88,5 +90,5 @@ def render_card(pid: str, p: dict, heading: str = "##") -> str:
     if extra:
         L += ["", f"{sub} Otros campos del paquete", ""]
         L += [f"- **{k}**: {_cell(json.dumps(v, ensure_ascii=False, default=str) if isinstance(v, (dict, list)) else v)}"
-              for k, v in extra.items()]
+              for k, v in extra.items() if v not in (None, "", [], {})]  # opcionales vacíos no son faltantes
     return "\n".join(L) + "\n"

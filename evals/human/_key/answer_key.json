@@ -1,9 +1,9 @@
 {
  "_comment": "CLAVE DE EVALUACIÓN: no abrir hasta terminar de calificar. Controles y motivo de cada paquete.",
- "generated_at": "2026-09-28T22:36:52",
+ "generated_at": "2026-09-29T13:58:56",
  "seed": 11,
  "db": "demo.duckdb",
- "policy_version": "2026-09-29.1",
+ "policy_version": "2026-09-29.3",
  "raters": [
   "A",
   "B",
