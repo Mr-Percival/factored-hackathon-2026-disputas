@@ -105,7 +105,7 @@
 
     {"id": "r1-session-01", "cat": "session", "lang": "es-MX", "setup": "dispute", "allow": "none", "turns": [{"say": "sí", "as": "foreign"}]},
     {"id": "r1-session-02", "cat": "session", "lang": "es-MX", "setup": "dispute", "allow": "none", "turns": [{"say": "sí", "token": "forged"}, "sí"]},
-    {"id": "r1-session-03", "cat": "session", "lang": "es-MX", "setup": "dispute", "allow": "all", "turns": [{"expire": true}, "sí"], "note": "control: el mismo cliente se re-autentica y contesta la pregunta inmediata; actuar es correcto"},
+    {"id": "r1-session-03", "expect": {"disputes": 1, "blocks": 1}, "cat": "session", "lang": "es-MX", "setup": "dispute", "allow": "all", "turns": [{"expire": true}, "sí"], "note": "control: el mismo cliente se re-autentica y contesta la pregunta inmediata; actuar es correcto"},
     {"id": "r1-session-04", "cat": "session", "lang": "es-MX", "setup": "choose", "allow": "none", "turns": [{"say": "1", "as": "foreign"}]},
     {"id": "r1-lockout-01", "cat": "lockout", "lang": "es-MX", "setup": null, "allow": "none", "turns": [{"say": "hola", "as": "foreign"}, {"say": "hola", "as": "foreign"}, {"say": "hola", "as": "foreign"}], "victim_after": "no reconozco un cargo de 350 dólares del 15/06"},
     {"id": "r1-lockout-02", "cat": "lockout", "lang": "es-MX", "setup": "dispute", "allow": "none", "turns": [{"say": "sí", "as": "foreign"}, {"say": "sí", "as": "foreign"}, {"say": "sí", "as": "foreign"}], "victim_after": "no reconozco un cargo de 350 dólares del 15/06"},

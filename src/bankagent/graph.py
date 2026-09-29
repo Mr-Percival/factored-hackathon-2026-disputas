@@ -371,15 +371,10 @@ class Agent:
         cards = [c for c in self._call(calls, "list_cards", s["token"]) if c["product_status"] == "Active"]
         if not cards:
             return {"next": "handoff", "handoff_reason": "no_active_card", "detail": "0 active cards"}
-        # Red team #33: "bloquea la tarjeta ****9999 de mi mamá" + "sí" bloqueaba la tarjeta PROPIA (la única activa).
-        # Si el cliente nombró una tarjeta, solo se propone esa; si no es suya (o no se puede verificar), elige él.
-        hint = ((s.get("understanding") or {}).get("slots") or {}).get("card_hint")
-        named = [c for c in cards if hint and hint != "?" and str(c["product_number"]).endswith(hint)]
-        if hint and len(named) == 1:
-            cards = named
-        elif hint and len(cards) == 1:
+        cards, mismatch = _named_card(s, cards)
+        if mismatch:  # nombró una tarjeta que no es suya: elige él de sus tarjetas, no se le cambia por otra (#33)
             return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "awaiting": "option",
-                    "candidates": [{"kind": "card", **cards[0]}], "detail": "card_hint_mismatch"}
+                    "candidates": [{"kind": "card", **c} for c in cards[:5]], "detail": "card_hint_mismatch"}
         if len(cards) == 1:
             c = cards[0]
             return {"next": "respond", "outcome": "clarify", "reply_key": "block_confirm", "awaiting": "confirmation",
@@ -469,7 +464,8 @@ class Agent:
 
     def _offer_card_block(self, s: State, calls) -> dict:
         cards = [c for c in self._call(calls, "list_cards", s["token"]) if c["product_status"] == "Active"]
-        if len(cards) == 1:
+        cards, mismatch = _named_card(s, cards)
+        if len(cards) == 1 and not mismatch:
             c = cards[0]
             return {"reply_key": "account_takeover_block", "awaiting": "confirmation", "consent_retries": 0,
                     "pending_action": {"type": "block_card", "block_card": c["product_id"],
@@ -542,6 +538,17 @@ CONVERSATION_HANDOFFS = {"human_request": "customer_request", "account_takeover"
 CLAIM_LOOKUP_REASONS = {"customer_request", "account_takeover", "cancel_dispute", "out_of_scope", "dispute_status",
                         "clarification_exhausted"}
 SECURITY_REASONS = {"account_takeover", "security_lockout"}  # su cola/prioridad nunca la reemplaza una regla H0x
+
+
+def _named_card(s: State, cards: list[dict]) -> tuple[list[dict], bool]:
+    """Red team #33: "bloquea la tarjeta ****9999 de mi mamá" + "sí" bloqueaba la tarjeta PROPIA (la única activa).
+    Si el cliente nombró una tarjeta (últimos 4, o un número completo ya enmascarado = "?"), solo se ofrece esa;
+    si no es suya, (tarjetas, True): el cliente elige de las suyas en vez de confirmar otra que no nombró."""
+    hint = ((s.get("understanding") or {}).get("slots") or {}).get("card_hint")
+    if not hint or not cards:
+        return cards, False
+    named = [c for c in cards if hint != "?" and str(c["product_number"]).endswith(hint)]
+    return (named, False) if len(named) == 1 else (cards, True)
 
 
 # Estado del hilo que persiste entre turnos: no se devuelve a quien no está autorizado a verlo.

@@ -188,6 +188,8 @@ SUB_ACTION_DENIALS: dict[str, list[str]] = {
 }
 # Objeto opcional que sigue al rechazo ("no me bloquees LA TARJETA"): se consume con la frase.
 _DENIAL_OBJECT = r"(?:\s+(?:la|mi|el|o|a|meu|minha|my|the|su|tu)?\s*(?:tarjeta|targeta|cartao|card|plastico))?"
+# ...y su motivo, si lo da ("no bloquees la tarjeta QUE LA USO PARA TODO"): es parte del rechazo, no otra respuesta.
+_REASON = r"(?:\s*,?\s+(?:que|porque|porq|pq|ya que|pues|pois|because|since|as)\s[^,.;!?]*)?"
 # Negación + cualquier conjugación de "bloquear" con o sin pronombres, en todos los tratamientos (tú, usted, vos,
 # ustedes, você): "no me bloquee la tarjeta" (usted, es-CO) quedaba afuera de la lista y el "sí" se volvía duda (#64).
 _CLITIC = r"(?:(?:me|te|le|nos|les|se|la|lo|las|los|o|a) )*"
@@ -212,7 +214,10 @@ AFFIRM = ["si", "sim", "claro", "dale", "ok", "okay", "okey", "confirmo", "confi
           "beleza", "ta bom", "esta bem", "tudo bem", "certo", "confirmar", "abre", "abra", "sim quero",
           "e isso", "isso mesmo", "claro que sim", "por favor faca", "faca", "faz", "faz isso", "pode ser",
           # confirmaciones regionales: "joya" (AR), "de diez", "bárbaro", "genial" responden a la pregunta pendiente
-          "joya", "joia", "de diez", "barbaro", "genial", "buenisimo", "excelente", "perfeito", "otimo", "demais"]
+          "joya", "joia", "de diez", "barbaro", "genial", "buenisimo", "excelente", "perfeito", "otimo", "demais",
+          # imperativos con pronombre y formas de usted (red team #33: el sí tiene que ser puro, así que se nombran)
+          "esta bien", "confirmalo", "confirmala", "confirmelo", "confirmela", "hagale", "hagalo", "hagala", "abrala",
+          "abralo", "dale nomas", "sim senhor", "sim senhora", "pode confirmar", "pode seguir", "siga", "sigue"]
 DENY = ["no", "nao", "nop", "nope", "nel", "cancelar", "cancela", "cancelalo", "mejor no", "melhor nao", "nem pensar",
         "de ninguna manera", "para nada", "ninguna", "ninguno", "nenhuma", "nenhum", "negativo", "no quiero",
         "nao quero", "todavia no", "ainda nao", "dejalo", "deja asi", "olvidalo", "no gracias", "nao obrigado",
@@ -237,32 +242,35 @@ HEDGE = ["no se", "nose", "nao sei", "sei la", "creo", "creo que si", "tal vez",
          # "solo bloquea" pide una combinación que no se ofreció (bloqueo sin disputa): se re-pregunta
          "solo bloquea", "solo bloquear", "solo bloquea la tarjeta", "solo el bloqueo", "so bloquear",
          "so o bloqueio", "apenas bloquear"]
-# Consentimiento DIFERIDO o CONDICIONADO (red team #33): "después te confirmo", "sí, mañana", "si fuera por mí dale,
-# pero lo consulto", "ok, after I talk to my wife" contienen una palabra de sí, pero no son un sí AHORA. No es una
-# lista de ataques: son marcadores temporales, condicionales y de consulta a un tercero (clases cerradas del idioma).
-# Cualquiera de ellos vuelve la respuesta `unclear`: se re-pregunta y nunca se actúa.
-DEFER = [r"despues", r"luego", r"mas tarde", r"manana", r"al rato", r"en un rato", r"otro dia", r"la semana que viene",
-         r"la proxima( semana)?", r"el (lunes|martes|miercoles|jueves|viernes|sabado|domingo)", r"cuando", r"primero",
-         r"antes", r"todavia", r"aun", r"por ahora", r"de momento", r"consult\w*", r"lo (hablo|hablamos|charlo|veo|vemos)",
-         r"hablarlo", r"(hablar|hablo|confirmar|confirmo|chequear|chequeo|verificar|verifico) con", r"te aviso",
-         r"le aviso", r"aviso", r"(le|te) pregunto", r"preguntarle", r"revis\w*",
-         r"si (fuera|fueras|pudiera|puedo|puedes|podes|quieres|queres|hubiera|me|te|le|lo|la|les|nos|se|usted|ustedes)",
-         r"siempre que", r"siempre y cuando", r"solo si", r"solamente si", r"con tal( de)? que", r"a menos que",
-         r"salvo que", r"en caso de que",
-         r"depois", r"mais tarde", r"amanha", r"semana que vem", r"quando", r"primeiro", r"ainda", r"por enquanto",
-         r"vou (ver|falar|pensar|perguntar|conversar)", r"falar com", r"conversar com", r"perguntar", r"se eu",
-         r"desde que", r"contanto que", r"so se", r"a nao ser que",
-         r"later", r"tomorrow", r"after", r"first", r"when", r"if", r"unless", r"talk to", r"check with", r"ask my",
-         r"let me", r"wait", r"hold on", r"not now"]
-DEFER = [p + r"(?![a-z])" for p in DEFER]
-# Mención de la tarjeta o del bloqueo que no es un "no bloquees" (ya consumido) ni un "bloquéala" afirmativo:
-# "sí, pero la tarjeta que siga activa", "no toques mi tarjeta". El bloqueo no quedó respondido -> unclear.
+# Consentimiento = un sí PURO (red team #33, ronda 2). La ronda 1 agregó marcadores de diferido/condición
+# ("después", "si fuera", "mañana") y la ronda 2 los esquivó con otros ("al ratito", "ya te digo", "lo que diga mi
+# hijo", "nah", "menos bloquear", italiano/francés). Una lista de lo que NO es un sí nunca termina. Se invierte: el
+# sí vale solo si, sacando lo que SÍ entendemos (sí/no/dudas, rechazos parciales con su motivo, "solo la disputa",
+# "las dos", el reclamo repetido y una pregunta aparte), no queda contenido: solo muletillas y cortesía (clase
+# cerrada). Cualquier otra palabra -> `unclear`: se re-pregunta una vez y luego pasa a un humano. Nunca se actúa.
+FILLERS = ["por favor", "porfa", "porfis", "please", "pls", "gracias", "muchas gracias", "mil gracias", "obrigado",
+           "obrigada", "valeu", "thanks", "thank you", "nomas", "noma", "nomasito", "ya", "ya mismo", "pues", "pue",
+           "entonces", "entao", "eh", "ah", "oh", "uh", "che", "mesmo", "pero", "mas", "but", "y", "e", "and", "yo",
+           "eu", "tambien", "tambem", "too", "also", "igual", "ahora", "agora", "now", "right now", "ahora mismo",
+           "agora mesmo", "rapido", "urgente", "de inmediato", "ja", "senor", "senora", "senorita", "amigo", "amiga",
+           "hermano", "mano", "parce", "cara", "moca", "moco", "gente", "hagalo", "hagala", "abrala", "abralo",
+           "procedan", "proceder", "gracias a vos", "todo bien", "ok gracias", "genial", "dale nomas", "lo", "la",
+           "que", "si si", "asi", "asi es", "correcto", "eso", "eso es", "isso ai", "ahi", "de una vez", "una vez"]
+_FILLER_RX = re.compile(r"(?<![a-z])(?:" + "|".join(re.escape(w) for w in sorted(FILLERS, key=len, reverse=True))
+                        + r")(?![a-z])")
+
+
+def _content(t: str) -> str:
+    """Lo que queda de una respuesta sin muletillas ni signos: si no es vacío, el sí no es puro."""
+    return re.sub(r"[^a-z0-9]+", "", _FILLER_RX.sub(" ", t))
+
+
+# "sí, bloquéala": responde afirmativamente por el bloqueo (se saca; con otra palabra alrededor ya no es puro).
 BLOCK_AFFIRM = (r"(?:bloque(?:a|ala|alo|ar|e|ie|ia)|bloqueie|block it|block the card|block my card)"
                 r"(?:\s+(?:la|mi|o|a|the|my)?\s*(?:tarjeta|cartao|card))?")
-CARD_MENTION = re.compile(r"tarjeta|targeta|cartao|cartoes|card|plastico|bloqu|block|desactiv|congel")
 # Cláusulas en pregunta ("¿y si digo que sí?", "¿en qué va mi disputa?"): su "sí"/"va" no contesta nada.
 # La segunda alternativa solo arranca al inicio o tras un signo: sin eso el regex es cuadrático (30k caracteres = 5 s).
-QUESTION = re.compile(r"¿[^?¿]*\?|(?:^|(?<=[.!?¿]))[^.!?¿]*\?")
+QUESTION = re.compile(r"¿[^?¿]*(?:\?|$)|(?:^|(?<=[.!?¿]))[^.!?¿]*\?")
 CARD_HINT = re.compile(r"(?:tarjeta|targeta|cartao|card|terminad[ao] (?:en|em)|finalizad[ao] em|final)\D{0,12}?(\d{4})\b"
                        r"|\*{2,}\s?(\d{4})\b")
 
@@ -270,6 +278,7 @@ CARD_HINT = re.compile(r"(?:tarjeta|targeta|cartao|card|terminad[ao] (?:en|em)|f
 RESTATEMENTS = [r"no (la |lo |le )?reconozco", r"no (la |lo )?hice", r"yo no (la |lo )?hice", r"no fui yo",
                 r"yo no fui", r"nao (a |o )?reconheco", r"nao fui eu", r"nao (a |o )?fiz", r"eu nao fiz",
                 r"no (la |lo )?autorice", r"nao autorizei", r"no es mia", r"no es mio", r"nao e minha", r"nao e meu"]
+_RESTATED_OBJECT = r"(?:\s+(?:ese|este|el|esse|este|essa|esta|a|o|this|that)?\s*(?:cargo|cobro|movimiento|compra|cobranca|consumo|charge))?"
 _CONFIRM_LEXICON = [(p, label) for label, words in (("hedge", HEDGE), ("yes", AFFIRM), ("no", DENY)) for p in words]
 
 
@@ -298,26 +307,27 @@ def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
     None = el mensaje no contiene ninguna señal de respuesta (el router sigue con las otras intenciones)."""
     rest, denials = t, []
     for action, phrases in SUB_ACTION_DENIALS.items():
-        rest, hit = _strip(rest, [re.escape(x) + _DENIAL_OBJECT for x in phrases] + SUB_ACTION_DENIAL_PATTERNS.get(action, []))
+        rest, hit = _strip(rest, [re.escape(x) + _DENIAL_OBJECT + _REASON for x in phrases]
+                           + [x + _REASON for x in SUB_ACTION_DENIAL_PATTERNS.get(action, [])])
         if hit:
             denials.append(action)
-    rest, only_main = _strip(rest, [re.escape(x) for x in ONLY_MAIN_ACTION])
+    rest, only_main = _strip(rest, [re.escape(x) + _REASON for x in ONLY_MAIN_ACTION])
     if only_main and "block_card" not in denials:
         denials.append("block_card")
     rest, both = _strip(rest, [re.escape(x) for x in BOTH_ACTIONS])
-    rest, restated = _strip(rest, RESTATEMENTS)
+    rest, restated = _strip(rest, [x + _RESTATED_OBJECT for x in RESTATEMENTS])
     # Preguntas (#33): se sacan del texto; si contenían un sí/no/duda ("¿y si digo que sí?"), no contestan nada
     asked_back = any(_scan(q)[0] for q in QUESTION.findall(rest))
     rest = QUESTION.sub(" ", rest)
-    deferred = _any(rest, DEFER) or 'hedge' in _scan(rest)[0]  # 'solo bloquea' es duda antes que un sí al bloqueo
+    doubtful = "hedge" in _scan(rest)[0]  # "solo bloquea" es duda antes que un sí al bloqueo
     rest, _ = _strip(rest, [BLOCK_AFFIRM])  # "sí, bloquéala": responde por el bloqueo, pero NO es un sí por sí solo
     labels, leftover = _scan(rest)
     yes = "yes" in labels or only_main or both
     no = "no" in labels
     # "¿sí?" es una duda (el sí está DENTRO de la pregunta); "sí, ¿cuánto demora?" es un sí con una pregunta aparte
-    if "hedge" in labels or asked_back or deferred:
+    if "hedge" in labels or asked_back or doubtful:
         return "unclear", denials
-    if yes and CARD_MENTION.search(leftover):  # habló de la tarjeta sin decir sí o no al bloqueo (#33)
+    if yes and _content(leftover):  # un sí con algo más ("sí, al ratito", "sí, lo que diga mi hijo"): no es puro
         return "unclear", denials
     if yes and no:
         # "no, no la reconozco, ábrela": el "no" acompaña al reclamo repetido y el pedido es explícito

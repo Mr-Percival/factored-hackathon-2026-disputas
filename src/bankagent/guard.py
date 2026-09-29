@@ -46,7 +46,9 @@ INJECTION_PATTERNS = [
 
 PII_PATTERNS = [
     (re.compile(r"\b(?:\d[ -]?){13,19}\b"), "[TARJETA]"),
-    (re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.]+\b"), "[EMAIL]"),
+    # (?<!...) en vez de \b: el match solo puede empezar al inicio de una racha; con \b, "a.a.a.…" sin @ se
+    # re-escaneaba desde cada posición (cuadrático: 40k caracteres = 6,6 s, red team #33)
+    (re.compile(r"(?<![\w.+-])[\w.+-]+@[\w-]+\.[\w.]+\b"), "[EMAIL]"),
     (re.compile(r"\+?\d{2,3}[ -]?\d{2,3}[ -]?\d{3,4}[ -]?\d{3,4}\b"), "[TELEFONO]"),
     (re.compile(r"\b[A-Z]{4}\d{6}[A-Z0-9]{8}\b"), "[CURP]"),
 ]
