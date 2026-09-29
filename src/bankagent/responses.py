@@ -40,6 +40,7 @@ T = {
         "tool_failure": "Tengo un problema técnico para consultar tus movimientos. Para no hacerte esperar, te comunico con un asesor.",
         "block_confirm": "¿Confirmas que quieres bloquear la tarjeta {card}? (sí / no)",
         "block_done": "Listo, la tarjeta {card} quedó bloqueada.",
+        "security_lockout": "Por seguridad pausé esta conversación y no puedo procesar más solicitudes por aquí. Un asesor revisará tu caso y te contactará por un canal seguro.",
     },
     "pt": {
         "session_missing": "Por segurança, preciso que você faça login no app antes de continuar.",
@@ -59,6 +60,7 @@ T = {
         "tool_failure": "Estou com um problema técnico para consultar suas movimentações. Para você não esperar, vou transferir para um atendente.",
         "block_confirm": "Confirma que deseja bloquear o cartão {card}? (sim / não)",
         "block_done": "Pronto, o cartão {card} foi bloqueado.",
+        "security_lockout": "Por segurança, pausei esta conversa e não posso processar mais solicitações por aqui. Um atendente vai revisar seu caso e entrará em contato por um canal seguro.",
     },
 }
 

@@ -1,6 +1,6 @@
 """Chat de consola para probar el agente a mano.
 
-    python -m bankagent.chat --customer CLI-XXXX [--db data/serving.duckdb] [--router llm] [--writer llm]
+    python -m bankagent.chat --customer CLI-XXXX [--db data/serving.duckdb] [--router llm] [--writer llm] [--audit data/audit.jsonl]
 
 Comandos: /trace (traza del último turno) · /handoff (paquete) · /expire (vence la sesión) · /salir
 """
@@ -11,6 +11,7 @@ import json
 import os
 import uuid
 
+from .audit import AuditLog
 from .factory import build_agent
 from .identity import IdentityService
 from .pipeline import ROOT
@@ -20,11 +21,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--customer", required=True, help="cliente con el que se simula el login en la app")
     ap.add_argument("--db", default=os.path.join(ROOT, "data", "serving.duckdb"))
+    ap.add_argument("--audit", default=None, help="log de auditoría JSONL con cadena de hashes (opcional)")
     ap.add_argument("--router", choices=["rules", "llm"], default="rules")
     ap.add_argument("--writer", choices=["templates", "llm"], default="templates")
     a = ap.parse_args()
     identity = IdentityService()
-    agent = build_agent(a.db, router=a.router, writer=a.writer, identity=identity)
+    agent = build_agent(a.db, router=a.router, writer=a.writer, identity=identity,
+                        audit=AuditLog(a.audit) if a.audit else None)
     token, thread, last = identity.login(a.customer), uuid.uuid4().hex, {}
     print(f"Sesión simulada para {a.customer}. Escribe tu mensaje (es / pt).")
     while True:

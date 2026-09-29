@@ -47,3 +47,11 @@ def test_rerun_is_idempotent_and_late_arrivals_upsert(tmp_path):
     assert _q(db, "SELECT count(*) FROM transactions")[0][0] == n1 + 1  # solo T-ANA-10 es nueva
     assert _q(db, "SELECT transaction_status FROM transactions WHERE transaction_id = 'T-ANA-1'") == [("Reversed",)]
     assert first["tables"]["transactions"]["warnings"]["mexico_without_mxn"] > 0
+
+
+def test_quality_report_covers_quarantine_warnings_and_lineage(serving_db):
+    from bankagent.quality_report import build
+    md = build(serving_db)
+    assert "segment.allowed" in md and "customer_id.fk" in md      # cuarentena
+    assert "mexico_without_mxn" in md                               # advertencias
+    assert "| customers | 1 |" in md.replace(",", "")               # linaje: 1 archivo nuevo de customers
