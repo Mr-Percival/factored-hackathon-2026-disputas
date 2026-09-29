@@ -95,9 +95,9 @@ class ModelSpec:
 
 MODELS: dict[str, ModelSpec] = {
     "mdeberta-en-es": ModelSpec("edithngalame/mdeberta-v3-prompt-injection-en-es", "74be2ffb282be41d57942b40eee54da4cdb6bd7c",
-                                "onnx/model.onnx", "onnx/tokenizer.json", "margin", "MIT", threshold=0.5),
+                                "onnx/model.onnx", "onnx/tokenizer.json", "margin", "MIT", threshold=0.01336),
     "protectai-v2": ModelSpec("protectai/deberta-v3-base-prompt-injection-v2", "90c9989b1a342275dd0d1a95aad283c04e075671",
-                              "onnx/model.onnx", "onnx/tokenizer.json", "logits", "Apache-2.0", threshold=0.5),
+                              "onnx/model.onnx", "onnx/tokenizer.json", "logits", "Apache-2.0", threshold=0.999988),
 }
 
 

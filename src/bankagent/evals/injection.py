@@ -226,12 +226,20 @@ def render(a, meta, rows, excluded, dev, test, pool, dets, names, scores, thresh
     n_dev_neg = sum(1 for r in dev if r.label == 0)
     w(f"Dev = `edith/validation` limpio: {len(dev)} filas ({n_dev_neg} benignas). Objetivo: FPR <= {a.dev_fpr:.0%} en dev.")
     w("")
-    w("| Detector | Licencia | Umbral (P(inyección)) | TPR dev | FPR dev |")
-    w("|---|---|---|---|---|")
+    w("| Detector | Licencia | Modelo @ commit | Umbral (P(inyección)) | Default en `guard.MODELS` | TPR dev | FPR dev |")
+    w("|---|---|---|---|---|---|---|")
     for n in dets:
         c = confusion([r.label for r in dev], preds(n, dev))
-        lic = "código del equipo" if n == "regex" else MODELS[n].license
-        w(f"| {n} | {lic} | {f(thresholds[n], 4) if n != 'regex' else 'coincidencia'} | {f(c['tpr'])} | {f(c['fpr'], 3)} |")
+        if n == "regex":
+            w(f"| regex | código del equipo | `guard.INJECTION_PATTERNS` | coincidencia | — | {f(c['tpr'])} | {f(c['fpr'], 3)} |")
+            continue
+        sp = MODELS[n]
+        # El default del código debe ser el umbral de dev redondeado; si no, alguien lo cambió sin re-evaluar.
+        ok = "ok" if abs(sp.threshold - thresholds[n]) <= 1e-4 * max(1.0, abs(thresholds[n])) + 1e-5 else "**DIFIERE**"
+        w(f"| {n} | {sp.license} | `{sp.repo}` @ `{sp.revision[:8]}` | {thresholds[n]:.6g} | {sp.threshold:g} ({ok}) | "
+          f"{f(c['tpr'])} | {f(c['fpr'], 3)} |")
+    w("")
+    w("Los umbrales de P(inyección) de los clasificadores no son comparables entre sí: cada modelo está calibrado distinto.")
     w("")
 
     w("### Resumen sobre todo el test (limpio y deduplicado)")
@@ -275,6 +283,25 @@ def render(a, meta, rows, excluded, dev, test, pool, dets, names, scores, thresh
         for l in langs:
             rs = [r for r in pool if r.lang == l]
             cells.append(f(roc_auc([r.label for r in rs], [scores[n][r.text] for r in rs]), 3))
+        w(f"| {n} | " + " | ".join(cells) + " |")
+    w("")
+
+    w("### Falsas alarmas en NUESTRO dominio (`team/banking_domain`, benignos)")
+    w("")
+    w("Un falso positivo aquí es un cliente legítimo al que el agente le responde \"no puedo procesar esa solicitud\" "
+      "(y suma un intento hacia el bloqueo de la conversación).")
+    w("")
+    fams = [("benign", "normales"), ("tricky", "difíciles")]
+    bank_all = [r for r in test if r.set == "team/banking_domain" and r.label == 0]
+    w("| Detector | " + " | ".join(f"{lab} {lg} (n={sum(1 for r in bank_all if r.family == fam and r.lang == lg)})"
+                                     for fam, lab in fams for lg in ("es", "pt")) + " |")
+    w("|---|" + "---|" * 4)
+    for n in names:
+        cells = []
+        for fam, _ in fams:
+            for lg in ("es", "pt"):
+                rs = [r for r in bank_all if r.family == fam and r.lang == lg]
+                cells.append(f"{sum(preds(n, rs))}/{len(rs)}")
         w(f"| {n} | " + " | ".join(cells) + " |")
     w("")
 
@@ -390,6 +417,9 @@ def render(a, meta, rows, excluded, dev, test, pool, dets, names, scores, thresh
     w("- **Portugués traducido por el equipo** (80 filas) sin revisión nativa; las filas originales de portugués en "
       "`test_other_lang` son 3. Los números en pt tienen IC amplios.")
     w("- **n chico** en los conjuntos del equipo (85 bancarios, 58 benignos): una falsa alarma mueve la FPR bancaria ~1.7 pp.")
+    w("- **Sesgo a favor del regex en `team/banking_domain`:** el mismo equipo escribió los patrones y los mensajes, "
+      "y algunos benignos difíciles ya estaban en `tests/test_security.py`. El 0/58 del regex es optimista; los "
+      "clasificadores nunca vieron estos textos.")
     w("- **Ruido de etiquetas** en deepset (p. ej. *Generate SQL code to access a database.* etiquetado como inyección).")
     w("- **Dataset y modelo EN-ES son muy recientes** (publicados el 2026-09-27 por una sola autora, sin revisión "
       "externa). Se usan porque sus splits están bien construidos y el modelo tiene licencia MIT; se fijan por commit.")
