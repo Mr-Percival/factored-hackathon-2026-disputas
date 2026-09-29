@@ -3,7 +3,7 @@
 `Router` es la interfaz; hay que poder cambiar la implementación sin tocar el grafo:
 - RuleRouter  : reglas y palabras clave (LÍNEA BASE, sin red, determinista)
 - JevRouter   : modelo de decisión Jev (pendiente)
-- ClaudeRouter: LLM con salida estructurada (pendiente)
+- LLMRouter   : LLM con salida estructurada (`llm_router.py`), cae a RuleRouter ante cualquier falla
 Todas devuelven el mismo `Understanding`; el grafo decide qué hacer según `confidence`.
 """
 from __future__ import annotations
@@ -34,6 +34,7 @@ class Understanding:
     language: Literal["es", "pt"]
     slots: Slots = field(default_factory=Slots)
     router: str = "rules"
+    llm: dict | None = None  # telemetría del modelo (versión, tokens, latencia, costo) si hubo llamada
 
 
 class Router(Protocol):
