@@ -213,8 +213,8 @@ def select_all(sel: Selector) -> list[dict]:
         # En ARS no hay compras >= 1.000.000 (solo transferencias); se prefiere una compra con tarjeta en USD.
         "c.country = 'Argentina'", active_ok, "t.transaction_status = 'Approved'", recent(90),
         low_fraud, "t.amount >= {HIGH}", "t.amount < 3 * {HIGH}"],
-        "(t.transaction_type = 'Purchase' AND p.product_type IN ({CARDS})) DESC, (t.fraud_score < {THR} / 4) DESC, "
-        "t.transaction_date DESC", b_high))
+        "(t.transaction_type = 'Purchase' AND p.product_type IN ({CARDS})) DESC, (t.transaction_country = 'Argentina') DESC, "
+        "(t.fraud_score < {THR} / 4) DESC, t.transaction_date DESC", b_high))
 
     # 4. Señal de fraude (pt-BR) -> H03. Primero se busca en Brasil; si ninguna transacción real de Brasil
     #    llega a H03 como regla decisiva, se usa la de mayor fraud_score de otro país y se deja constancia.

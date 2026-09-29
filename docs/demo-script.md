@@ -23,7 +23,7 @@ python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw    # deb
 | 0 | 0:00–0:20 | Contexto | — | — |
 | 1 | 0:20–1:05 | Disputa normal + bloqueo (es-MX) | `CLI-ZT72318S7XDV` | `resolved` |
 | 2 | 1:05–1:40 | Cargo ambiguo (es-CO) | `CLI-N70CIEUDZ4TJ` | `resolved` |
-| 3 | 1:40–2:10 | Monto alto → humano (es-AR, voseo) | `CLI-AQDKO2TN7CE0` | `handoff` H02 |
+| 3 | 1:40–2:10 | Monto alto → humano (es-AR, voseo) | `CLI-R21LOD45KEKD` | `handoff` H02 |
 | 4 | 2:10–2:50 | Portugués: cargo en Brasil y señal de fraude | `CLI-KSKVL6PTYCX3`, `CLI-JP52WOIS6RWO` | `resolved` · `handoff` H03 |
 | 5 | 2:50–3:25 | Seguridad: inyección y sesión vencida | `CLI-ZT72318S7XDV`, `CLI-N70CIEUDZ4TJ` | `blocked` · `auth_error` |
 | 6 | 3:25–3:40 | Cierre | — | — |
@@ -55,14 +55,14 @@ Qué mostrar:
 Qué mostrar: cuando hay más de una candidata, el agente **pregunta en vez de adivinar** (`find_transaction` → `2 candidates`).
 "242.000" se entiende como miles, al estilo colombiano.
 
-### Escena 3: monto alto, handoff a humano (es-AR, voseo): `CLI-AQDKO2TN7CE0`
+### Escena 3: monto alto, handoff a humano (es-AR, voseo): `CLI-R21LOD45KEKD`
 | Turno | Cliente escribe | Agente (esperado) |
 |---|---|---|
-| 1 | `Che, me aparece un cargo de 2.651.000 pesos del 17/06 que no reconozco. ¿Me podés ayudar?` | "Monto alto: un analista debe revisar la disputa. Ya le pasé tu caso a un asesor…" → `handoff` |
+| 1 | `Che, me aparece un cargo de 2.155.000 pesos del 17/06 que no reconozco. ¿Me podés ayudar?` | "Monto alto: un analista debe revisar la disputa. Ya le pasé tu caso a un asesor…" → `handoff` |
 
 Qué mostrar en el **panel de handoff**:
 - `reason = H02_high_amount` y `policy.rules_fired` con el ID de la regla y su versión.
-- `verified_facts.transaction`: 2,651,264.23 ARS, transferencia del 17/06/2026 en Córdoba. Son hechos leídos de las
+- `verified_facts.transaction`: 2,154,962.73 ARS, transferencia del 17/06/2026 en La Plata. Son hechos leídos de las
   herramientas, no del texto del cliente.
 - `request` (lo que dijo el cliente, con la PII enmascarada) y `unresolved_questions` (lo que le queda por decidir al asesor).
 - La decisión la toma `policy.yaml` (ARS ≥ 1.000.000), no el modelo.
@@ -109,8 +109,8 @@ antes de cada deploy."
 | Escenario | Cliente | Mensaje exacto | Esperado |
 |---|---|---|---|
 | Reclamante recurrente | `CLI-AN2HHXQ4HS9V` | `No reconozco un cargo de 437 dólares del 17/06` | `handoff` H04 |
-| Cliente suspendido | `CLI-OB358IY9WT3Y` | `No reconozco un cargo de 516.000 pesos del 17/06` | `handoff` H01 |
-| Transacción rechazada | `CLI-V3VOMLG4SZNC` | `No reconozco un cargo de 297 dólares del 17/06` | `rejected` D02 (Boutique Moda, Miami: no generó cargo) |
+| Cliente suspendido | `CLI-TTZIW3NPJRGA` | `No reconozco un cargo de 1.756.000 pesos del 16/06` | `handoff` H01 |
+| Transacción rechazada | `CLI-L1SPP8IL8TNO` | `No reconozco un cargo de 315 dólares del 17/06` | `rejected` D02 (Gasolinera Express: fue rechazada, no generó cargo) |
 | Fuera de plazo | `CLI-722A2BCMSALK` | `No reconozco un cargo de 107.000 pesos del 17/01/2026` | `rejected` D05 (más de 120 días) |
 | Fuera de alcance | `CLI-ZT72318S7XDV` | `Quiero pedir un préstamo personal` | `handoff` `out_of_scope` |
 | Sin intención | `CLI-ZT72318S7XDV` | `hola` | `clarify` (explica qué puede hacer) |
@@ -139,10 +139,10 @@ python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw         
 
 | Métrica | Valor (2026-09-28) |
 |---|---|
-| Tamaño de `data/demo/demo.duckdb` | **4.8 MB** (509 clientes · 1,314 productos · 14,590 transacciones · 243 quejas) |
-| Tiempo de construcción | ≈ 110 s (lee todos los CSV de `data/raw` y filtra) |
-| Selección de clientes | ≈ 10 s (13 escenarios, 9 corridas del agente sobre la base completa) |
-| Verificación | 13/13 OK en la base completa y en la de demo, con umbral de fraude 60 (`main`) y 30 (PR #18) |
+| Tamaño de `data/demo/demo.duckdb` | **4.5 MB** (509 clientes · 1,317 productos · 14,665 transacciones · 244 quejas) |
+| Tiempo de construcción | ≈ 110–135 s (lee todos los CSV de `data/raw` y filtra) |
+| Selección de clientes | ≈ 10–15 s (13 escenarios, 9 corridas del agente sobre la base completa) |
+| Verificación | 13/13 OK en la base completa y en la de demo, con el umbral de fraude vigente (30, PR #18) y con el anterior (60) |
 
 **Huella de la entrega usada** (sha256 de `ruta|tamaño` por tabla, misma fórmula que `source_fingerprint` del
 manifiesto del pipeline en el PR #18):

@@ -1,10 +1,10 @@
 {
   "_comment": "Generado por scripts/select_demo_customers.py. Clientes REALES del dataset sintético del organizador; sin PII (solo IDs, montos, fechas, comercios, países). Regenerar si cambia dataset_fingerprint.",
-  "generated_at": "2026-09-28T21:38:41",
+  "generated_at": "2026-09-28T21:51:06",
   "policy": {
-    "version": "2026-09-28.1",
+    "version": "2026-09-29.1",
     "as_of": "2026-06-17",
-    "fraud_threshold": 60.0,
+    "fraud_threshold": 30.0,
     "high_amount": {
       "USD": 1000,
       "MXN": 20000,
@@ -37,12 +37,12 @@
   "customer_ids": [
     "CLI-722A2BCMSALK",
     "CLI-AN2HHXQ4HS9V",
-    "CLI-AQDKO2TN7CE0",
     "CLI-JP52WOIS6RWO",
     "CLI-KSKVL6PTYCX3",
+    "CLI-L1SPP8IL8TNO",
     "CLI-N70CIEUDZ4TJ",
-    "CLI-OB358IY9WT3Y",
-    "CLI-V3VOMLG4SZNC",
+    "CLI-R21LOD45KEKD",
+    "CLI-TTZIW3NPJRGA",
     "CLI-ZT72318S7XDV"
   ],
   "missing_scenarios": [],
@@ -170,29 +170,29 @@
       "id": "high_amount_ar",
       "title": "Monto alto: handoff a analista (es-AR, voseo)",
       "locale": "es-AR",
-      "customer_id": "CLI-AQDKO2TN7CE0",
+      "customer_id": "CLI-R21LOD45KEKD",
       "customer": {
-        "customer_id": "CLI-AQDKO2TN7CE0",
+        "customer_id": "CLI-R21LOD45KEKD",
         "country": "Argentina",
         "status": "Active",
         "repeat_complainer": false
       },
       "transaction": {
-        "transaction_id": "TRX-2HEFK4QUQSIDSXUGB93L",
-        "date": "2026-06-17 22:55:04",
+        "transaction_id": "TRX-KI9KQNP4EMA4BWGT5PDU",
+        "date": "2026-06-17 20:43:30",
         "type": "Transfer",
-        "amount": 2651264.23,
+        "amount": 2154962.73,
         "currency": "ARS",
         "merchant": null,
         "country": "Argentina",
-        "city": "Córdoba",
+        "city": "La Plata",
         "status": "Approved",
-        "fraud_score": 14.61,
+        "fraud_score": 7.44,
         "card_type": "Cuenta Ahorro"
       },
       "turns": [
         {
-          "say": "Che, me aparece un cargo de 2.651.000 pesos del 17/06 que no reconozco. ¿Me podés ayudar?",
+          "say": "Che, me aparece un cargo de 2.155.000 pesos del 17/06 que no reconozco. ¿Me podés ayudar?",
           "expect": {
             "outcome": "handoff",
             "lang": "es",
@@ -201,7 +201,7 @@
             "rules_fired": [
               "H02_high_amount"
             ],
-            "txn_id": "TRX-2HEFK4QUQSIDSXUGB93L",
+            "txn_id": "TRX-KI9KQNP4EMA4BWGT5PDU",
             "reply_contains": "asesor"
           }
         }
@@ -259,9 +259,9 @@
         "outcome": "handoff",
         "rule": "H03_fraud_signal"
       },
-      "note": "Ninguna transacción real en Brasil llega a H03 como regla decisiva con la política vigente (umbral 60): se usa la de mayor fraud_score en México, con el cliente escribiendo en portugués.",
+      "note": "Ninguna transacción real en Brasil llega a H03 como regla decisiva con la política vigente (umbral 30): se usa la de mayor fraud_score en México, con el cliente escribiendo en portugués.",
       "selection": {
-        "sql_candidates": 63,
+        "sql_candidates": 146,
         "agent_runs": 1
       }
     },
@@ -370,29 +370,29 @@
       "id": "inactive_h01",
       "title": "Cliente suspendido/inactivo: handoff (H01)",
       "locale": "es-CO",
-      "customer_id": "CLI-OB358IY9WT3Y",
+      "customer_id": "CLI-TTZIW3NPJRGA",
       "customer": {
-        "customer_id": "CLI-OB358IY9WT3Y",
+        "customer_id": "CLI-TTZIW3NPJRGA",
         "country": "Colombia",
         "status": "Suspended",
         "repeat_complainer": false
       },
       "transaction": {
-        "transaction_id": "TRX-A483LANI2QF5B4INWE5B",
-        "date": "2026-06-17 16:44:56",
+        "transaction_id": "TRX-JZIID7EG0GQ69P0FYUH2",
+        "date": "2026-06-16 23:55:38",
         "type": "Purchase",
-        "amount": 516353.44,
+        "amount": 1755659.29,
         "currency": "COP",
-        "merchant": "Cable TV",
+        "merchant": "Internet Plus",
         "country": "Colombia",
-        "city": "Cartagena",
+        "city": "Barranquilla",
         "status": "Approved",
-        "fraud_score": 13.84,
-        "card_type": "Tarjeta Crédito"
+        "fraud_score": 1.46,
+        "card_type": "Tarjeta Débito"
       },
       "turns": [
         {
-          "say": "No reconozco un cargo de 516.000 pesos del 17/06",
+          "say": "No reconozco un cargo de 1.756.000 pesos del 16/06",
           "expect": {
             "outcome": "handoff",
             "lang": "es",
@@ -400,7 +400,7 @@
             "rules_fired": [
               "H01_customer_not_active"
             ],
-            "txn_id": "TRX-A483LANI2QF5B4INWE5B",
+            "txn_id": "TRX-JZIID7EG0GQ69P0FYUH2",
             "handoff_reason": "H01_customer_not_active"
           }
         }
@@ -418,29 +418,29 @@
       "id": "declined_d02",
       "title": "Transacción rechazada: no hay cargo (D02)",
       "locale": "es-MX",
-      "customer_id": "CLI-V3VOMLG4SZNC",
+      "customer_id": "CLI-L1SPP8IL8TNO",
       "customer": {
-        "customer_id": "CLI-V3VOMLG4SZNC",
+        "customer_id": "CLI-L1SPP8IL8TNO",
         "country": "México",
         "status": "Active",
         "repeat_complainer": false
       },
       "transaction": {
-        "transaction_id": "TRX-J7I243LZAOJ1W7UAE13W",
-        "date": "2026-06-17 21:54:53",
+        "transaction_id": "TRX-LPHD2E87OARKJ8BAMMEL",
+        "date": "2026-06-17 21:31:15",
         "type": "Purchase",
-        "amount": 296.59,
+        "amount": 314.61,
         "currency": "USD",
-        "merchant": "Boutique Moda",
-        "country": "USA",
-        "city": "Miami",
+        "merchant": "Gasolinera Express",
+        "country": "México",
+        "city": "Puebla",
         "status": "Declined",
-        "fraud_score": 8.71,
+        "fraud_score": 1.67,
         "card_type": "Tarjeta Crédito"
       },
       "turns": [
         {
-          "say": "No reconozco un cargo de 297 dólares del 17/06",
+          "say": "No reconozco un cargo de 315 dólares del 17/06",
           "expect": {
             "outcome": "rejected",
             "lang": "es",
@@ -448,7 +448,7 @@
             "rules_fired": [
               "D02_declined_not_charged"
             ],
-            "txn_id": "TRX-J7I243LZAOJ1W7UAE13W"
+            "txn_id": "TRX-LPHD2E87OARKJ8BAMMEL"
           }
         }
       ],

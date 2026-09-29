@@ -34,7 +34,7 @@ src/bankagent/
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
-scripts/                descarga S3 y EDA
+scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)
 ```
 
 ## Setup reproducible
