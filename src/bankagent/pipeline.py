@@ -1,6 +1,7 @@
 """Pipeline raw -> serving.
 
     python -m bankagent.pipeline --raw data/raw --out data/serving.duckdb [--sample-customers 500]
+                                 [--include-customers ids.txt|demo_customers.json]
 
 Tres ideas, nada más:
 1. Contrato por tabla (config/contracts.yaml): tipos, obligatorios, dominios, FKs.
@@ -82,7 +83,18 @@ def _violations(table: str, spec: dict) -> list[tuple[str, str]]:
     return checks
 
 
-def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contracts_path: str = CONTRACTS) -> dict:
+def read_customer_ids(path: str) -> list[str]:
+    """IDs a forzar en la muestra: .json con clave `customer_ids`, o texto con un ID por línea (# comenta)."""
+    with open(path, encoding="utf-8-sig") as f:
+        if path.lower().endswith(".json"):
+            return [str(c) for c in json.load(f)["customer_ids"]]
+        return [ln.split("#")[0].strip() for ln in f if ln.split("#")[0].strip()]
+
+
+def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contracts_path: str = CONTRACTS,
+        include_customers: list[str] | None = None) -> dict:
+    """`sample_customers` = N clientes deterministas (orden por hash). `include_customers` se agregan siempre
+    a la muestra (p. ej. los clientes del guion de demo); si se pasa sin `sample_customers`, solo se cargan esos."""
     contracts = load_contracts(contracts_path)
     norm = contracts.pop("normalize", {})
     con = duckdb.connect(out_db)
@@ -91,6 +103,11 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
     report = {"run_id": run_id, "started_at": dt.datetime.now().isoformat(), "raw_dir": os.path.abspath(raw_dir),
               "out_db": os.path.abspath(out_db),
               "sample_customers": sample_customers, "normalizations": norm, "tables": {}}
+    include = sorted(set(include_customers or []))
+    subset = bool(sample_customers or include)
+    if include:
+        con.execute("CREATE OR REPLACE TEMP TABLE _include (customer_id VARCHAR)")
+        con.executemany("INSERT INTO _include VALUES (?)", [(c,) for c in include])
 
     for table in LOAD_ORDER:
         spec = contracts[table]
@@ -117,9 +134,14 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
         con.execute(f"""CREATE OR REPLACE TEMP TABLE _stg AS
             SELECT {_staging_select(table, spec, norm)}
             FROM read_csv({file_list}, all_varchar=true, header=true, union_by_name=true, hive_partitioning=false)""")
-        if sample_customers and table == "customers":
-            con.execute(f"DELETE FROM _stg WHERE customer_id NOT IN (SELECT customer_id FROM _stg ORDER BY hash(customer_id) LIMIT {int(sample_customers)})")
-        elif sample_customers and "customer_id" in spec["columns"]:
+        if subset and table == "customers":
+            keep = []
+            if sample_customers:
+                keep.append(f"SELECT customer_id FROM _stg ORDER BY hash(customer_id) LIMIT {int(sample_customers)}")
+            if include:
+                keep.append("SELECT customer_id FROM _include")
+            con.execute(f"DELETE FROM _stg WHERE customer_id NOT IN ({' UNION '.join(f'({q})' for q in keep)})")
+        elif subset and "customer_id" in spec["columns"]:
             con.execute("DELETE FROM _stg WHERE customer_id NOT IN (SELECT customer_id FROM customers)")
         stats["rows_in"] = con.execute("SELECT count(*) FROM _stg").fetchone()[0]
 
@@ -154,6 +176,9 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
             stats["max_partition"] = str(con.execute(f'SELECT max("{spec["partition_key"]}") FROM {table}').fetchone()[0])
         report["tables"][table] = stats
 
+    if include:  # cuántos de los forzados existen de verdad (un ID que no está en la entrega no se inventa)
+        found = con.execute("SELECT count(*) FROM customers WHERE customer_id IN (SELECT customer_id FROM _include)").fetchone()[0]
+        report["include_customers"] = {"requested": len(include), "found": found}
     report["finished_at"] = dt.datetime.now().isoformat()
     con.close()
     runs_dir = os.path.join(os.path.dirname(os.path.abspath(out_db)), "runs")
@@ -168,11 +193,16 @@ def main():
     ap.add_argument("--raw", default=os.path.join(ROOT, "data", "raw"))
     ap.add_argument("--out", default=os.path.join(ROOT, "data", "serving.duckdb"))
     ap.add_argument("--sample-customers", type=int, default=None)
+    ap.add_argument("--include-customers", default=None,
+                    help="archivo con IDs que siempre entran en la muestra (.txt uno por línea, o .json con customer_ids)")
     a = ap.parse_args()
-    rep = run(a.raw, a.out, a.sample_customers)
+    include = read_customer_ids(a.include_customers) if a.include_customers else None
+    rep = run(a.raw, a.out, a.sample_customers, include_customers=include)
     for t, s in rep["tables"].items():
         print(f"{t:14s} new_files={s['files_new']:5d} in={s['rows_in']:>9,} loaded={s['rows_loaded']:>9,} "
               f"quarantined={s['rows_quarantined']:>6,} warnings={s['warnings']}")
+    if "include_customers" in rep:
+        print("include_customers:", rep["include_customers"])
     print("run:", rep["run_id"])
 
 
