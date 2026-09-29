@@ -125,7 +125,10 @@ class RuleRouter:
             m = re.search(r"\b([1-9])\b", t)
             if m and len(t) <= 40:
                 return Understanding("select_option", 0.95, lang, Slots(option=int(m.group(1))))
-        if awaiting == "confirmation":
+        # "no reconozco otro cargo de 50" no es un "no": es un pedido nuevo que descarta la acción pendiente.
+        words = len(re.findall(r"[a-z0-9]+", t))
+        new_request = words > 3 and any(_has(t, k) for k in KEYWORDS["dispute_charge"] + KEYWORDS["block_card"])
+        if awaiting == "confirmation" and not new_request:
             if any(_has(t, k) for k in KEYWORDS["deny"]) and not any(_has(t, k) for k in ("si", "sim")):
                 return Understanding("deny", 0.9, lang)
             if any(_has(t, k) for k in KEYWORDS["confirm"]):
