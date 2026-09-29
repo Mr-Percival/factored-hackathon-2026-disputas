@@ -89,10 +89,10 @@ def _check(expect: dict, got: dict) -> list[str]:
 
 def run_scenario(db: str, sc: dict, policy_path: str = POLICY, router: str = "rules") -> tuple[bool, list[dict]]:
     """Corre el escenario con un agente nuevo (ops en memoria: sin estado de otros escenarios).
-    `router`: "rules" (línea base) o "embeddings" (router aprendido lite, extra ml)."""
+    `router`: "rules" (línea base) o "embeddings" (router aprendido lite, extra ml; el de la demo, ADR 0009)."""
     identity = IdentityService()
     tools = BankTools(db, identity)
-    agent = build_agent(tools, router=router, policy=PolicyEngine(policy_path))
+    agent = build_agent(tools, router=router, writer="templates", policy=PolicyEngine(policy_path))
     token = identity.login(sc["customer_id"])
     log, ok = [], True
     try:

@@ -76,7 +76,7 @@ describe("demo web", () => {
     expect(
       screen.getByText(/Sandbox con datos sintéticos · política sintética · no mueve dinero/),
     ).toBeInTheDocument();
-    expect(screen.getByText("Modo reglas (sin LLM)")).toBeInTheDocument();
+    expect(screen.getByText("Sin LLM")).toBeInTheDocument(); // el router se conoce con el primer turno
     expect(
       screen.getByText(/cargos no reconocidos, cobros indebidos y bloqueo de tarjeta/),
     ).toBeInTheDocument();
@@ -103,6 +103,7 @@ describe("demo web", () => {
       text: "No reconozco un cargo\nde 77 dólares",
     });
     expect(within(log).getByText("Aclaración")).toBeInTheDocument();
+    expect(screen.getByText("Modo reglas (sin LLM)")).toBeInTheDocument(); // cabecera: router del último turno
     // la respuesta nueva se anuncia en la región viva
     expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent(/Agente: Encontré el cargo/);
     // "Por qué respondió así": traza con herramientas fallidas/ok e intentos, y política

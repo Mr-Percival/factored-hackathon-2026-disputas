@@ -140,9 +140,11 @@ class Runtime:
         return bool(self.policy.version)
 
     def _new_agent(self) -> Agent:
-        # LLM apagado a propósito (sin proveedores pagos). BANKAGENT_ROUTER=embeddings activa el router aprendido local.
+        # LLM apagado a propósito (sin proveedores pagos). Por defecto el router aprendido local (ADR 0009, "Decisión de
+        # demo"); BANKAGENT_ROUTER=rules vuelve a la línea base. Si el modelo no carga (sin artefacto o sin numpy),
+        # cada turno responde RuleRouter y la traza/la UI lo dicen: `rules(fallback:model_unavailable)`.
         tools = self.tools.fork_ops("s_" + secrets.token_hex(8))
-        router = os.environ.get("BANKAGENT_ROUTER", "rules")
+        router = os.environ.get("BANKAGENT_ROUTER", "embeddings")
         router = router if router in ("rules", "embeddings") else "rules"  # nunca LLM ni el modelo full en la demo
         return build_agent(tools, router=router, writer="templates", policy=self.policy, audit=self.audit)
 

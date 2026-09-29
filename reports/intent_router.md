@@ -2,33 +2,33 @@
 
 > Generado por `scripts/train_intent.py` — no editar a mano. Decisión y justificación: [ADR 0009](../docs/adr/0009-router-aprendido.md). Corpus, guía y anotaciones: [`corpus/intent/`](../corpus/intent/).
 
-- **Aprendido lite (char) — se despliega:** `char2-5-tfidf` + regresión logística (C=30.0, clases balanceadas), temperatura T=0.62, umbral de abstención τ=0.68 (máxima cobertura con acción equivocada ≤ 1% en validación). Artefactos `models/intent_router_lite/` (0.2 MB).
-- **Aprendido full (char+MiniLM) — offline:** `char2-5-tfidf+qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q@faf4aa42` + regresión logística (C=30.0, clases balanceadas), temperatura T=0.68, umbral de abstención τ=0.76 (máxima cobertura con acción equivocada ≤ 1% en validación). Artefactos `models/intent_router_full/` (0.2 MB).
-- Corpus de train sha256 `8d3421c48e00014f…`; test congelado en `corpus/intent/MANIFEST.json` (2026-09-29T01:25:19).
+- **Aprendido lite (char) — se despliega:** `char2-5-tfidf` + regresión logística (C=10.0, clases balanceadas), temperatura T=0.48, umbral de abstención τ=0.69 (máxima cobertura con acción equivocada ≤ 1% en validación). Artefactos `models/intent_router_lite/` (0.2 MB).
+- **Aprendido full (char+MiniLM) — offline:** `char2-5-tfidf+qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q@faf4aa42` + regresión logística (C=10.0, clases balanceadas), temperatura T=0.58, umbral de abstención τ=0.74 (máxima cobertura con acción equivocada ≤ 1% en validación). Artefactos `models/intent_router_full/` (0.2 MB).
+- Corpus de train sha256 `4cd70e1c063d07e7…`; test congelado en `corpus/intent/MANIFEST.json` (2026-09-29T01:25:19).
 
 ## Resumen
 
 | split | métrica | RuleRouter (línea base) | Aprendido lite (char) — se despliega | Aprendido full (char+MiniLM) — offline |
 |---|---|---|---|---|
 | **test (autores C y G)** | n=306 (152 familias) |  |  |  |
-|  | macro-F1, 9 intenciones (IC 95%) | 0.548 [0.473, 0.604] | 0.868 [0.826, 0.902] | 0.904 [0.863, 0.934] |
-|  | Δ macro-F1 vs. reglas (IC 95%) | — | +0.321 [0.259, 0.393] | +0.356 [0.296, 0.425] |
-|  | macro-F1 por ruta del grafo | 0.571 | 0.839 | 0.882 |
-|  | mensajes con acción equivocada | 18.6% (57) | 2.6% (8) | 1.6% (5) |
+|  | macro-F1, 9 intenciones (IC 95%) | 0.548 [0.473, 0.604] | 0.877 [0.832, 0.913] | 0.924 [0.876, 0.957] |
+|  | Δ macro-F1 vs. reglas (IC 95%) | — | +0.330 [0.257, 0.409] | +0.376 [0.300, 0.456] |
+|  | macro-F1 por ruta del grafo | 0.571 | 0.856 | 0.920 |
+|  | mensajes con acción equivocada | 18.6% (57) | 1.6% (5) | 1.6% (5) |
 |  | handoff pedido → se inició disputa | 33 | 3 | 2 |
-|  | costo esperado por mensaje (IC 95%) | 0.673 [0.544, 0.820] | 0.126 [0.076, 0.181] | 0.090 [0.044, 0.146] |
-|  | cobertura (sin aclarar por baja confianza) | 64.7% | 89.9% | 92.2% |
-|  | 5 semillas (85% de familias): macro-F1 | — | 0.849 ± 0.007 | 0.892 ± 0.009 |
+|  | costo esperado por mensaje (IC 95%) | 0.673 [0.544, 0.820] | 0.105 [0.060, 0.161] | 0.080 [0.034, 0.138] |
+|  | cobertura (sin aclarar por baja confianza) | 64.7% | 89.5% | 94.4% |
+|  | 5 semillas (85% de familias): macro-F1 | — | 0.846 ± 0.011 | 0.902 ± 0.013 |
 | **test de estilo no visto (autor D)** | n=175 (69 familias) |  |  |  |
-|  | macro-F1, 9 intenciones (IC 95%) | 0.719 [0.631, 0.783] | 0.878 [0.822, 0.919] | 0.897 [0.842, 0.941] |
-|  | Δ macro-F1 vs. reglas (IC 95%) | — | +0.159 [0.086, 0.243] | +0.179 [0.104, 0.274] |
-|  | macro-F1 por ruta del grafo | 0.712 | 0.855 | 0.868 |
+|  | macro-F1, 9 intenciones (IC 95%) | 0.719 [0.631, 0.783] | 0.869 [0.814, 0.910] | 0.895 [0.838, 0.939] |
+|  | Δ macro-F1 vs. reglas (IC 95%) | — | +0.151 [0.078, 0.236] | +0.177 [0.101, 0.272] |
+|  | macro-F1 por ruta del grafo | 0.712 | 0.842 | 0.867 |
 |  | mensajes con acción equivocada | 1.1% (2) | 0.0% (0) | 0.0% (0) |
 |  | handoff pedido → se inició disputa | 1 | 0 | 0 |
-|  | costo esperado por mensaje (IC 95%) | 0.211 [0.147, 0.283] | 0.086 [0.055, 0.123] | 0.066 [0.035, 0.101] |
-|  | cobertura (sin aclarar por baja confianza) | 58.9% | 90.9% | 92.6% |
-|  | 5 semillas (85% de familias): macro-F1 | — | 0.865 ± 0.014 | 0.882 ± 0.011 |
-| **CPU, 1 hilo** | latencia de clasificación p50 / p95 (HybridRouter = esto + reglas) | 0.57 / 0.77 ms | 0.20 / 0.28 ms | 14.24 / 21.10 ms |
+|  | costo esperado por mensaje (IC 95%) | 0.211 [0.147, 0.283] | 0.086 [0.056, 0.119] | 0.074 [0.040, 0.114] |
+|  | cobertura (sin aclarar por baja confianza) | 58.9% | 88.6% | 93.1% |
+|  | 5 semillas (85% de familias): macro-F1 | — | 0.861 ± 0.011 | 0.888 ± 0.007 |
+| **CPU, 1 hilo** | latencia de clasificación p50 / p95 (HybridRouter = esto + reglas) | 0.53 / 0.69 ms | 0.18 / 0.27 ms | 14.80 / 23.04 ms |
 |  | en disco | 0 MB | 0.2 MB + 0 MB preentrenado | 0.2 MB + 252.1 MB preentrenado |
 
 - Las 9 etiquetas son las intenciones de usuario que el grafo ya maneja (#54); RuleRouter las cubre todas, así que la comparación es directa. RuleRouter se evalúa como lo usa el grafo: confianza < 0.6 → aclarar (`unknown`).
@@ -38,24 +38,24 @@
 
 ## Datos y etiquetas
 
-| intención | train (n=800) | test (n=306) | test_style (n=175) |
+| intención | train (n=864) | test (n=306) | test_style (n=175) |
 |---|---|---|---|
-| dispute_charge | 185 | 67 | 46 |
+| dispute_charge | 229 | 67 | 46 |
 | block_card | 95 | 33 | 23 |
 | account_takeover | 62 | 23 | 15 |
 | human_request | 69 | 18 | 16 |
-| dispute_status | 53 | 38 | 0 |
-| cancel_dispute | 48 | 33 | 0 |
-| out_of_scope | 174 | 57 | 51 |
+| dispute_status | 57 | 38 | 0 |
+| cancel_dispute | 52 | 33 | 0 |
+| out_of_scope | 186 | 57 | 51 |
 | closing | 47 | 17 | 11 |
 | unknown | 67 | 20 | 13 |
 
 | dialecto | train | test | test_style |
 |---|---|---|---|
-| es-MX | 218 | 72 | 43 |
-| es-CO | 181 | 58 | 42 |
-| es-AR | 160 | 64 | 33 |
-| pt-BR | 200 | 82 | 40 |
+| es-MX | 234 | 72 | 43 |
+| es-CO | 197 | 58 | 42 |
+| es-AR | 176 | 64 | 33 |
+| pt-BR | 216 | 82 | 40 |
 | mix | 41 | 30 | 17 |
 
 - **Procedencia:** enunciados escritos por el equipo con asistentes de IA, un autor por sesión aislada que solo leyó la [guía de etiquetado](../corpus/intent/GUIA_ETIQUETADO.md) (ni las reglas ni otros archivos del corpus). Split **por autor, fijado antes de escribir**: A, B, E, F → train; C, G → test; D → test de estilo no visto (voz a texto, telegráfico, formal). F y G se sumaron en la v2 de la guía para las intenciones nuevas de #54 (`dispute_status`, `cancel_dispute`); los archivos anteriores no se tocaron y una revisión completa no encontró enunciados viejos que cambiaran de etiqueta (`review/schema_v2_relabel.jsonl` vacío). No hay texto de clientes ni del dataset del organizador (ADR 0003).
@@ -79,13 +79,13 @@ Cada fold entrena con todos los autores de train menos uno y valida con el que q
 
 | candidato | macro-F1 | C | T | ECE cruda → calibrada | τ | cobertura | acción equivocada | costo/msg | p50 / p95 ms | MB preentrenado |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `char` ← lite | 0.865 | 30.0 | 0.62 | 0.114 → 0.013 | 0.68 | 84.0% | 1.0% | 0.122 | 0.20 / 0.28 | 0 |
-| `m2v` | 0.818 | 30.0 | 0.87 | 0.042 → 0.020 | 0.81 | 64.8% | 0.9% | 0.196 | 0.18 / 0.21 | 531.0 |
-| `minilm` | 0.891 | 30.0 | 0.78 | 0.049 → 0.021 | 0.76 | 84.1% | 1.0% | 0.117 | 13.92 / 20.32 | 252.1 |
-| `e5` | 0.856 | 30.0 | 0.57 | 0.148 → 0.025 | 0.81 | 72.5% | 1.0% | 0.170 | 10.27 / 14.71 | 135.4 |
-| `char+m2v` | 0.873 | 30.0 | 0.71 | 0.065 → 0.028 | 0.82 | 77.0% | 1.0% | 0.138 | 0.43 / 0.54 | 531.0 |
-| `char+minilm` ← full | 0.924 | 30.0 | 0.68 | 0.062 → 0.011 | 0.76 | 88.4% | 1.0% | 0.091 | 14.24 / 21.10 | 252.1 |
-| RuleRouter | — |  |  |  |  |  | 9.0% | 0.432 | 0.57 / 0.77 | 0 |
+| `char` ← lite | 0.875 | 10.0 | 0.48 | 0.192 → 0.019 | 0.69 | 84.4% | 0.9% | 0.121 | 0.18 / 0.27 | 0 |
+| `m2v` | 0.806 | 30.0 | 0.89 | 0.029 → 0.021 | 0.82 | 63.7% | 0.9% | 0.209 | 0.18 / 0.25 | 531.0 |
+| `minilm` | 0.895 | 30.0 | 0.80 | 0.046 → 0.010 | 0.82 | 79.3% | 0.9% | 0.135 | 13.77 / 20.41 | 252.1 |
+| `e5` | 0.857 | 30.0 | 0.58 | 0.136 → 0.018 | 0.81 | 74.8% | 0.9% | 0.156 | 9.99 / 15.58 | 135.4 |
+| `char+m2v` | 0.876 | 30.0 | 0.72 | 0.059 → 0.028 | 0.80 | 78.5% | 0.9% | 0.133 | 0.38 / 0.49 | 531.0 |
+| `char+minilm` ← full | 0.924 | 10.0 | 0.58 | 0.105 → 0.019 | 0.74 | 89.4% | 0.9% | 0.089 | 14.80 / 23.04 | 252.1 |
+| RuleRouter | — |  |  |  |  |  | 8.3% | 0.411 | 0.53 / 0.69 | 0 |
 
 `char` = TF-IDF de n-gramas de caracteres 2–5 aprendido del corpus; `m2v` = model2vec potion-multilingual-128M; `minilm` = paraphrase-multilingual-MiniLM-L12-v2 (ONNX int8); `e5` = multilingual-e5-small (ONNX int8). Regla fijada antes de mirar el test: **full** = mayor macro-F1 en validación (si otro queda a menos de 0.01, el más liviano). **lite** = `char`, el único que entra en el deploy gratuito (512 MB de RAM, 0.1 CPU) sin onnxruntime ni un modelo de 250 MB. Umbral τ: máxima cobertura con acción equivocada ≤ 1% en validación.
 
@@ -95,23 +95,23 @@ Cada fold entrena con todos los autores de train menos uno y valida con el que q
 
 |  | Aprendido lite (char) — se despliega | Aprendido full (char+MiniLM) — offline |
 |---|---|---|
-| ECE (10 bins) | 0.035 | 0.025 |
-| macro-F1 sin abstención | 0.928 | 0.956 |
-| acción equivocada sin abstención | 3.6% | 3.3% |
+| ECE (10 bins) | 0.036 | 0.023 |
+| macro-F1 sin abstención | 0.905 | 0.951 |
+| acción equivocada sin abstención | 4.6% | 3.6% |
 
 ### Por intención (precisión / recall / F1)
 
 | intención | soporte | rules P/R/F1 | lite P/R/F1 | full P/R/F1 |
 |---|---|---|---|---|
-| dispute_charge | 67 | 0.38 / 0.49 / 0.43 | 0.91 / 0.96 / 0.93 | 0.97 / 0.97 / 0.97 |
-| block_card | 33 | 0.86 / 0.73 / 0.79 | 0.94 / 0.94 / 0.94 | 0.91 / 0.97 / 0.94 |
-| account_takeover | 23 | 0.67 / 0.26 / 0.38 | 1.00 / 0.96 / 0.98 | 1.00 / 0.96 / 0.98 |
+| dispute_charge | 67 | 0.38 / 0.49 / 0.43 | 0.95 / 0.94 / 0.95 | 0.97 / 0.96 / 0.96 |
+| block_card | 33 | 0.86 / 0.73 / 0.79 | 0.94 / 0.94 / 0.94 | 0.92 / 1.00 / 0.96 |
+| account_takeover | 23 | 0.67 / 0.26 / 0.38 | 1.00 / 0.87 / 0.93 | 1.00 / 0.87 / 0.93 |
 | human_request | 18 | 0.68 / 0.72 / 0.70 | 1.00 / 0.94 / 0.97 | 0.94 / 0.94 / 0.94 |
-| dispute_status | 38 | 0.92 / 0.29 / 0.44 | 1.00 / 0.58 / 0.73 | 1.00 / 0.66 / 0.79 |
-| cancel_dispute | 33 | 0.93 / 0.42 / 0.58 | 1.00 / 0.73 / 0.84 | 1.00 / 0.88 / 0.94 |
-| out_of_scope | 57 | 0.92 / 0.21 / 0.34 | 0.94 / 0.89 / 0.92 | 0.96 / 0.91 / 0.94 |
+| dispute_status | 38 | 0.92 / 0.29 / 0.44 | 1.00 / 0.66 / 0.79 | 1.00 / 0.87 / 0.93 |
+| cancel_dispute | 33 | 0.93 / 0.42 / 0.58 | 0.96 / 0.79 / 0.87 | 0.97 / 0.91 / 0.94 |
+| out_of_scope | 57 | 0.92 / 0.21 / 0.34 | 0.96 / 0.89 / 0.93 | 0.96 / 0.89 / 0.93 |
 | closing | 17 | 1.00 / 0.94 / 0.97 | 1.00 / 0.94 / 0.97 | 1.00 / 0.94 / 0.97 |
-| unknown | 20 | 0.18 / 0.95 / 0.30 | 0.38 / 0.90 / 0.53 | 0.50 / 1.00 / 0.67 |
+| unknown | 20 | 0.18 / 0.95 / 0.30 | 0.39 / 0.95 / 0.55 | 0.61 / 1.00 / 0.75 |
 
 ### Confusión por ruta del grafo
 
@@ -130,21 +130,21 @@ Aprendido lite (char) — se despliega:
 
 | verdad \ predicción | disputa | bloqueo | estado | handoff | cierre | aclarar |
 |---|---|---|---|---|---|---|
-| disputa | 64 | 0 | 0 | 0 | 0 | 3 |
+| disputa | 63 | 0 | 0 | 0 | 0 | 4 |
 | bloqueo | 0 | 31 | 0 | 0 | 0 | 2 |
-| estado | 2 | 0 | 22 | 1 | 0 | 13 |
-| handoff | 3 | 2 | 0 | 115 | 0 | 11 |
+| estado | 0 | 0 | 25 | 0 | 0 | 13 |
+| handoff | 3 | 2 | 0 | 116 | 0 | 10 |
 | cierre | 0 | 0 | 0 | 0 | 16 | 1 |
-| aclarar | 1 | 0 | 0 | 1 | 0 | 18 |
+| aclarar | 0 | 0 | 0 | 1 | 0 | 19 |
 
 Aprendido full (char+MiniLM) — offline:
 
 | verdad \ predicción | disputa | bloqueo | estado | handoff | cierre | aclarar |
 |---|---|---|---|---|---|---|
-| disputa | 65 | 0 | 0 | 1 | 0 | 1 |
-| bloqueo | 0 | 32 | 0 | 0 | 0 | 1 |
-| estado | 0 | 0 | 25 | 1 | 0 | 12 |
-| handoff | 2 | 3 | 0 | 121 | 0 | 5 |
+| disputa | 64 | 0 | 0 | 1 | 0 | 2 |
+| bloqueo | 0 | 33 | 0 | 0 | 0 | 0 |
+| estado | 0 | 0 | 33 | 1 | 0 | 4 |
+| handoff | 2 | 3 | 0 | 120 | 0 | 6 |
 | cierre | 0 | 0 | 0 | 0 | 16 | 1 |
 | aclarar | 0 | 0 | 0 | 0 | 0 | 20 |
 
@@ -152,15 +152,15 @@ Aprendido full (char+MiniLM) — offline:
 
 | verdad \ predicción | dispute charge | block card | account takeover | human request | dispute status | cancel dispute | out of scope | closing | unknown |
 |---|---|---|---|---|---|---|---|---|---|
-| dispute charge | 64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
+| dispute charge | 63 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
 | block card | 0 | 31 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| account takeover | 1 | 0 | 22 | 0 | 0 | 0 | 0 | 0 | 0 |
+| account takeover | 1 | 0 | 20 | 0 | 0 | 0 | 0 | 0 | 2 |
 | human request | 0 | 0 | 0 | 17 | 0 | 0 | 1 | 0 | 0 |
-| dispute status | 2 | 0 | 0 | 0 | 22 | 0 | 1 | 0 | 13 |
-| cancel dispute | 1 | 0 | 0 | 0 | 0 | 24 | 0 | 0 | 8 |
-| out of scope | 1 | 2 | 0 | 0 | 0 | 0 | 51 | 0 | 3 |
+| dispute status | 0 | 0 | 0 | 0 | 25 | 0 | 0 | 0 | 13 |
+| cancel dispute | 1 | 0 | 0 | 0 | 0 | 26 | 0 | 0 | 6 |
+| out of scope | 1 | 2 | 0 | 0 | 0 | 1 | 51 | 0 | 2 |
 | closing | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 1 |
-| unknown | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 18 |
+| unknown | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 19 |
 
 </details>
 
@@ -168,47 +168,47 @@ Aprendido full (char+MiniLM) — offline:
 
 | corte | grupo | n | rules | lite | full |
 |---|---|---|---|---|---|
-| autor | C | 203 | 54.7% | 93.1% | 95.1% |
-| autor | G | 103 | 35.9% | 73.8% | 82.5% |
-| dialecto | es-AR | 64 | 45.3% | 84.4% | 89.1% |
-| dialecto | es-CO | 58 | 39.7% | 84.5% | 84.5% |
-| dialecto | es-MX | 72 | 47.2% | 86.1% | 88.9% |
+| autor | C | 203 | 54.7% | 92.1% | 94.1% |
+| autor | G | 103 | 35.9% | 78.6% | 90.3% |
+| dialecto | es-AR | 64 | 45.3% | 87.5% | 93.8% |
+| dialecto | es-CO | 58 | 39.7% | 82.8% | 87.9% |
+| dialecto | es-MX | 72 | 47.2% | 88.9% | 91.7% |
 | dialecto | mix | 30 | 73.3% | 96.7% | 100.0% |
-| dialecto | pt-BR | 82 | 48.8% | 86.6% | 95.1% |
-| estilo | chat | 207 | 41.1% | 84.5% | 90.3% |
-| estilo | emoji | 7 | 42.9% | 71.4% | 85.7% |
+| dialecto | pt-BR | 82 | 48.8% | 86.6% | 93.9% |
+| estilo | chat | 207 | 41.1% | 85.5% | 91.8% |
+| estilo | emoji | 7 | 42.9% | 71.4% | 100.0% |
 | estilo | formal | 11 | 63.6% | 81.8% | 90.9% |
 | estilo | largo | 5 | 60.0% | 80.0% | 80.0% |
 | estilo | portunol | 16 | 81.2% | 100.0% | 100.0% |
 | estilo | terse | 25 | 80.0% | 96.0% | 96.0% |
-| estilo | typos | 24 | 41.7% | 95.8% | 87.5% |
-| negativo difícil | False | 230 | 52.6% | 86.1% | 91.3% |
-| negativo difícil | True | 76 | 35.5% | 88.2% | 89.5% |
+| estilo | typos | 24 | 41.7% | 100.0% | 95.8% |
+| negativo difícil | False | 230 | 52.6% | 88.3% | 94.8% |
+| negativo difícil | True | 76 | 35.5% | 85.5% | 86.8% |
 
 ### Errores
 
-**lite**: 41 errores (32 también de reglas). Pares más frecuentes: dispute_status → unknown (13), cancel_dispute → unknown (8), dispute_charge → unknown (3), out_of_scope → unknown (3), block_card → unknown (2), out_of_scope → block_card (2).
+**lite**: 38 errores (27 también de reglas). Pares más frecuentes: dispute_status → unknown (13), cancel_dispute → unknown (6), dispute_charge → unknown (4), block_card → unknown (2), account_takeover → unknown (2), out_of_scope → unknown (2).
 
-**full**: 28 errores (23 también de reglas). Pares más frecuentes: dispute_status → unknown (12), out_of_scope → block_card (3), cancel_dispute → unknown (3), dispute_charge → unknown (1), dispute_charge → human_request (1), block_card → unknown (1).
+**full**: 22 errores (15 también de reglas). Pares más frecuentes: dispute_status → unknown (4), account_takeover → unknown (3), out_of_scope → block_card (3), dispute_charge → unknown (2), cancel_dispute → unknown (2), dispute_charge → human_request (1).
 
 Errores más confiados de **lite** (los más peligrosos: la abstención no los frena):
 
 | id | dialecto | texto | verdad | lite (p) | reglas |
 |---|---|---|---|---|---|
-| C-0186 | pt-BR | o app diz que meu cartão tá bloqueado, quero liberar pra usar | out_of_scope | block_card (0.9760000109672546) | block_card |
-| C-0202 | es-CO | Nada más, que tenga buen día. | closing | unknown (0.9660000205039978) | closing |
-| C-0219 | pt-BR | quanto tá o jogo do Flamengo? | unknown | out_of_scope (0.9639999866485596) | unknown |
-| C-0169 | es-AR | qué pasa si desconozco una compra, me devuelven la plata al toque? pregunto nomás | out_of_scope | dispute_charge (0.9559999704360962) | dispute_charge |
-| G-0086 | pt-BR | quero cancelar o seguro do cartão | out_of_scope | block_card (0.9549999833106995) | out_of_scope |
-| C-0135 | es-AR | cuánto tengo que escribir para que me atienda una persona?? | human_request | out_of_scope (0.890999972820282) | unknown |
-| C-0107 | es-CO | alguien entró a mi app y compró cosas con mi tarjeta, no reconozco ninguno de esos cargos | account_takeover | dispute_charge (0.878000020980835) | account_takeover |
-| G-0036 | pt-BR | abri uma reclamação do débito duplicado no mercado e até agora nada, como tá isso? | dispute_status | dispute_charge (0.8090000152587891) | unknown |
-| G-0063 | es-AR | ey, el cobro de Netflix que desconocí era de la cuenta que comparto con mi hermana, olvidate del reclamo | cancel_dispute | dispute_charge (0.8040000200271606) | dispute_charge |
-| G-0029 | es-MX | Buen día. El pasado día 12 presenté una aclaración por un cargo no reconocido de $1,250 en una tienda en línea | dispute_status | out_of_scope (0.6980000138282776) | dispute_charge |
-| G-0026 | es-AR | ¿Me confirmás que recibieron el reclamo que hice ayer por el cobro duplicado? | dispute_status | dispute_charge (0.6840000152587891) | dispute_charge |
-| C-0218 | pt-BR | me passa uma receita de bolo de cenoura | unknown | dispute_charge (0.6809999942779541) | unknown |
+| C-0186 | pt-BR | o app diz que meu cartão tá bloqueado, quero liberar pra usar | out_of_scope | block_card (0.9819999933242798) | block_card |
+| C-0219 | pt-BR | quanto tá o jogo do Flamengo? | unknown | out_of_scope (0.9760000109672546) | unknown |
+| C-0202 | es-CO | Nada más, que tenga buen día. | closing | unknown (0.968999981880188) | closing |
+| G-0086 | pt-BR | quero cancelar o seguro do cartão | out_of_scope | block_card (0.9629999995231628) | out_of_scope |
+| C-0169 | es-AR | qué pasa si desconozco una compra, me devuelven la plata al toque? pregunto nomás | out_of_scope | dispute_charge (0.9419999718666077) | dispute_charge |
+| C-0135 | es-AR | cuánto tengo que escribir para que me atienda una persona?? | human_request | out_of_scope (0.8970000147819519) | unknown |
+| G-0085 | es-AR | quiero cancelar la transferencia que hice recién, me equivoqué de CBU | out_of_scope | cancel_dispute (0.8640000224113464) | out_of_scope |
+| C-0107 | es-CO | alguien entró a mi app y compró cosas con mi tarjeta, no reconozco ninguno de esos cargos | account_takeover | dispute_charge (0.8299999833106995) | account_takeover |
+| G-0063 | es-AR | ey, el cobro de Netflix que desconocí era de la cuenta que comparto con mi hermana, olvidate del reclamo | cancel_dispute | dispute_charge (0.7580000162124634) | dispute_charge |
+| G-0036 | pt-BR | abri uma reclamação do débito duplicado no mercado e até agora nada, como tá isso? | dispute_status | unknown (0.6880000233650208) | unknown |
+| G-0026 | es-AR | ¿Me confirmás que recibieron el reclamo que hice ayer por el cobro duplicado? | dispute_status | unknown (0.6830000281333923) | dispute_charge |
+| G-0033 | es-CO | hola 😊 queria saber si ya abonaron lo de mi disputa | dispute_status | unknown (0.6759999990463257) | dispute_charge |
 
-<details><summary>lite acierta y reglas fallan (126) · reglas aciertan y lite falla (9)</summary>
+<details><summary>lite acierta y reglas fallan (131) · reglas aciertan y lite falla (11)</summary>
 
 | id | texto | verdad | reglas | lite |
 |---|---|---|---|---|
@@ -224,14 +224,16 @@ Errores más confiados de **lite** (los más peligrosos: la abstención no los f
 | C-0020 | hola, apareceu un débito de 120 dólares de la aerolínea Azul, yo no compré nada | dispute_charge | unknown | dispute_charge |
 | C-0021 | me robaron la billetera y ya hay una compra en un Oxxo que no hice | dispute_charge | unknown | dispute_charge |
 | C-0022 | me robaron la tarjeta en el Transmilenio y ya aparece un cargo de 250 mil en el Éxito | dispute_charge | unknown | dispute_charge |
+| C-0017 | pedí una licuadora por internet en Falabella, el pedido nunca llegó pero el cargo sí salió en el ext | dispute_charge | dispute_charge | unknown |
 | C-0082 | necesito hacer block de mi card, la perdí en el Uber | block_card | block_card | unknown |
+| C-0105 | entraron a mi banca en línea y hicieron 3 transferencias que no reconozco | account_takeover | account_takeover | unknown |
+| C-0106 | hackearam minha conta e fizeram um pix de R$ 2.000 que eu não reconheço | account_takeover | account_takeover | unknown |
 | C-0107 | alguien entró a mi app y compró cosas con mi tarjeta, no reconozco ninguno de esos cargos | account_takeover | account_takeover | dispute_charge |
 | C-0202 | Nada más, que tenga buen día. | closing | closing | unknown |
-| C-0218 | me passa uma receita de bolo de cenoura | unknown | unknown | dispute_charge |
 | C-0219 | quanto tá o jogo do Flamengo? | unknown | unknown | out_of_scope |
 | G-0009 | Buenas tardes, quisiera consultar el estado de la disputa que radiqué el lunes por un cobro de Rappi | dispute_status | dispute_status | unknown |
 | G-0060 | ya me devolvieron la plata directamente, anulen el reclamo porfa | cancel_dispute | cancel_dispute | unknown |
-| G-0085 | quiero cancelar la transferencia que hice recién, me equivoqué de CBU | out_of_scope | out_of_scope | unknown |
+| G-0085 | quiero cancelar la transferencia que hice recién, me equivoqué de CBU | out_of_scope | out_of_scope | cancel_dispute |
 | G-0086 | quero cancelar o seguro do cartão | out_of_scope | out_of_scope | block_card |
 
 </details>
@@ -240,23 +242,23 @@ Errores más confiados de **lite** (los más peligrosos: la abstención no los f
 
 |  | Aprendido lite (char) — se despliega | Aprendido full (char+MiniLM) — offline |
 |---|---|---|
-| ECE (10 bins) | 0.026 | 0.026 |
-| macro-F1 sin abstención | 0.934 | 0.942 |
-| acción equivocada sin abstención | 1.7% | 0.0% |
+| ECE (10 bins) | 0.033 | 0.037 |
+| macro-F1 sin abstención | 0.937 | 0.936 |
+| acción equivocada sin abstención | 1.7% | 0.6% |
 
 ### Por intención (precisión / recall / F1)
 
 | intención | soporte | rules P/R/F1 | lite P/R/F1 | full P/R/F1 |
 |---|---|---|---|---|
-| dispute_charge | 46 | 0.97 / 0.72 / 0.82 | 1.00 / 0.74 / 0.85 | 1.00 / 0.76 / 0.86 |
+| dispute_charge | 46 | 0.97 / 0.72 / 0.82 | 1.00 / 0.72 / 0.84 | 1.00 / 0.76 / 0.86 |
 | block_card | 23 | 0.94 / 0.74 / 0.83 | 1.00 / 0.96 / 0.98 | 1.00 / 0.96 / 0.98 |
 | account_takeover | 15 | 1.00 / 0.53 / 0.70 | 1.00 / 0.87 / 0.93 | 1.00 / 0.93 / 0.97 |
 | human_request | 16 | 1.00 / 0.81 / 0.90 | 1.00 / 0.94 / 0.97 | 1.00 / 1.00 / 1.00 |
 | dispute_status | 0 | 0.00 / 0.00 / 0.00 | 0.00 / 0.00 / 0.00 | 0.00 / 0.00 / 0.00 |
 | cancel_dispute | 0 | 0.00 / 0.00 / 0.00 | 0.00 / 0.00 / 0.00 | 0.00 / 0.00 / 0.00 |
-| out_of_scope | 51 | 1.00 / 0.35 / 0.52 | 0.87 / 0.90 / 0.88 | 0.92 / 0.92 / 0.92 |
+| out_of_scope | 51 | 1.00 / 0.35 / 0.52 | 0.90 / 0.88 / 0.89 | 0.88 / 0.90 / 0.89 |
 | closing | 11 | 0.92 / 1.00 / 0.96 | 1.00 / 0.91 / 0.95 | 1.00 / 0.91 / 0.95 |
-| unknown | 13 | 0.18 / 1.00 / 0.31 | 0.43 / 0.92 / 0.59 | 0.44 / 0.92 / 0.60 |
+| unknown | 13 | 0.18 / 1.00 / 0.31 | 0.38 / 0.92 / 0.53 | 0.46 / 0.92 / 0.62 |
 
 ### Confusión por ruta del grafo
 
@@ -275,10 +277,10 @@ Aprendido lite (char) — se despliega:
 
 | verdad \ predicción | disputa | bloqueo | estado | handoff | cierre | aclarar |
 |---|---|---|---|---|---|---|
-| disputa | 34 | 0 | 0 | 5 | 0 | 7 |
+| disputa | 33 | 0 | 0 | 3 | 0 | 10 |
 | bloqueo | 0 | 22 | 0 | 0 | 0 | 1 |
 | estado | 0 | 0 | 0 | 0 | 0 | 0 |
-| handoff | 0 | 0 | 0 | 74 | 0 | 8 |
+| handoff | 0 | 0 | 0 | 73 | 0 | 9 |
 | cierre | 0 | 0 | 0 | 1 | 10 | 0 |
 | aclarar | 0 | 0 | 0 | 1 | 0 | 12 |
 
@@ -286,10 +288,10 @@ Aprendido full (char+MiniLM) — offline:
 
 | verdad \ predicción | disputa | bloqueo | estado | handoff | cierre | aclarar |
 |---|---|---|---|---|---|---|
-| disputa | 35 | 0 | 0 | 3 | 0 | 8 |
+| disputa | 35 | 0 | 0 | 5 | 0 | 6 |
 | bloqueo | 0 | 22 | 0 | 0 | 0 | 1 |
 | estado | 0 | 0 | 0 | 0 | 0 | 0 |
-| handoff | 0 | 0 | 0 | 77 | 0 | 5 |
+| handoff | 0 | 0 | 0 | 76 | 0 | 6 |
 | cierre | 0 | 0 | 0 | 0 | 10 | 1 |
 | aclarar | 0 | 0 | 0 | 1 | 0 | 12 |
 
@@ -297,13 +299,13 @@ Aprendido full (char+MiniLM) — offline:
 
 | verdad \ predicción | dispute charge | block card | account takeover | human request | dispute status | cancel dispute | out of scope | closing | unknown |
 |---|---|---|---|---|---|---|---|---|---|
-| dispute charge | 34 | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 7 |
+| dispute charge | 33 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 10 |
 | block card | 0 | 22 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | account takeover | 0 | 0 | 13 | 0 | 0 | 0 | 0 | 0 | 2 |
 | human request | 0 | 0 | 0 | 15 | 0 | 0 | 0 | 0 | 1 |
 | dispute status | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | cancel dispute | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| out of scope | 0 | 0 | 0 | 0 | 0 | 0 | 46 | 0 | 5 |
+| out of scope | 0 | 0 | 0 | 0 | 0 | 0 | 45 | 0 | 6 |
 | closing | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 10 | 0 |
 | unknown | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 12 |
 
@@ -313,42 +315,42 @@ Aprendido full (char+MiniLM) — offline:
 
 | corte | grupo | n | rules | lite | full |
 |---|---|---|---|---|---|
-| autor | D | 175 | 64.6% | 86.9% | 89.1% |
-| dialecto | es-AR | 33 | 57.6% | 90.9% | 97.0% |
+| autor | D | 175 | 64.6% | 85.7% | 88.6% |
+| dialecto | es-AR | 33 | 57.6% | 90.9% | 93.9% |
 | dialecto | es-CO | 42 | 71.4% | 83.3% | 83.3% |
-| dialecto | es-MX | 43 | 60.5% | 90.7% | 88.4% |
+| dialecto | es-MX | 43 | 60.5% | 86.0% | 90.7% |
 | dialecto | mix | 17 | 100.0% | 82.4% | 94.1% |
-| dialecto | pt-BR | 40 | 52.5% | 85.0% | 87.5% |
-| estilo | formal | 47 | 61.7% | 78.7% | 83.0% |
-| estilo | terse | 59 | 61.0% | 86.4% | 84.7% |
-| estilo | voz | 69 | 69.6% | 92.8% | 97.1% |
-| negativo difícil | False | 154 | 70.1% | 85.1% | 87.7% |
+| dialecto | pt-BR | 40 | 52.5% | 85.0% | 85.0% |
+| estilo | formal | 47 | 61.7% | 76.6% | 85.1% |
+| estilo | terse | 59 | 61.0% | 86.4% | 83.1% |
+| estilo | voz | 69 | 69.6% | 91.3% | 95.7% |
+| negativo difícil | False | 154 | 70.1% | 83.8% | 87.0% |
 | negativo difícil | True | 21 | 23.8% | 100.0% | 100.0% |
 
 ### Errores
 
-**lite**: 23 errores (11 también de reglas). Pares más frecuentes: dispute_charge → unknown (7), dispute_charge → out_of_scope (5), out_of_scope → unknown (5), account_takeover → unknown (2), block_card → unknown (1), human_request → unknown (1).
+**lite**: 25 errores (11 también de reglas). Pares más frecuentes: dispute_charge → unknown (10), out_of_scope → unknown (6), dispute_charge → out_of_scope (3), account_takeover → unknown (2), block_card → unknown (1), human_request → unknown (1).
 
-**full**: 19 errores (9 también de reglas). Pares más frecuentes: dispute_charge → unknown (8), out_of_scope → unknown (4), dispute_charge → out_of_scope (3), block_card → unknown (1), account_takeover → unknown (1), closing → unknown (1).
+**full**: 20 errores (9 también de reglas). Pares más frecuentes: dispute_charge → unknown (6), dispute_charge → out_of_scope (5), out_of_scope → unknown (5), block_card → unknown (1), account_takeover → unknown (1), closing → unknown (1).
 
 Errores más confiados de **lite** (los más peligrosos: la abstención no los frena):
 
 | id | dialecto | texto | verdad | lite (p) | reglas |
 |---|---|---|---|---|---|
-| D-0164 | es-MX | cuál es la capital de Perú | unknown | out_of_scope (0.996999979019165) | unknown |
-| D-0143 | es-MX | Agradezco su atención; no requiero nada más por el momento. Quedo atento. | closing | out_of_scope (0.8880000114440918) | closing |
-| D-0134 | mix | hola eh queria saber si tengo seguro de vida no cartão ou como contrato um | out_of_scope | unknown (0.8519999980926514) | out_of_scope |
-| D-0003 | es-MX | Estimados, por medio de la presente manifiesto que no reconozco el cargo por trescientos cincuenta pesos aplic | dispute_charge | out_of_scope (0.8450000286102295) | dispute_charge |
-| D-0033 | es-CO | Cordialmente solicito la revisión de un cobro superior al valor acordado en un establecimiento hotelero, con u | dispute_charge | out_of_scope (0.8240000009536743) | dispute_charge |
-| D-0032 | es-CO | monto distinto al pagado | dispute_charge | out_of_scope (0.7680000066757202) | unknown |
-| D-0024 | es-AR | Estimados, me dirijo a ustedes para impugnar un consumo por nueve mil pesos correspondiente a un pedido cancel | dispute_charge | out_of_scope (0.7200000286102295) | unknown |
-| D-0030 | es-MX | Solicito respetuosamente la aclaración de dos cargos idénticos por mil doscientos pesos efectuados en el mismo | dispute_charge | out_of_scope (0.6850000023841858) | dispute_charge |
-| D-0011 | pt-BR | compra não chegou | dispute_charge | unknown (0.6209999918937683) | unknown |
-| D-0021 | es-CO | Respetados señores, desconozco la transacción por ciento cuarenta mil pesos realizada en Medellín, ciudad en l | dispute_charge | unknown (0.6069999933242798) | dispute_charge |
-| D-0130 | es-CO | queja por mal servicio | out_of_scope | unknown (0.6010000109672546) | unknown |
-| D-0080 | pt-BR | caí num golpe de phishing | account_takeover | unknown (0.597000002861023) | unknown |
+| D-0164 | es-MX | cuál es la capital de Perú | unknown | out_of_scope (0.9980000257492065) | unknown |
+| D-0143 | es-MX | Agradezco su atención; no requiero nada más por el momento. Quedo atento. | closing | out_of_scope (0.9070000052452087) | closing |
+| D-0032 | es-CO | monto distinto al pagado | dispute_charge | out_of_scope (0.902999997138977) | unknown |
+| D-0134 | mix | hola eh queria saber si tengo seguro de vida no cartão ou como contrato um | out_of_scope | unknown (0.8849999904632568) | out_of_scope |
+| D-0009 | es-AR | Estimados: por la presente informo que el cajero automático no me entregó el efectivo solicitado y, sin embarg | dispute_charge | out_of_scope (0.7250000238418579) | unknown |
+| D-0030 | es-MX | Solicito respetuosamente la aclaración de dos cargos idénticos por mil doscientos pesos efectuados en el mismo | dispute_charge | out_of_scope (0.7070000171661377) | dispute_charge |
+| D-0003 | es-MX | Estimados, por medio de la presente manifiesto que no reconozco el cargo por trescientos cincuenta pesos aplic | dispute_charge | unknown (0.6779999732971191) | dispute_charge |
+| D-0024 | es-AR | Estimados, me dirijo a ustedes para impugnar un consumo por nueve mil pesos correspondiente a un pedido cancel | dispute_charge | unknown (0.6779999732971191) | unknown |
+| D-0018 | es-MX | A quien corresponda: solicito la cancelación de un cargo recurrente de ciento ochenta pesos por un servicio qu | dispute_charge | unknown (0.6269999742507935) | dispute_charge |
+| D-0080 | pt-BR | caí num golpe de phishing | account_takeover | unknown (0.6240000128746033) | unknown |
+| D-0166 | es-CO | envío de tarjeta | out_of_scope | unknown (0.6240000128746033) | unknown |
+| D-0039 | pt-BR | Prezados, solicito a revisão de uma transação de cento e cinquenta reais cujo valor diverge do comprovante que | dispute_charge | unknown (0.6159999966621399) | unknown |
 
-<details><summary>lite acierta y reglas fallan (51) · reglas aciertan y lite falla (12)</summary>
+<details><summary>lite acierta y reglas fallan (51) · reglas aciertan y lite falla (14)</summary>
 
 | id | texto | verdad | reglas | lite |
 |---|---|---|---|---|
@@ -364,18 +366,18 @@ Errores más confiados de **lite** (los más peligrosos: la abstención no los f
 | D-0061 | cancelar cartão | block_card | unknown | block_card |
 | D-0062 | Prezados, por segurança solicito o cancelamento do meu cartão, que não localizo desde ontem. | block_card | unknown | block_card |
 | D-0063 | oye una duda ya no voy a usar esta tarjeta la que tiene el chip roto o sea la vieja quiero cancelarl | block_card | unknown | block_card |
-| D-0003 | Estimados, por medio de la presente manifiesto que no reconozco el cargo por trescientos cincuenta p | dispute_charge | dispute_charge | out_of_scope |
+| D-0003 | Estimados, por medio de la presente manifiesto que no reconozco el cargo por trescientos cincuenta p | dispute_charge | dispute_charge | unknown |
+| D-0018 | A quien corresponda: solicito la cancelación de un cargo recurrente de ciento ochenta pesos por un s | dispute_charge | dispute_charge | unknown |
 | D-0019 | parce imagínese que estaba mirando el extracto y hay un pago en una tienda de Medellín por ciento cu | dispute_charge | dispute_charge | unknown |
 | D-0021 | Respetados señores, desconozco la transacción por ciento cuarenta mil pesos realizada en Medellín, c | dispute_charge | dispute_charge | unknown |
 | D-0030 | Solicito respetuosamente la aclaración de dos cargos idénticos por mil doscientos pesos efectuados e | dispute_charge | dispute_charge | out_of_scope |
-| D-0033 | Cordialmente solicito la revisión de un cobro superior al valor acordado en un establecimiento hotel | dispute_charge | dispute_charge | out_of_scope |
+| D-0033 | Cordialmente solicito la revisión de un cobro superior al valor acordado en un establecimiento hotel | dispute_charge | dispute_charge | unknown |
 | D-0036 | Estimados: desconozco un débito mensual de cuatro mil pesos de una aplicación de juegos; solicito su | dispute_charge | dispute_charge | unknown |
 | D-0067 | uy me parece que alguien me vio digitar la clave en el cajero y ahora tengo miedo entonces mejor blo | block_card | block_card | unknown |
 | D-0083 | acceso no autorizado | account_takeover | account_takeover | unknown |
 | D-0134 | hola eh queria saber si tengo seguro de vida no cartão ou como contrato um | out_of_scope | out_of_scope | unknown |
 | D-0135 | seguros | out_of_scope | out_of_scope | unknown |
-| D-0143 | Agradezco su atención; no requiero nada más por el momento. Quedo atento. | closing | closing | out_of_scope |
-| D-0164 | cuál es la capital de Perú | unknown | unknown | out_of_scope |
+| D-0139 | quiero invertir unos veinte mil pesos en algo seguro o sea cetes o un fondo no sé qué me recomiendan | out_of_scope | out_of_scope | unknown |
 
 </details>
 
@@ -385,8 +387,8 @@ Temperatura ajustada por NLL en las predicciones fuera de fold; ECE con 10 bins 
 
 | sistema | ECE validación cruda → calibrada | ECE test | ECE test_style |
 |---|---|---|---|
-| lite | 0.114 → 0.013 | 0.035 | 0.026 |
-| full | 0.062 → 0.011 | 0.025 | 0.026 |
+| lite | 0.192 → 0.019 | 0.036 | 0.033 |
+| full | 0.105 → 0.019 | 0.023 | 0.037 |
 
 ![Diagrama de confiabilidad](figures/intent_reliability.png)
 

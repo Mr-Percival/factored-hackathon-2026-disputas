@@ -36,8 +36,11 @@ COPY pyproject.toml ./
 COPY src/ src/
 COPY config/ config/
 COPY docs/demo/demo_customers.json docs/demo/demo_customers.json
-# Router aprendido lite (ADR 0009): 0.2 MB + numpy. Se activa con BANKAGENT_ROUTER=embeddings; el full no entra.
+# Router aprendido lite (ADR 0009, "Decisión de demo"): 0.2 MB + numpy, por defecto en la demo. Si el artefacto no
+# carga, cada turno responde RuleRouter y la traza/la UI dicen `rules(fallback:model_unavailable)`.
+# BANKAGENT_ROUTER=rules en tiempo de ejecución vuelve a la línea base. El full (MiniLM, 252 MB) no entra.
 COPY models/intent_router_lite/ models/intent_router_lite/
+ENV BANKAGENT_ROUTER=embeddings
 RUN pip install --no-deps -e .
 
 COPY docker/ docker/

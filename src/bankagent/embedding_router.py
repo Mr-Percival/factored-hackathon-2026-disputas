@@ -74,8 +74,29 @@ class HybridRouter:
         ms = (time.perf_counter() - t0) * 1000
         label = "unknown" if pred.abstained else pred.label
         intent = label if label in INTENTS else COMPAT.get(label, "unknown")
-        return replace(base, intent=intent, confidence=pred.p, router=self.name,
-                       llm=_telemetry(model, ms, label=pred.label, p=round(pred.p, 4), abstained=pred.abstained))
+        tele = _telemetry(model, ms, label=pred.label, p=round(pred.p, 4), abstained=pred.abstained)
+        backoff = rule_backoff(base, intent)
+        if backoff:
+            return replace(base, router=f"{self.name}(rules:{backoff})", llm={**tele, "backoff": backoff})
+        return replace(base, intent=intent, confidence=pred.p, router=self.name, llm=tele)
+
+
+ACTION_INTENTS = ("dispute_charge", "block_card")  # rutas que buscan movimientos/tarjetas y proponen una acción
+RULE_EVIDENCE = 0.85  # confianza de RuleRouter con una sola intención ganadora (sin empate): hubo palabra clave
+
+
+def rule_backoff(base: Understanding, model_intent: str) -> str | None:
+    """Cuándo responde la regla aunque se consultó el modelo (#64): el modelo se ABSTIENE y RuleRouter tiene una
+    intención inequívoca que NO es de acción (fuera de alcance, pedido de humano, toma de cuenta, estado o retiro de
+    una disputa, cierre). Abstenerse significa "no sé": en vez de pedir aclaración ("quero fazer um emprestimo",
+    "quiero dar de baja un seguro" -> p≈0.5), se usa la evidencia léxica de la línea base.
+    Hacia disputa/bloqueo NO se cede: en validación fuera de fold (train, dejando un autor afuera) ceder también esas
+    subía los mensajes con acción equivocada de 1.0% a 3.9% (> objetivo preregistrado de 1%); así, 0 acciones nuevas."""
+    if model_intent != "unknown" or base.confidence < RULE_EVIDENCE:
+        return None
+    if base.intent in ACTION_INTENTS or base.intent in ("unknown", "unclear"):
+        return None
+    return "abstain"
 
 
 def _telemetry(model: IntentModel | None, ms: float, fallback: str | None = None, error: str | None = None,
