@@ -2,6 +2,8 @@
 
 > Un agente de disputas de cargos no reconocidos. **El modelo interpreta y redacta; el código decide y actúa.**
 
+> Cómo se operaría en producción (topología, capacidad, monitoreo, acceso, retención, runbook): [`operations.md`](operations.md).
+
 ## 1. Vista general: 4 capas
 
 ```mermaid

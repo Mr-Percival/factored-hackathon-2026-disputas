@@ -26,6 +26,7 @@ from langgraph.graph import END, START, StateGraph
 from .audit import AuditLog
 from .guard import detect_injection, redact
 from .identity import AuthError
+from .observability import emit as emit_trace
 from .policy import PolicyEngine
 from .responses import TemplateWriter, fmt_option, fmt_txn
 from .tools import BankTools, ToolError
@@ -142,6 +143,7 @@ class Agent:
             if out.get("llm"):  # telemetría del modelo (router/writer): versión, tokens, costo, fallback
                 entry["llm"] = out["llm"]
             out.pop("llm", None)
+            emit_trace(entry)  # JSON por nodo si BANKAGENT_LOG_JSON=1 (docs/operations.md)
             return {**out, "trace": [entry]}
         return wrapper
 

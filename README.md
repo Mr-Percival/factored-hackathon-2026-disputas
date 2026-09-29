@@ -9,6 +9,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
 - Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
+- Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
 
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.

@@ -28,6 +28,9 @@ import yaml
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CONTRACTS = os.path.join(ROOT, "config", "contracts.yaml")
 LOAD_ORDER = ["customers", "products", "transactions", "complaints"]  # padres antes que hijos (FKs)
+# Índices para las lecturas de las herramientas (todas filtran por el cliente de la sesión). Sin ellos,
+# search_transactions recorre 4.4M filas por turno (~45 ms); con ellos ~3 ms. Ver reports/capacity.md.
+LOOKUP_INDEXES = {"products": "customer_id", "transactions": "customer_id", "complaints": "customer_id"}
 
 
 def load_contracts(path: str = CONTRACTS) -> dict:
@@ -153,6 +156,8 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
             stats["failed_checks"][name] = n
 
         cols = ", ".join(f'"{c}"' for c in spec["columns"])
+        if table in LOOKUP_INDEXES:  # carga masiva sin mantener el índice fila a fila; se recrea al final
+            con.execute(f"DROP INDEX IF EXISTS idx_{table}_{LOOKUP_INDEXES[table]}")
         con.execute(f"INSERT INTO quarantine_{table} SELECT {cols}, _failed, {_sql_str(run_id)} FROM _stg WHERE _failed IS NOT NULL")
         stats["rows_quarantined"] = con.execute("SELECT count(*) FROM _stg WHERE _failed IS NOT NULL").fetchone()[0]
 
@@ -179,6 +184,8 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
     if include:  # cuántos de los forzados existen de verdad (un ID que no está en la entrega no se inventa)
         found = con.execute("SELECT count(*) FROM customers WHERE customer_id IN (SELECT customer_id FROM _include)").fetchone()[0]
         report["include_customers"] = {"requested": len(include), "found": found}
+    for table, col in LOOKUP_INDEXES.items():
+        con.execute(f'CREATE INDEX IF NOT EXISTS idx_{table}_{col} ON {table} ("{col}")')
     report["finished_at"] = dt.datetime.now().isoformat()
     con.close()
     runs_dir = os.path.join(os.path.dirname(os.path.abspath(out_db)), "runs")
