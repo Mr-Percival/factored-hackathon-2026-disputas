@@ -4,13 +4,13 @@
 # `value: null` => la slide muestra [[PENDIENTE: ...]] y make_deck.py lo lista al final.
 # Nunca poner un número que no esté en el reporte citado en `source`.
 
-eval_agent:        {value: null, source: "reports/eval.md (#12)", desc: "éxito de tarea del agente (LLM) en casos reservados"}
-eval_baseline:     {value: null, source: "reports/eval.md (#12)", desc: "éxito de tarea de la línea base (reglas + plantillas)"}
-eval_cases:        {value: null, source: "reports/eval.md (#12)", desc: "n.º de casos reservados y cómo se generaron"}
-inj_detection:     {value: null, source: "reports/injection_eval.md (#8/#9)", desc: "recall de detección de inyección (clasificador vs patrones)"}
-inj_fpr:           {value: null, source: "reports/injection_eval.md (#8/#9)", desc: "falsos positivos sobre mensajes legítimos"}
-inj_harm:          {value: null, source: "reports/injection_eval.md (#8)", desc: "daño: fugas del señuelo / acciones no confirmadas"}
-fairness:          {value: null, source: "reports/eval.md (#13)", desc: "misma decisión entre variantes MX/CO/AR/pt-BR"}
+eval_agent:        {value: "86% resolución segura (49/57) · 0/115 inseguros", source: "reports/eval.md (#12, tras #54)", desc: "agente (reglas + plantillas, sin LLM) en casos reservados congelados"}
+eval_baseline:     {value: "sin política: 82/115 inseguros · deriva todo: 0/57 resueltos", source: "reports/eval.md (#12)", desc: "líneas base B1 (automatiza sin política) y B0 (transfiere todo)"}
+eval_cases:        {value: "115 casos + 44 variantes de dialecto, 3 corridas", source: "reports/eval.md (#12)", desc: "generados por el equipo por construcción; test congelado por hash"}
+inj_detection:     {value: "regex AUC 0.55 · clasificador AUC 0.97", source: "reports/injection_eval.md (#8/#9)", desc: "detección de inyección en splits de prueba públicos (n=1123 ataques)"}
+inj_fpr:           {value: "regex 0/58 · clasificador 20/58 en mensajes bancarios", source: "reports/injection_eval.md (#8/#9)", desc: "falsas alarmas sobre mensajes legítimos del dominio (por eso el regex queda por defecto)"}
+inj_harm:          {value: "0/2.531 ataques con daño, incluso con el guard apagado", source: "reports/injection_eval.md (#8)", desc: "directos 0/1123 · en confirmación 0/1123 · persistentes 0/225 · indirectos 0/60"}
+fairness:          {value: "10/11 grupos con la misma decisión", source: "reports/eval.md (#13)", desc: "misma decisión entre variantes MX/CO/AR/pt-BR"}
 capacity:          {value: "p95 233 ms por turno · ~61 turnos/s por réplica (sin LLM, costo $0)", source: "reports/capacity.md (#19)", desc: "latencia p95 y costo por conversación"}
 demo_url:          {value: null, source: "deploy (#15)", desc: "URL de la demo desplegada"}
 replay_auto:       {value: "33% [30–36%] (SIMULACIÓN, n=1000)", source: "reports/replay.md (#30)", desc: "quejas reales que el agente resolvería solo y seguro en el replay (del total; 38% sin transacción plausible)"}
