@@ -1,22 +1,28 @@
 """Estado del proceso: un agente, las sesiones del navegador y sus conversaciones.
 
-Concurrencia: FastAPI corre los endpoints síncronos en un pool de hilos, pero las conexiones DuckDB de
-`BankTools` (y su lista de auditoría) no son seguras para usarse desde varios hilos a la vez. Todas las
-operaciones que tocan el agente, la identidad o la base pasan por `Runtime.lock`, así que los turnos se
-serializan dentro del proceso. Un turno con reglas + plantillas tarda milisegundos, suficiente para la
-demo. Para escalar: varias réplicas del contenedor (cada una con su estado) detrás de afinidad de sesión,
-o un checkpointer y un almacén de sesiones compartidos (p. ej. Postgres/Redis).
+Concurrencia. FastAPI corre los endpoints síncronos en el pool de hilos de uvicorn y los turnos de
+conversaciones distintas corren EN PARALELO sobre el mismo `Agent`:
+- `BankTools` usa un cursor DuckDB por hilo (`threading.local`, #29). La API no comparte conexiones ni
+  cursores propios: toda lectura pasa por las herramientas o por `BankTools._ro_c` (cursor del hilo).
+- Los turnos de UNA misma conversación se serializan con un lock por conversación (el checkpointer
+  guarda el estado entre turnos: dos mensajes simultáneos del mismo hilo competirían por él).
+- El almacén de sesiones (dicts de este módulo) se protege con `_store_lock`, que nunca envuelve un turno.
+Regresión cubierta por `tests/test_api.py::test_parallel_customers_only_see_their_own_data`.
 
 Mapa de identidades (el token del agente NUNCA sale de aquí):
 
     cookie (id de sesión opaco) -> BrowserSession{token del agente, customer_id, conversaciones}
     conversation_id             -> id de sesión dueña
+
+Una réplica guarda este estado en memoria. Para escalar horizontalmente: afinidad de sesión en el balanceador
+o almacén de sesiones y checkpointer compartidos (Redis/Postgres). Ver docs/operations.md.
 """
 from __future__ import annotations
 
 import json
 import os
 import secrets
+import shutil
 import tempfile
 import threading
 import time
@@ -30,6 +36,7 @@ from ..identity import IdentityService
 from .config import Settings
 from .schemas import ScenarioFile
 
+MAX_TOOL_AUDIT = 200  # `BankTools.audit` es una lista en memoria: en un servidor se recorta
 
 
 @dataclass
@@ -95,39 +102,37 @@ class Runtime:
         # LLM apagado a propósito: reglas + plantillas (sin llamadas a proveedores pagos).
         self.agent: Agent = build_agent(self.db_path, router="rules", writer="templates",
                                         identity=self.identity, audit=audit)
-        self.lock = threading.Lock()
+        self._store_lock = threading.Lock()
         self.sessions: OrderedDict[str, BrowserSession] = OrderedDict()
         self.owners: dict[str, str] = {}
+        self._turn_locks: dict[str, threading.Lock] = {}
         self.message_limiter = RateLimiter(settings.rate_limit_per_min)
         self.session_limiter = RateLimiter(settings.session_rate_limit_per_min)
 
     # ------------------------------------------------------------------ ciclo de vida
     def close(self) -> None:
-        with self.lock:
-            for conn in (self.agent.tools._ro, self.agent.tools._ops):
-                try:
-                    conn.close()
-                except Exception:  # noqa: BLE001 - cierre best effort
-                    pass
+        for conn in (self.agent.tools._ro, self.agent.tools._ops):
+            try:
+                conn.close()
+            except Exception:  # noqa: BLE001 - cierre best effort
+                pass
         if self._tmp:
-            import shutil
-
             shutil.rmtree(self._tmp, ignore_errors=True)
 
+    def _scalar(self, sql: str, params: list | None = None):
+        row = self.agent.tools._ro_c.execute(sql, params or []).fetchone()  # cursor del hilo actual
+        return row[0] if row else None
+
     def ready(self) -> bool:
-        with self.lock:
-            self.agent.tools._ro.execute("SELECT count(*) FROM customers").fetchone()
+        self._scalar("SELECT count(*) FROM customers")
         return bool(self.agent.policy.version)
 
     # ------------------------------------------------------------------ sesiones
     def customer_exists(self, customer_id: str) -> bool:
-        with self.lock:
-            row = self.agent.tools._ro.execute(
-                "SELECT count(*) FROM customers WHERE customer_id = ?", [customer_id]).fetchone()
-        return bool(row and row[0])
+        return bool(self._scalar("SELECT count(*) FROM customers WHERE customer_id = ?", [customer_id]))
 
     def login(self, customer_id: str) -> BrowserSession:
-        with self.lock:
+        with self._store_lock:
             self._evict()
             token = self.identity.login(customer_id)
             s = BrowserSession(secrets.token_urlsafe(32), customer_id, token, self.clock())
@@ -137,7 +142,7 @@ class Runtime:
     def get_session(self, sid: str | None) -> BrowserSession | None:
         if not sid:
             return None
-        with self.lock:
+        with self._store_lock:
             s = self.sessions.get(sid)
             if s and self.clock() - s.created_at > self.settings.session_ttl_s:
                 self._drop(sid)
@@ -145,24 +150,27 @@ class Runtime:
             return s
 
     def logout(self, sid: str) -> None:
-        with self.lock:
+        with self._store_lock:
             self._drop(sid)
 
     def expire(self, s: BrowserSession) -> None:
-        with self.lock:
+        with self._store_lock:
             self.identity.expire(s.token)
 
     def expires_in(self, s: BrowserSession) -> int:
-        with self.lock:
-            return int(self.identity.seconds_left(s.token))
+        return int(self.identity.seconds_left(s.token))
+
+    def _forget_conversation(self, cid: str) -> None:
+        self.owners.pop(cid, None)
+        self._turn_locks.pop(cid, None)
+        self.agent.graph.checkpointer.delete_thread(cid)  # libera la memoria del checkpointer
 
     def _drop(self, sid: str) -> None:
         s = self.sessions.pop(sid, None)
         if not s:
             return
         for cid in s.conversations:
-            self.owners.pop(cid, None)
-            self.agent.graph.checkpointer.delete_thread(cid)  # libera la memoria del checkpointer
+            self._forget_conversation(cid)
         self.identity.revoke(s.token)
 
     def _evict(self) -> None:
@@ -174,24 +182,24 @@ class Runtime:
 
     # ------------------------------------------------------------------ conversaciones
     def new_conversation(self, s: BrowserSession) -> str:
-        with self.lock:
+        with self._store_lock:
             if len(s.conversations) >= self.settings.max_conversations_per_session:
-                oldest = s.conversations.pop(0)
-                self.owners.pop(oldest, None)
-                self.agent.graph.checkpointer.delete_thread(oldest)
+                self._forget_conversation(s.conversations.pop(0))
             cid = "c_" + secrets.token_urlsafe(16)
             s.conversations.append(cid)
             self.owners[cid] = s.sid
+            self._turn_locks[cid] = threading.Lock()
             return cid
 
     def owns(self, s: BrowserSession, conversation_id: str) -> bool:
-        with self.lock:
+        with self._store_lock:
             return self.owners.get(conversation_id) == s.sid
 
     def chat(self, s: BrowserSession, conversation_id: str, text: str) -> dict:
-        with self.lock:
+        with self._store_lock:
+            turn_lock = self._turn_locks.get(conversation_id) or threading.Lock()
+        with turn_lock:  # solo serializa turnos de ESTA conversación
             state = self.agent.chat(conversation_id, s.token, text)
-            # `BankTools.audit` es una lista en memoria que crecería sin límite en un servidor: la traza del
-            # grafo (y el AuditLog opcional) ya registran cada llamada.
-            del self.agent.tools.audit[:-200]
-            return state
+        with self._store_lock:
+            del self.agent.tools.audit[:-MAX_TOOL_AUDIT]
+        return state

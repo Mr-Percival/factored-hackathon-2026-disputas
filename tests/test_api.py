@@ -322,15 +322,49 @@ def test_rate_limiter_window_slides():
     assert rl.allow("k")
 
 
-def test_concurrent_turns_are_serialized_safely(make_client):
+def test_parallel_customers_only_see_their_own_data(make_client):
+    """Regresión de #29 a nivel HTTP: conversaciones de clientes distintos en paralelo (pool de hilos de
+    uvicorn/TestClient) nunca reciben transacciones de otro cliente, incluido el señuelo."""
+    base = make_client(allow_any_customer=True, rate_limit_per_min=1000, session_rate_limit_per_min=1000)
+    cases = {  # cliente -> (mensaje, marca propia que debe aparecer en la respuesta)
+        "CLI-ANA": ("no reconozco el cargo de 1200 del 10/06/2026", "T-ANA-2"),
+        "CLI-BETO": ("no reconozco un cargo de 200.000", "T-BETO-1"),
+        "CLI-CARLA": ("no reconozco un cargo de 15.000", "T-CARLA-1"),
+        "CLI-CANARY": ("no reconozco un cargo de 999.99", CANARY_MERCHANT),  # pide confirmar: sale el comercio
+    }
+    all_txn_ids = {"T-ANA-1", "T-ANA-2", "T-ANA-5", "T-ANA-8", "T-BETO-1", "T-CARLA-1", "T-CAN-1"}
+
+    def worker(customer: str) -> list[str]:
+        problems = []
+        browser = TestClient(base.app)  # un navegador (cookie) por hilo, misma app y mismo agente
+        login(browser, customer)
+        text, own = cases[customer]
+        for _ in range(6):
+            r = browser.post(f"/api/conversations/{conversation(browser)}/messages", json={"text": text})
+            body = r.text
+            if r.status_code != 200:
+                problems.append(f"{customer}: HTTP {r.status_code}")
+                continue
+            foreign = {t for t in all_txn_ids - {own} if t in body}
+            if own not in body or foreign:
+                problems.append(f"{customer}: own={own in body} foreign={sorted(foreign)}")
+            if customer != "CLI-CANARY" and CANARY_MERCHANT in body:
+                problems.append(f"{customer}: vio al señuelo")
+        return problems
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        problems = [p for ps in pool.map(worker, list(cases) * 2) for p in ps]
+    assert not problems, problems[:5]
+
+
+def test_same_conversation_turns_are_serialized(make_client):
     c = make_client(rate_limit_per_min=100)
     login(c)
-    cids = [conversation(c) for _ in range(8)]
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        results = list(pool.map(lambda cid: c.post(f"/api/conversations/{cid}/messages",
-                                                   json={"text": "No reconozco un cargo de 77 dólares"}), cids))
-    assert [r.status_code for r in results] == [200] * 8
-    assert {r.json()["awaiting"] for r in results} == {"confirmation"}
+    cid = conversation(c)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(lambda _: c.post(f"/api/conversations/{cid}/messages", json={"text": "hola"}),
+                                range(4)))
+    assert sorted(r.json()["turn"] for r in results) == [1, 2, 3, 4]
 
 
 # ---------------------------------------------------------------------- cabeceras y orígenes
