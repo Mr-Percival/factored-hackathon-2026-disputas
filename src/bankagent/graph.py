@@ -28,7 +28,7 @@ from .guard import InjectionDetector, detector_from_env, redact
 from .identity import AuthError
 from .observability import emit as emit_trace
 from .policy import PolicyEngine
-from .responses import TemplateWriter, fmt_option, fmt_txn
+from .responses import TemplateWriter, fmt_option, fmt_txn, handoff_summary
 from .tools import BankTools, ToolError
 from .understanding import Router, RuleRouter, detect_language
 
@@ -312,6 +312,7 @@ class Agent:
                          for e in s.get("trace", []) if e["tools"]],
             "unresolved_questions": unresolved,
         }
+        packet["summary"] = handoff_summary(packet)  # una línea determinista para el asesor (#32)
         return {"next": "respond", "outcome": "handoff", "handoff": packet, "awaiting": None, "pending_action": None,
                 "reply_key": reason if reason in ("tool_failure", "out_of_scope", "security_lockout") else "handoff",
                 "detail": reason}

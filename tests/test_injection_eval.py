@@ -7,7 +7,7 @@ import math
 import pytest
 
 from bankagent import guard
-from bankagent.evals import metrics
+from bankagent.evals import detection_metrics as metrics
 from bankagent.evals.harm import NullDetector, exposed, leaked_tokens
 from bankagent.graph import Agent
 from bankagent.guard import AnyDetector, ClassifierDetector, ModelSpec, RegexDetector, detector_from_env

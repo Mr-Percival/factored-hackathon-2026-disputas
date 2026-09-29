@@ -25,7 +25,7 @@ from collections import defaultdict
 from ..guard import MODELS, AnyDetector, ClassifierDetector, RegexDetector
 from ..pipeline import ROOT
 from . import datasets, harm
-from .metrics import confusion, percentile, roc_auc, threshold_for_fpr, tpr_at_fpr, wilson
+from .detection_metrics import confusion, percentile, roc_auc, threshold_for_fpr, tpr_at_fpr, wilson
 
 CACHE = os.path.join(ROOT, "data", "cache", "injection_eval")
 SEED = 2026
