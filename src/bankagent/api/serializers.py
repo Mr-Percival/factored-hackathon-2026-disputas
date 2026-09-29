@@ -13,7 +13,7 @@ from typing import Any
 
 from ..responses import fmt_option
 from .schemas import (Candidate, Decision, Evidence, Handoff, HandoffPolicy, PendingAction, Rule, ToolCall,
-                      TraceStep, TurnResult)
+                      TraceStep, TurnResult, Understanding)
 
 HANDOFF_REASONS = {
     "out_of_scope": "Fuera del alcance del canal automático",
@@ -21,7 +21,13 @@ HANDOFF_REASONS = {
     "action_not_verified": "La acción no se pudo verificar",
     "no_active_card": "El cliente no tiene tarjetas activas",
     "security_lockout": "Conversación pausada por intentos bloqueados repetidos",
+    # motivos que agrega feat/conversational-robustness (#38-#44); los desconocidos se muestran crudos
+    "customer_request": "El cliente pidió hablar con una persona",
+    "clarification_limit": "Demasiadas aclaraciones sin llegar a un cargo concreto",
+    "account_takeover": "Señales de toma de cuenta",
 }
+HANDOFF_KNOWN_KEYS = {"reason", "created_at", "language", "request", "verified_facts", "policy", "actions_taken",
+                      "evidence", "unresolved_questions"}
 
 
 def jsonable(v: Any) -> Any:
@@ -80,7 +86,16 @@ def handoff_view(p: dict | None) -> Handoff | None:
         actions_taken=[_tool(a) for a in p.get("actions_taken") or []],
         evidence=[Evidence(turn=e["turn"], node=e["node"], tools=list(e["tools"])) for e in p.get("evidence") or []],
         unresolved_questions=list(p.get("unresolved_questions") or []),
+        extra=jsonable({k: v for k, v in p.items() if k not in HANDOFF_KNOWN_KEYS}),
     )
+
+
+def understanding_view(u: dict | None) -> Understanding | None:
+    if not u:
+        return None
+    slots = {k: v for k, v in (u.get("slots") or {}).items() if v is not None}
+    return Understanding(intent=str(u.get("intent", "unknown")), confidence=float(u.get("confidence") or 0.0),
+                         router=str(u.get("router", "")), slots=jsonable(slots))
 
 
 def candidates_view(state: dict) -> list[Candidate]:
@@ -94,7 +109,7 @@ def pending_view(state: dict) -> PendingAction | None:
     a = state.get("pending_action") if state.get("awaiting") == "confirmation" else None
     if not a:
         return None
-    return PendingAction(type=a["type"], card_label=a.get("card_label"))
+    return PendingAction(type=str(a.get("type", "")), card_label=a.get("card_label"))
 
 
 def turn_result(conversation_id: str, state: dict) -> TurnResult:
@@ -104,6 +119,7 @@ def turn_result(conversation_id: str, state: dict) -> TurnResult:
         conversation_id=conversation_id, turn=int(state.get("turn") or 0), reply=state.get("reply") or "",
         outcome=state.get("outcome") or "clarify", lang=lang, awaiting=state.get("awaiting"),
         candidates=candidates_view(state), pending_action=pending_view(state),
+        understanding=understanding_view(state.get("understanding")),
         # la decisión y el handoff se muestran solo si se produjeron en ESTE turno
         decision=decision_view(state.get("decision")), handoff=handoff_view(state.get("handoff")),
         trace=trace, trace_total_ms=round(sum(s.ms for s in trace), 2),

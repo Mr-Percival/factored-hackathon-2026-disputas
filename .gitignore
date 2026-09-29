@@ -28,3 +28,9 @@ __pycache__/
 
 # Capturas de QA del deck (se regeneran con scripts/make_deck_pdf.py --shots)
 docs/pitch/screens/deck_*.png
+
+# Frontend (web/)
+node_modules/
+web/dist/
+web/coverage/
+*.tsbuildinfo

@@ -9,7 +9,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-Outcome = Literal["resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked", "auth_error"]
+# Los resultados y motivos se tipan como str abiertos: el grafo puede sumar valores nuevos sin romper la API
+# (la UI muestra los desconocidos con una etiqueta neutra y el valor crudo).
+KNOWN_OUTCOMES = ("resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked", "auth_error")
 Lang = Literal["es", "pt"]
 CUSTOMER_ID_PATTERN = r"^[A-Za-z0-9_-]{1,40}$"
 MAX_MESSAGE_CHARS = 1000
@@ -32,8 +34,10 @@ class QuickReply(_Model):
     text: str
 
 
-DEFAULT_QUICK_REPLIES = [QuickReply(label=x, text=y) for x, y in
-                         (("sí", "sí"), ("no", "no"), ("la 1", "la 1"), ("la 2", "la 2"), ("sim (pt)", "sim"))]
+# Incluye las respuestas del consentimiento separado disputa/bloqueo (#38-#41) para cuando lleguen.
+DEFAULT_QUICK_REPLIES = [QuickReply(label=x, text=x) for x in
+                         ("sí", "no", "la 1", "la 2", "1", "2", "sí, ambas", "solo la disputa", "sim",
+                          "quiero hablar con una persona")]
 
 
 class ScriptTurn(_Model):
@@ -179,7 +183,7 @@ class Candidate(_Model):
 
 
 class PendingAction(_Model):
-    type: Literal["open_dispute", "block_card"]
+    type: str = Field(description="open_dispute | block_card (abierto: el grafo puede agregar acciones)")
     card_label: str | None = None
 
 
@@ -205,16 +209,27 @@ class Handoff(_Model):
     actions_taken: list[ToolCall]
     evidence: list[Evidence]
     unresolved_questions: list[str]
+    extra: dict[str, Any] = Field(default_factory=dict,
+                                  description="Campos del paquete que esta versión de la API no modela (se muestran tal cual)")
+
+
+class Understanding(_Model):
+    """Qué entendió el router (reglas) y con qué confianza: evidencia de que se abstiene en vez de adivinar."""
+    intent: str
+    confidence: float
+    router: str
+    slots: dict[str, Any]
 
 
 class TurnResult(_Model):
     conversation_id: str
     turn: int
     reply: str
-    outcome: Outcome
+    outcome: str = Field(description="Conocidos: " + " | ".join(KNOWN_OUTCOMES) + ". Abierto a valores nuevos.")
     lang: Lang
-    awaiting: Literal["option", "confirmation"] | None = None
+    awaiting: str | None = Field(default=None, description="option | confirmation | None")
     candidates: list[Candidate]
+    understanding: Understanding | None = None
     pending_action: PendingAction | None = None
     decision: Decision | None = None
     handoff: Handoff | None = None
