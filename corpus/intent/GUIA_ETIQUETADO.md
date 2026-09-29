@@ -31,7 +31,7 @@ humano y *no* describe ningún problema concreto, es `human_request`.
 | `hard_negative` | `true` si está pensado para confundir (palabras clave de otra intención, negaciones, "desbloquear", "comisión", "cobran"…). |
 | `style` | Texto libre corto: `chat`, `typos`, `formal`, `voz`, `terse`, `largo`, `emoji`… |
 
-El `author` y el `id` los agrega `scripts/build_intent_corpus.py` a partir del nombre del archivo.
+El `author` y el `id` (`<autor>-<línea>`) los agrega `scripts/train_intent.py` a partir del nombre y la línea del archivo.
 
 ## Reglas para quien escribe
 1. Varía largo, registro, orden de la información y dialecto; incluye errores de tipeo reales, sin tildes,
