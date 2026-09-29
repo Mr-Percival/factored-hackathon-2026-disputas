@@ -8,6 +8,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Arquitectura y diagramas: [`docs/architecture.md`](docs/architecture.md)
 - Por qué este flujo (datos): [`reports/EDA_findings.md`](reports/EDA_findings.md)
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
+- Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
 
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
@@ -44,7 +45,7 @@ src/bankagent/
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad y pipeline
-scripts/                descarga S3 y EDA
+scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)
 ```
 
 ## Setup reproducible
@@ -57,7 +58,11 @@ pytest -q                                             # corre sin datos reales n
 cp .env.example .env                                  # completar
 python scripts/s3_download.py
 python -m bankagent.pipeline                          # -> data/serving.duckdb + data/runs/<run>.json
-python -m bankagent.pipeline --sample-customers 500 --out data/demo.duckdb   # base liviana para el deploy
+
+# Base liviana para el deploy (~5 MB): clientes del guion de demo + muestra determinista. Ver docs/demo-script.md
+python scripts/select_demo_customers.py                                       # -> docs/demo/demo_customers.json
+python -m bankagent.pipeline --out data/demo/demo.duckdb --sample-customers 500 --include-customers docs/demo/demo_customers.json
+python scripts/verify_demo.py --db data/demo/demo.duckdb                      # 13/13 escenarios o código 1
 
 python -m bankagent.chat --customer CLI-XXXXXXXX
 ```
