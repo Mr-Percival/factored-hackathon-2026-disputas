@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Outcome = Literal["resolved", "clarify", "informed", "rejected", "handoff", "cancelled", "blocked", "auth_error"]
 Lang = Literal["es", "pt"]
@@ -20,35 +20,99 @@ class _Model(BaseModel):
 
 
 # ---------------------------------------------------------------------- escenarios
-class Example(_Model):
+Category = Literal["resolution", "handoff", "policy", "security", "clarify"]
+CATEGORY_BY_OUTCOME: dict[str, Category] = {
+    "resolved": "resolution", "cancelled": "resolution", "handoff": "handoff", "rejected": "policy",
+    "informed": "policy", "blocked": "security", "auth_error": "security", "clarify": "clarify"}
+DISCLAIMER = "Sandbox con datos sintéticos · política sintética · no mueve dinero"
+
+
+class QuickReply(_Model):
     label: str
     text: str
-    tag: str | None = None
+
+
+DEFAULT_QUICK_REPLIES = [QuickReply(label=x, text=y) for x, y in
+                         (("sí", "sí"), ("no", "no"), ("la 1", "la 1"), ("la 2", "la 2"), ("sim (pt)", "sim"))]
+
+
+class ScriptTurn(_Model):
+    kind: Literal["message", "expire_session"]
+    text: str | None = None
+    expect_outcome: str | None = None
+
+
+class Expected(_Model):
+    outcome: str | None = None
+    rule: str | None = None
 
 
 class Scenario(_Model):
+    id: str
+    title: str
     customer_id: str
-    name: str
-    description: str
-    examples: list[Example]
+    lang: Lang
+    locale: str | None = None
+    category: Category
+    note: str | None = None
+    turns: list[ScriptTurn]
+    expected: Expected
 
 
-class ScenarioFile(_Model):
-    """Formato de `config/demo_scenarios.json` (validado al arrancar)."""
+class _RawTurn(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    version: str
-    disclaimer: str
-    scenarios: list[Scenario] = Field(min_length=1)
-    quick_replies: list[Example] = []
+    say: str | None = Field(default=None, min_length=1, max_length=MAX_MESSAGE_CHARS)
+    action: Literal["expire_session"] | None = None
+    expect: dict[str, Any] = {}
+
+    @model_validator(mode="after")
+    def _one_of(self):
+        if (self.say is None) == (self.action is None):
+            raise ValueError("cada turno lleva 'say' o 'action'")
+        return self
+
+
+class _RawScenario(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    title: str
+    customer_id: str = Field(pattern=CUSTOMER_ID_PATTERN)
+    locale: str | None = None
+    note: str | None = None
+    turns: list[_RawTurn] = Field(min_length=1)
+    expected: dict[str, Any] = {}
+
+
+class ScenarioFile(BaseModel):
+    """Formato de `docs/demo/demo_customers.json` (datos del organizador, #28) y de `config/demo_scenarios.json`
+    (fixture). Se valida al arrancar; los campos extra (transacción esperada, huella del dataset) se ignoran y
+    no se exponen por la API."""
+    model_config = ConfigDict(extra="ignore")
+    scenarios: list[_RawScenario] = Field(min_length=1)
+    disclaimer: str = DISCLAIMER
+    quick_replies: list[QuickReply] = DEFAULT_QUICK_REPLIES
+
+    def to_api(self) -> list[Scenario]:
+        out = []
+        for s in self.scenarios:
+            outcome = s.expected.get("outcome")
+            out.append(Scenario(
+                id=s.id, title=s.title, customer_id=s.customer_id, locale=s.locale, note=s.note,
+                lang="pt" if (s.locale or "").lower().startswith("pt") else "es",
+                category=CATEGORY_BY_OUTCOME.get(outcome or "", "clarify"),
+                turns=[ScriptTurn(kind="message", text=t.say, expect_outcome=t.expect.get("outcome")) if t.say
+                       else ScriptTurn(kind="expire_session") for t in s.turns],
+                expected=Expected(outcome=outcome, rule=s.expected.get("rule"))))
+        return out
 
 
 class ScenariosResponse(_Model):
-    version: str
+    source: str = Field(description="Archivo de escenarios cargado (sin ruta)")
     disclaimer: str
     data_source: Literal["fixture", "env"]
     allow_any_customer: bool
     scenarios: list[Scenario]
-    quick_replies: list[Example]
+    quick_replies: list[QuickReply]
 
 
 # ---------------------------------------------------------------------- sesión y conversación

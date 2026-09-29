@@ -85,8 +85,10 @@ def resolve_db(settings: Settings) -> tuple[str, str, str | None]:
 class Runtime:
     def __init__(self, settings: Settings, clock=time.time):
         self.settings, self.clock = settings, clock
-        self.scenarios = load_scenarios(settings.scenarios_path)
-        self.allowlist = {s.customer_id for s in self.scenarios.scenarios}
+        self.scenarios_source = os.path.basename(settings.scenarios_file)
+        raw = load_scenarios(settings.scenarios_file)
+        self.scenarios, self.disclaimer, self.quick_replies = raw.to_api(), raw.disclaimer, raw.quick_replies
+        self.allowlist = {s.customer_id for s in self.scenarios}
         self.db_path, self.data_source, self._tmp = resolve_db(settings)
         self.identity = IdentityService(clock=clock)
         audit = AuditLog(settings.audit_path) if settings.audit_path else None

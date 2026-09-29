@@ -3,7 +3,7 @@
 | Variable | Default | Uso |
 |---|---|---|
 | BANKAGENT_DB | (vacío) | base serving DuckDB (solo lectura). Vacío: se construye la base de demo del fixture |
-| BANKAGENT_SCENARIOS | config/demo_scenarios.json | escenarios de la demo (y allowlist del login simulado) |
+| BANKAGENT_SCENARIOS | (auto) | escenarios y allowlist del login simulado. Auto: con BANKAGENT_DB, docs/demo/demo_customers.json (clientes reales, #28); sin él, config/demo_scenarios.json (fixture) |
 | BANKAGENT_ALLOW_ANY_CUSTOMER | 0 | 1 = login con cualquier customer_id existente (solo uso local con datos reales) |
 | BANKAGENT_AUDIT_PATH | (vacío) | log de auditoría JSONL con cadena de hashes |
 | BANKAGENT_CORS_ORIGINS | (vacío) | orígenes extra permitidos, separados por coma (dev: http://localhost:5173) |
@@ -19,7 +19,8 @@ from dataclasses import dataclass
 
 from ..policy import ROOT
 
-DEFAULT_SCENARIOS = os.path.join(ROOT, "config", "demo_scenarios.json")
+FIXTURE_SCENARIOS = os.path.join(ROOT, "config", "demo_scenarios.json")
+DEMO_SCENARIOS = os.path.join(ROOT, "docs", "demo", "demo_customers.json")
 DEFAULT_WEB_DIST = os.path.join(ROOT, "web", "dist")
 
 
@@ -32,7 +33,7 @@ def _flag(value: str | None, default: bool) -> bool:
 @dataclass(frozen=True)
 class Settings:
     db_path: str | None = None
-    scenarios_path: str = DEFAULT_SCENARIOS
+    scenarios_path: str | None = None  # None = automático (ver `scenarios_file`)
     allow_any_customer: bool = False
     audit_path: str | None = None
     cors_origins: tuple[str, ...] = ()
@@ -52,7 +53,7 @@ class Settings:
         secure = e.get("BANKAGENT_COOKIE_SECURE", "auto").strip().lower()
         return cls(
             db_path=e.get("BANKAGENT_DB") or None,
-            scenarios_path=e.get("BANKAGENT_SCENARIOS") or DEFAULT_SCENARIOS,
+            scenarios_path=e.get("BANKAGENT_SCENARIOS") or None,
             allow_any_customer=_flag(e.get("BANKAGENT_ALLOW_ANY_CUSTOMER"), False),
             audit_path=e.get("BANKAGENT_AUDIT_PATH") or None,
             cors_origins=tuple(o.strip() for o in (e.get("BANKAGENT_CORS_ORIGINS") or "").split(",") if o.strip()),
@@ -61,3 +62,13 @@ class Settings:
             web_dist=e.get("BANKAGENT_WEB_DIST") or DEFAULT_WEB_DIST,
             docs=_flag(e.get("BANKAGENT_DOCS"), True),
         )
+
+    @property
+    def scenarios_file(self) -> str:
+        """Escenarios coherentes con la base: los del fixture para la base del fixture y los de clientes reales
+        (docs/demo/demo_customers.json, #28) cuando se apunta a una base del organizador."""
+        if self.scenarios_path:
+            return self.scenarios_path
+        if self.db_path and os.path.exists(DEMO_SCENARIOS):
+            return DEMO_SCENARIOS
+        return FIXTURE_SCENARIOS

@@ -6,9 +6,9 @@ from concurrent.futures import ThreadPoolExecutor
 import pytest
 from fastapi.testclient import TestClient
 
-from bankagent.api.config import Settings
+from bankagent.api.config import DEMO_SCENARIOS, FIXTURE_SCENARIOS, Settings
 from bankagent.api.main import create_app
-from bankagent.api.runtime import RateLimiter
+from bankagent.api.runtime import RateLimiter, load_scenarios
 from bankagent.api.serializers import jsonable
 from bankagent.audit import verify
 from bankagent.demo_fixture import CANARY_MERCHANT
@@ -22,7 +22,8 @@ def make_client(serving_db, tmp_path):
     clients = []
 
     def make(base_url="http://testserver", **overrides) -> TestClient:
-        settings = Settings(**{"db_path": serving_db, "web_dist": str(tmp_path / "no-dist"), **overrides})
+        settings = Settings(**{"db_path": serving_db, "scenarios_path": FIXTURE_SCENARIOS,
+                               "web_dist": str(tmp_path / "no-dist"), **overrides})
         c = TestClient(create_app(settings), base_url=base_url)
         c.__enter__()
         clients.append(c)
@@ -78,22 +79,37 @@ def test_ready_reports_503_when_db_is_gone(client):
 
 def test_scenarios_come_from_json(client):
     r = client.get("/api/scenarios").json()
-    with open(os.path.join(ROOT, "config", "demo_scenarios.json"), encoding="utf-8") as f:
+    with open(FIXTURE_SCENARIOS, encoding="utf-8") as f:
         raw = json.load(f)
-    assert [s["customer_id"] for s in r["scenarios"]] == [s["customer_id"] for s in raw["scenarios"]]
+    assert r["source"] == "demo_scenarios.json"
+    assert [s["id"] for s in r["scenarios"]] == [s["id"] for s in raw["scenarios"]]
     assert r["disclaimer"].startswith("Sandbox") and r["quick_replies"] and not r["allow_any_customer"]
-    tags = {e["tag"] for s in r["scenarios"] for e in s["examples"]}
-    assert {"injection", "pt"} <= tags
+    assert {"pt", "es"} == {s["lang"] for s in r["scenarios"]}
+    assert {"resolution", "handoff", "policy", "security"} <= {s["category"] for s in r["scenarios"]}
+    assert any(t["kind"] == "expire_session" for s in r["scenarios"] for t in s["turns"])
 
 
 def test_scenarios_file_is_swappable(make_client, tmp_path):
     custom = tmp_path / "other.json"
-    custom.write_text(json.dumps({"version": "x", "disclaimer": "d", "scenarios": [
-        {"customer_id": "CLI-BETO", "name": "B", "description": "d", "examples": []}]}), encoding="utf-8")
+    custom.write_text(json.dumps({"scenarios": [{"id": "b", "title": "B", "customer_id": "CLI-BETO",
+                                                 "turns": [{"say": "hola"}], "transaction": {"x": 1}}]}),
+                      encoding="utf-8")
     c = make_client(scenarios_path=str(custom))
-    assert [s["customer_id"] for s in c.get("/api/scenarios").json()["scenarios"]] == ["CLI-BETO"]
+    r = c.get("/api/scenarios").json()
+    assert [s["customer_id"] for s in r["scenarios"]] == ["CLI-BETO"] and "transaction" not in r["scenarios"][0]
     assert c.post("/api/sessions", json={"customer_id": "CLI-ANA"}).status_code == 403  # ya no está en la allowlist
     login(c, "CLI-BETO")
+
+
+def test_real_demo_scenarios_file_is_valid_and_auto_selected(tmp_path):
+    """docs/demo/demo_customers.json (#28) carga con el mismo loader; con BANKAGENT_DB se usa por defecto."""
+    doc = load_scenarios(DEMO_SCENARIOS)
+    scenarios = doc.to_api()
+    assert len(scenarios) >= 10 and {s.lang for s in scenarios} == {"es", "pt"}
+    assert any(t.kind == "expire_session" for s in scenarios for t in s.turns)
+    assert Settings(db_path=str(tmp_path / "x.duckdb")).scenarios_file == DEMO_SCENARIOS
+    assert Settings().scenarios_file == FIXTURE_SCENARIOS
+    assert Settings(db_path="x", scenarios_path="y.json").scenarios_file == "y.json"
 
 
 # ---------------------------------------------------------------------- sesión por cookie
@@ -237,14 +253,28 @@ def test_foreign_conversation_is_not_found(client):
     assert say(client, "c_does-not-exist", "hola", status=404)
 
 
-@pytest.mark.parametrize("scenario_index", [0, 1, 2])
-def test_every_json_example_runs_through_the_api(client, scenario_index):
-    sc = client.get("/api/scenarios").json()
-    s = sc["scenarios"][scenario_index]
+def _fixture_ids():
+    with open(FIXTURE_SCENARIOS, encoding="utf-8") as f:
+        return [s["id"] for s in json.load(f)["scenarios"]]
+
+
+@pytest.mark.parametrize("scenario_id", _fixture_ids())
+def test_every_fixture_scenario_plays_as_scripted(client, scenario_id):
+    """El guion que ve la UI se cumple turno a turno a través de la API (como scripts/verify_demo.py)."""
+    s = next(x for x in client.get("/api/scenarios").json()["scenarios"] if x["id"] == scenario_id)
     login(client, s["customer_id"])
-    for ex in s["examples"]:
-        r = say(client, conversation(client), ex["text"])
+    cid, r = conversation(client), None
+    for t in s["turns"]:
+        if t["kind"] == "expire_session":
+            client.post("/api/sessions/expire")
+            continue
+        r = say(client, cid, t["text"])
+        assert r["outcome"] == t["expect_outcome"], (t, r["reply"])
         assert r["reply"] and r["trace"] and CANARY_MERCHANT not in json.dumps(r)
+    rule = s["expected"]["rule"]
+    if rule and rule.startswith(("H0", "D0")):
+        fired = [x["id"] for x in (r["decision"] or {}).get("rules", [])]
+        assert rule in fired
 
 
 # ---------------------------------------------------------------------- validación y límites
