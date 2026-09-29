@@ -66,6 +66,7 @@ class PolicyEngine:
         self.rules = [(r, _compile(r["when"])) for r in self.cfg["dispute"]["rules"]]
         self._offer_block = _compile(self.cfg["actions"]["block_card"]["offer_when"])
         self.conversation = self.cfg.get("conversation", {})
+        self.window_days = int(self.cfg["dispute"]["window_days"])
 
     def requires_confirmation(self, action: str) -> bool:
         return self.cfg["actions"][action]["requires_confirmation"]
@@ -86,6 +87,7 @@ class PolicyEngine:
             "txn_age_days": (self.as_of - txn_date).days,
             "txn_already_disputed": txn["transaction_id"] in history.get("open_dispute_transactions", []),
             "high_amount": self.cfg["dispute"]["high_amount"],
+            "window_days": self.window_days,
         }
         hits = [RuleHit(r["id"], r["outcome"], r["explain"])
                 for r, code in self.rules if eval(code, {"__builtins__": {}}, ctx)]  # noqa: S307 (AST validado)

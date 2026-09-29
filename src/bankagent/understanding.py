@@ -32,6 +32,10 @@ class Slots:
     country: str | None = None
     option: int | None = None  # "la 2", "opção 1"; -1 = "la última"
     case_id: str | None = None  # "DSP-…" mencionado por el cliente (nunca se lee como monto)
+    count: int | None = None  # "3 cargos de 20": cuántos movimientos dice el cliente (el 3 no es el monto)
+    # Comercio: el router puede proponer texto libre; el grafo lo resuelve SOLO contra los comercios del propio
+    # cliente (`match_merchant`), nunca contra una lista global.
+    merchant: str | None = None
 
 
 @dataclass
@@ -100,7 +104,56 @@ MONTHS.update({m: i for i, m in enumerate(["janeiro", "fevereiro", "marco", "abr
 WEEKDAYS = {"lunes": 0, "martes": 1, "miercoles": 2, "jueves": 3, "viernes": 4, "sabado": 5, "domingo": 6,
             "segunda": 0, "terca": 1, "quarta": 2, "quinta": 3, "sexta": 4}
 # Frases de fecha que contienen números y no son montos ("hace 3 días", "el 9 de junio")
-DATE_NUMBERS = re.compile(r"\b(hace|ha) \d+ dias?\b|\b\d{1,2} de (" + "|".join(MONTHS) + r")\b")
+DATE_NUMBERS = re.compile(r"\b(hace|ha|faz) \d+ (dias?|semanas?|mes|meses)\b|\b\d{1,2} de (" + "|".join(MONTHS) + r")\b")
+# Números en palabra para "hace tres semanas", "3 cargos", "há duas semanas".
+NUMBER_WORDS = {"un": 1, "uno": 1, "una": 1, "um": 1, "uma": 1, "dos": 2, "dois": 2, "duas": 2, "tres": 3,
+                "cuatro": 4, "quatro": 4, "cinco": 5, "seis": 6, "siete": 7, "sete": 7, "ocho": 8, "oito": 8,
+                "nueve": 9, "nove": 9, "diez": 10, "dez": 10, "quince": 15, "quinze": 15}
+_NUM = r"(\d+|" + "|".join(NUMBER_WORDS) + r")"
+# "3 cargos", "dos cobros", "duas compras": cantidad de movimientos, no monto
+COUNT = re.compile(_NUM + r" (cargos|cobros|compras|movimientos|transacciones|consumos|cobrancas|lancamentos|"
+                          r"debitos|veces|vezes)\b")
+# Referencias a la tarjeta o IDs: nunca son montos ("mi tarjeta 4152", "terminada en 4152", "DSP-123")
+NOT_AMOUNTS = re.compile(r"\b(tarjeta|cartao|terminad[ao] en|terminad[ao] em|final|finalizad[ao] em)\s+(\*+)?\d{4}\b"
+                         r"|\*+\d{2,4}|\b(dsp|trx|cli|hnd)-?[a-z0-9]{3,}\b")
+
+
+def _int(word: str) -> int:
+    return int(word) if word.isdigit() else NUMBER_WORDS[word]
+
+
+def parse_count(t: str) -> int | None:
+    m = COUNT.search(t)
+    return _int(m.group(1)) if m and _int(m.group(1)) > 1 else None
+
+
+def amount_text(t: str) -> str:
+    """El texto sin lo que parece número pero no es monto: fechas dd/mm, IDs, tarjeta, cantidades."""
+    t = NOT_AMOUNTS.sub(" ", t)
+    t = COUNT.sub(r" \2", t)
+    return re.sub(r"\b\d{1,2}[/-]\d{1,2}([/-]\d{2,4})?\b", " ", t)
+
+
+# Comercios: palabras que por sí solas no identifican a un comercio ("una tienda", "el super").
+MERCHANT_STOPWORDS = {"de", "del", "la", "el", "los", "las", "y", "e", "do", "da", "tienda", "comercio", "servicio",
+                      "servicios", "centro", "estacion", "restaurante", "super", "mercado", "store", "shop", "cafe"}
+
+
+def _tokens(s: str) -> list[str]:
+    return [w for w in re.findall(r"[a-z0-9]+", _norm(s)) if len(w) >= 3]
+
+
+def match_merchant(text: str, names: list[str]) -> list[str]:
+    """Comercios del cliente nombrados en el texto. Coincide si TODAS las palabras significativas del comercio
+    están en el mensaje (con tolerancia a plural/typo leve por prefijo de 5 letras). Por qué exigir todas:
+    "tienda" no debe elegir entre "Tienda General" y "Tienda Don José"; "Gasolinera Express" sí es uno."""
+    words = set(_tokens(text))
+    out = []
+    for name in names:
+        sig = [w for w in _tokens(name) if w not in MERCHANT_STOPWORDS] or _tokens(name)
+        if sig and all(any(x == w or (len(w) >= 5 and x.startswith(w[:5])) for x in words) for w in sig):
+            out.append(name)
+    return out
 
 # ---------------------------------------------------------------- confirmación tri-estado (#38)
 # Por qué tablas y no "contiene sí": una confirmación mal leída ejecuta una acción que el cliente no pidió.
@@ -248,7 +301,7 @@ def _has(t: str, kw: str) -> bool:
 def parse_amount(t: str) -> float | None:
     t = DATE_NUMBERS.sub(" ", t)
     m = re.search(r"(?:\$|usd|mxn|cop|ars|r\$)?\s*(\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)"
-                  r"(\s*(?:mil\b|lucas\b|millon\w*|milh\w*))?", t)
+                  r"(\s*(?:mil\b|lucas\b|k\b|millon\w*|milh\w*|palos?\b))?", t)
     if not m:
         return None
     raw, dec = m.group(1), ""
@@ -261,8 +314,8 @@ def parse_amount(t: str) -> float | None:
         if tail and not re.fullmatch(r"\d{1,3}([.,]\d{3})+", raw):
             raw, dec = tail.group(1), tail.group(2)
     value = float(re.sub(r"[.,]", "", raw) + (f".{dec}" if dec else ""))
-    if mult:
-        value *= 1_000_000 if mult.strip().startswith(("millon", "milh")) else 1000
+    if mult:  # "2 palos" = 2 millones (AR/CO)
+        value *= 1_000_000 if mult.strip().startswith(("millon", "milh", "palo")) else 1000
     return value
 
 
@@ -280,10 +333,20 @@ def parse_dates(t: str, today: dt.date) -> tuple[dt.date | None, dt.date | None]
     if any(_has(t, k) for k in ("antier", "anteayer", "anteontem", "antes de ayer")):
         d = today - dt.timedelta(days=2)
         return d, d
-    m = re.search(r"\b(?:hace|ha) (\d+) dias?\b", t)
-    if m:
-        d = today - dt.timedelta(days=int(m.group(1)))
-        return d, d
+    m = re.search(rf"\b(?:hace|ha|faz) {_NUM} (dias?|semanas?|mes|meses)\b", t)
+    if m:  # días: fecha exacta; semanas/meses: ventana alrededor ("hace tres semanas" ~ 21 días ± 4)
+        n, unit = _int(m.group(1)), m.group(2)
+        if unit.startswith("dia"):
+            d = today - dt.timedelta(days=n)
+            return d, d
+        days, slack = (n * 7, 4) if unit.startswith("semana") else (n * 30, 15)
+        center = today - dt.timedelta(days=days)
+        return center - dt.timedelta(days=slack), min(today, center + dt.timedelta(days=slack))
+    if any(k in t for k in ("semana antepasada", "semana retrasada")):
+        return today - dt.timedelta(days=21), today - dt.timedelta(days=14)
+    if any(k in t for k in ("mes pasado", "mes passado")):
+        last = today.replace(day=1) - dt.timedelta(days=1)
+        return last.replace(day=1), last
     m = re.search(r"\b(\d{1,2}) de (" + "|".join(MONTHS) + r")\b", t)
     if m:
         try:
@@ -305,6 +368,11 @@ def parse_dates(t: str, today: dt.date) -> tuple[dt.date | None, dt.date | None]
             return day, day
         except ValueError:
             return None, None
+    m = re.search(r"\b(?:en|em|de|durante) (" + "|".join(MONTHS) + r")\b", t)
+    if m:  # solo el mes ("en mayo"): todo el mes, la última vez que ocurrió
+        first = _past(dt.date(today.year, MONTHS[m.group(1)], 1), today)
+        nxt = (first.replace(day=28) + dt.timedelta(days=4)).replace(day=1)
+        return first, min(today, nxt - dt.timedelta(days=1))
     m = re.search(r"\b(?:el|na|no) (" + "|".join(WEEKDAYS) + r")\b", t)
     if m:  # "el martes" = el último martes antes de hoy
         back = (today.weekday() - WEEKDAYS[m.group(1)]) % 7 or 7
@@ -404,8 +472,8 @@ class RuleRouter:
         # "no reconozco otro cargo de 50" no es un "no": es un pedido nuevo que descarta la acción pendiente.
         m = CASE_ID.search(t)
         slots.case_id = m.group(0).upper() if m else None
-        no_ids = re.sub(r"\b(dsp|trx|cli|hnd)-?[a-z0-9]{3,}\b", " ", t)  # un ID nunca es un monto
-        slots.amount = parse_amount(re.sub(r"\b\d{1,2}[/-]\d{1,2}([/-]\d{2,4})?\b", " ", no_ids))
+        slots.amount = parse_amount(amount_text(t))
+        slots.count = parse_count(t)
         slots.date_from, slots.date_to = parse_dates(t, today)
         slots.country = next((v for k, v in COUNTRIES.items() if _has(t, k)), None)
         if awaiting == "confirmation":

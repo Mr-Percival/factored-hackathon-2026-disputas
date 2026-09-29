@@ -30,7 +30,7 @@ from .observability import emit as emit_trace
 from .policy import PolicyEngine
 from .responses import TemplateWriter, fmt_option, fmt_txn, handoff_summary
 from .tools import BankTools, ToolError
-from .understanding import Router, RuleRouter, detect_language, session_language
+from .understanding import Router, RuleRouter, detect_language, match_merchant, session_language
 
 DISPUTABLE_TYPES = {"Purchase", "Withdrawal", "Payment", "Transfer", "Adjustment"}
 TRANSIENT_ERRORS = {"unavailable", "timeout"}
@@ -43,7 +43,7 @@ class State(TypedDict, total=False):
     # contexto que persiste entre turnos (checkpointer)
     turn: int
     lang: str
-    awaiting: str | None           # None | "option" | "confirmation"
+    awaiting: str | None           # None | "option" | "confirmation" | "details" (se pidió monto/fecha/comercio)
     candidates: list[dict]
     txn: dict | None
     pending_action: dict | None    # {type, transaction_id, block_card, card_label, declined}
@@ -230,7 +230,10 @@ class Agent:
         if awaiting == "option" and u.intent == "select_option":
             return {**out, "next": "select_option"}
         if awaiting == "option" and u.intent == "none_of_these":  # pide otro dato; cuenta como aclaración
-            return {**out, **self._clarify(s, "none_of_these", candidates=[], awaiting=None)}
+            return {**out, **self._clarify(s, "none_of_these", candidates=[], awaiting="details")}
+        if s.get("awaiting") == "details" and (u.intent == "unknown" or u.confidence < self.min_confidence):
+            # respuesta a "dime el monto, la fecha o el comercio": "de 151 dólares" sigue el reclamo anterior
+            return {**out, "next": "find_transaction", "awaiting": None, "pending_action": None, "txn": None}
         if u.confidence < self.min_confidence or u.intent in ("unknown", "unclear", "none_of_these"):
             return {**out, **self._clarify(s, "unknown")}
         if u.intent in CONVERSATION_HANDOFFS:  # pedido de humano, toma de cuenta, cancelar una disputa
@@ -276,13 +279,22 @@ class Agent:
     def find_transaction(self, s: State, calls) -> dict:
         sl = s["understanding"]["slots"]
         amt = sl.get("amount")
+        # Comercio: se compara el texto con los comercios del PROPIO cliente (lista por sesión, sin fuga).
+        names = self._call(calls, "list_merchants", s["token"])
+        merchants = match_merchant(sl.get("merchant") or redact(s["user_text"]), names)
+        has_data = amt or sl.get("date_from") or sl.get("country") or merchants
+        if not has_data:  # sin monto, fecha, país ni comercio: se pide un dato antes de listar movimientos al azar
+            return {**self._clarify(s, "need_details", awaiting="details"), "detail": "no search data"}
         found = self._call(calls, "search_transactions", s["token"],
                            date_from=sl.get("date_from"), date_to=sl.get("date_to"),
                            amount_min=amt * 0.9 if amt else None, amount_max=amt * 1.1 if amt else None,
-                           country=sl.get("country"), limit=20)
-        found = [t for t in found if t["transaction_type"] in DISPUTABLE_TYPES][:5]
+                           merchant=merchants[0] if len(merchants) == 1 else None,
+                           country=sl.get("country"), limit=50)
+        found = [t for t in found if t["transaction_type"] in DISPUTABLE_TYPES
+                 and (not merchants or t.get("merchant_name") in merchants)]
+        found = rank_candidates(found, amt, self.policy.as_of, self.policy.window_days)[:5]
         if not found:
-            return {**self._clarify(s, "no_match"), "detail": "0 candidates"}
+            return {**self._clarify(s, "no_match", awaiting="details"), "detail": "0 candidates"}
         if len(found) == 1:
             return {"next": "decide", "txn": found[0], "candidates": [], "detail": "1 candidate"}
         return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "candidates": found,
@@ -469,6 +481,19 @@ HANDOFF_REPLIES = {"tool_failure", "out_of_scope", "security_lockout", "consent_
 # Intenciones de conversación que siempre pasan a un humano, con su motivo de handoff (#40).
 CONVERSATION_HANDOFFS = {"human_request": "customer_request", "account_takeover": "account_takeover",
                          "cancel_dispute": "cancel_dispute"}
+
+
+def rank_candidates(found: list[dict], amount: float | None, as_of: dt.date, window_days: int) -> list[dict]:
+    """Orden de las candidatas: primero las que la política permite disputar (dentro del plazo de D05), luego la
+    cercanía al monto declarado y, a igualdad, la más reciente. Así "la 1" casi siempre es la correcta y los
+    movimientos que D05 rechazaría quedan al final en vez de mezclarse con los recientes."""
+    def key(t):
+        d = t["transaction_date"]
+        d = d.date() if isinstance(d, dt.datetime) else d
+        too_old = (as_of - d).days > window_days
+        gap = abs(float(t["amount"]) - amount) / amount if amount else 0.0
+        return (too_old, round(gap, 3), -d.toordinal())
+    return sorted(found, key=key)
 
 
 def _confirm_key(action: dict) -> str:

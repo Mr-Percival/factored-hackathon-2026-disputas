@@ -138,7 +138,9 @@ def test_none_of_these_asks_for_another_detail(env):
     tok, th = env.login("CLI-ANA"), env.thread()
     env.agent.chat(th, tok, "me cobraron 350 y no fui yo")
     r = env.agent.chat(th, tok, "ninguna de esas")
-    assert r["outcome"] == "clarify" and r["awaiting"] is None and "otro dato" in r["reply"]
+    assert r["outcome"] == "clarify" and r["awaiting"] == "details" and "otro dato" in r["reply"]
+    r = env.agent.chat(th, tok, "fue el 5 de junio")  # el dato nuevo sigue el mismo reclamo
+    assert r["txn"]["transaction_id"] == "T-ANA-5" and "Confirmas" in r["reply"]
 
 
 # ------------------------------------------------------------------ guard: falsos positivos y ataques de la revisión

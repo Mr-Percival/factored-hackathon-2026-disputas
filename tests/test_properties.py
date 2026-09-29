@@ -42,7 +42,8 @@ from fixture_data import CANARY_MERCHANT, MALICIOUS_MERCHANT
 TTL = 900
 PARTICIPANTS = ("CLI-ANA", "CLI-BETO", "CLI-CARLA")  # CLI-CANARY es señuelo: nunca inicia sesión
 END = "__end__"
-TOOLS = ("get_profile", "list_cards", "search_transactions", "get_transaction", "dispute_history",
+TOOLS = ("get_profile", "list_cards", "search_transactions", "get_transaction", "dispute_history", "list_merchants",
+         "list_disputes",
          "block_card", "open_dispute")
 ACTIONS = ("open_dispute", "block_card")
 
@@ -690,7 +691,7 @@ def test_regression_stale_confirmation_is_not_reused(env):
     """I1. Antes: la pregunta "¿Confirmas?" quedaba pendiente tras un turno no entendido, y un "dale" DOS turnos
     después abría la disputa y bloqueaba la tarjeta, aunque el último mensaje del agente no preguntaba nada."""
     tok, th = env.login("CLI-ANA"), env.thread()
-    assert env.agent.chat(th, tok, "no reconozco un cargo")["awaiting"] == "option"
+    assert env.agent.chat(th, tok, "no reconozco un cargo de 350")["awaiting"] == "option"
     assert "Confirmas" in env.agent.chat(th, tok, "2")["reply"]
     r = env.agent.chat(th, tok, "la número 8")  # no se entiende: el agente responde otra cosa
     assert "Confirmas" not in r["reply"]
@@ -719,7 +720,7 @@ def test_regression_thread_is_bound_to_its_customer(env):
     """I2. Antes: otro cliente con sesión VÁLIDA que usara el id de hilo de Ana veía la lista de movimientos de Ana
     (bastaba con responder una opción inválida: el agente re-listaba los candidatos guardados en el estado)."""
     th = env.thread()
-    r = env.agent.chat(th, env.login("CLI-ANA"), "no reconozco un cargo")
+    r = env.agent.chat(th, env.login("CLI-ANA"), "no reconozco un cargo de 350")  # #41: sin datos ya no lista al azar
     assert "Amazon" in r["reply"]
     r = env.agent.chat(th, env.login("CLI-BETO"), "6")
     assert r["outcome"] == "auth_error" and "Amazon" not in r["reply"] and "Liverpool" not in r["reply"]

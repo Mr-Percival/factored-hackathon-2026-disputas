@@ -27,7 +27,7 @@ dispute:
       explain: "La transacción está pendiente; se puede disputar cuando se asiente."
     - id: D05_too_old
       outcome: reject
-      when: "txn_age_days > 120"
+      when: "txn_age_days > window_days"
       explain: "Supera el plazo de 120 días para disputar."
     - id: H01_customer_not_active
       outcome: handoff
@@ -47,6 +47,8 @@ dispute:
       outcome: handoff
       when: "history.is_repeat_complainer"
       explain: "Cliente con reclamos recientes: requiere revisión humana."
+
+  window_days: 120  # plazo para disputar (D05); también ordena las candidatas: las fuera de plazo van al final
 
   high_amount:  # por moneda, en unidades locales
     USD: 1000

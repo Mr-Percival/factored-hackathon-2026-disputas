@@ -151,6 +151,17 @@ class BankTools:
             return {"complaints_last_90d": r[0] or 0, "is_repeat_complainer": bool(r[1]), "open_dispute_transactions": open_disputes}
         return self._run("dispute_history", {}, fn)
 
+    def list_merchants(self, token: str) -> list[str]:
+        """Comercios distintos en los movimientos de ESTE cliente: el grafo compara el texto contra esta lista
+        acotada por sesión (nunca contra comercios de otros clientes)."""
+        def fn():
+            cid = self.identity.resolve(token).customer_id
+            rows = self._ro_c.execute("""WITH own AS MATERIALIZED (SELECT merchant_name FROM transactions WHERE customer_id = ?)
+                SELECT DISTINCT merchant_name FROM own WHERE merchant_name IS NOT NULL AND merchant_name <> ''
+                ORDER BY 1""", [cid]).fetchall()
+            return [r[0] for r in rows]
+        return self._run("list_merchants", {}, fn)
+
     def list_disputes(self, token: str) -> list[dict]:
         """Disputas abiertas por ESTE cliente (ops). Para "¿en qué va mi disputa?": nunca de otro cliente."""
         def fn():
