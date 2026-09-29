@@ -100,6 +100,7 @@ def run(raw_dir: str, out_db: str, sample_customers: int | None = None, contract
     a la muestra (p. ej. los clientes del guion de demo); si se pasa sin `sample_customers`, solo se cargan esos."""
     contracts = load_contracts(contracts_path)
     norm = contracts.pop("normalize", {})
+    os.makedirs(os.path.dirname(os.path.abspath(out_db)), exist_ok=True)  # la carpeta de salida puede no existir (CI)
     con = duckdb.connect(out_db)
     con.execute("CREATE TABLE IF NOT EXISTS _processed_files (file_id VARCHAR PRIMARY KEY, path VARCHAR, table_name VARCHAR, run_id VARCHAR)")
     run_id = dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]

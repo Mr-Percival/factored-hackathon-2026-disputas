@@ -98,3 +98,10 @@ def test_lookup_indexes_exist_and_survive_incremental_runs(tmp_path):
     idx = {r[0] for r in _q(db, "SELECT index_name FROM duckdb_indexes()")}
     assert idx == {f"idx_{t}_{c}" for t, c in pipeline.LOOKUP_INDEXES.items()}
     assert _q(db, "SELECT count(*) FROM transactions WHERE customer_id = 'CLI-ANA' AND transaction_id = 'T-ANA-10'") == [(1,)]
+
+
+def test_pipeline_creates_missing_output_dir(tmp_path):
+    raw, out = tmp_path / "raw", tmp_path / "no" / "existe" / "s.duckdb"
+    write_fixture(str(raw))
+    pipeline.run(str(raw), str(out))
+    assert out.exists()
