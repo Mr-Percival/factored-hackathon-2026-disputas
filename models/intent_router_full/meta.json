@@ -1,0 +1,51 @@
+{
+  "version": "intent-v2-full",
+  "model_id": "char2-5-tfidf+qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q@faf4aa42",
+  "candidate": "char+minilm",
+  "C": 30.0,
+  "corpus_sha256": "8d3421c48e00014f62167d118f06066d53e613f4c95017f4ab0e57f98237d267",
+  "train_authors": [
+    "A",
+    "B",
+    "E",
+    "F"
+  ],
+  "n_train": 800,
+  "trained_by": "scripts/train_intent.py",
+  "target_wrong_action": 0.01,
+  "threshold_rule": "máxima cobertura con acción equivocada ≤ 1% en validación",
+  "sklearn": "1.9.1",
+  "numpy": "2.5.3",
+  "labels": [
+    "dispute_charge",
+    "block_card",
+    "account_takeover",
+    "human_request",
+    "dispute_status",
+    "cancel_dispute",
+    "out_of_scope",
+    "closing",
+    "unknown"
+  ],
+  "temperature": 0.6840179852268424,
+  "threshold": 0.76,
+  "encoder": {
+    "type": "concat",
+    "parts": [
+      {
+        "type": "char",
+        "n_min": 2,
+        "n_max": 5,
+        "dim": 6741
+      },
+      {
+        "type": "onnx",
+        "model_id": "qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q",
+        "revision": "faf4aa4225822f3bc6376869cb1164e8e3feedd0",
+        "model_file": "model_optimized.onnx",
+        "prefix": "",
+        "max_len": 128
+      }
+    ]
+  }
+}

@@ -140,9 +140,11 @@ class Runtime:
         return bool(self.policy.version)
 
     def _new_agent(self) -> Agent:
-        # LLM apagado a propósito: reglas + plantillas (sin llamadas a proveedores pagos).
+        # LLM apagado a propósito (sin proveedores pagos). BANKAGENT_ROUTER=embeddings activa el router aprendido local.
         tools = self.tools.fork_ops("s_" + secrets.token_hex(8))
-        return build_agent(tools, router="rules", writer="templates", policy=self.policy, audit=self.audit)
+        router = os.environ.get("BANKAGENT_ROUTER", "rules")
+        router = router if router in ("rules", "embeddings") else "rules"  # nunca LLM ni el modelo full en la demo
+        return build_agent(tools, router=router, writer="templates", policy=self.policy, audit=self.audit)
 
     # ------------------------------------------------------------------ sesiones
     def customer_exists(self, customer_id: str) -> bool:

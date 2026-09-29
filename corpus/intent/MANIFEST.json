@@ -1,0 +1,14 @@
+{
+  "frozen_at": "2026-09-29T01:25:19",
+  "note": "Hashes del test congelados antes de cualquier ajuste. train_intent.py se niega a correr si cambian.",
+  "test_files": {
+    "corpus/intent/review/adjudication.jsonl": "ce9e18b341dd2bf20b681f22ba2dc5715612f5e403dbcccc7e6fe5aa09032443",
+    "corpus/intent/review/fourth_annotator.jsonl": "166a31381c31bcdaef1b8bb88b6e25756675d72c82d4c8323dbfa79ecd69bc7b",
+    "corpus/intent/review/schema_v2_relabel.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "corpus/intent/review/second_annotator.jsonl": "23afc7be152d2188d7d291043728f113e63caed72325dff5595031b6fbe05508",
+    "corpus/intent/review/third_annotator.jsonl": "59a7b6b63c6c7a3e1bb30c0ac2ce3c369f14da15dd883e298d202b024f47f025",
+    "corpus/intent/test/author_C.jsonl": "954da733af71efb7e3d8e56af94ea95866df92bdf89efbe96d61a56461bb607b",
+    "corpus/intent/test/author_G.jsonl": "24ade0ad192ffecfbe161a9863acafd94ee3df04d742cd7c54de075f418a8109",
+    "corpus/intent/test_style/author_D.jsonl": "051b5c81ffd9f1ae6d783e0346f33a5435be5a05cd0bcb2a37e965a10f676aac"
+  }
+}

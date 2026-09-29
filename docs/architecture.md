@@ -61,7 +61,7 @@ flowchart LR
 |---|---|---|
 | ¿La sesión es válida? ¿El dato es suyo? | `identity.py` + `tools.py` | Código |
 | ¿El mensaje es un ataque? | `guard.py` (`InjectionDetector`) | Patrones (default) · clasificador ONNX opt-in, evaluado en [ADR 0005](adr/0005-deteccion-inyeccion.md) |
-| ¿Qué quiere el cliente? | `Router` (interfaz) | Reglas (línea base) · LLM · otro modelo |
+| ¿Qué quiere el cliente? | `Router` (interfaz) | Reglas (línea base) · router aprendido local: intención con modelo, slots y consentimiento con reglas ([ADR 0009](adr/0009-router-aprendido.md)) · LLM |
 | ¿Cuál es la transacción? | `search_transactions` + aclaración | Código; pregunta si hay más de una |
 | ¿Procede la disputa o va a un humano? | `policy.yaml` | Reglas con ID |
 | ¿Ejecutar la acción? | Cliente (confirmación) + `tools.py` (verificación) | Humano + código |

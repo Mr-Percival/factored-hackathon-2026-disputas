@@ -90,14 +90,19 @@ def _b1() -> System:
                   meta={"description": "B1: automatización ingenua, sin política ni confirmación"})
 
 
-def _embeddings() -> System:
-    """Router aprendido por embeddings (#42). Cuando exista, completar aquí la importación."""
-    try:
-        from ..embeddings_router import EmbeddingsRouter  # type: ignore[import-not-found]
-    except ImportError as e:
-        raise RuntimeError("El router por embeddings (#42) todavía no está en el repo") from e
-    return System("embeddings", EmbeddingsRouter(), TemplateWriter(),
-                  meta={"description": "Agente con router por embeddings + plantillas"})
+def _embeddings(full: bool = False) -> System:
+    """Router aprendido (#42, ADR 0009): intención con modelo local, slots y contexto con RuleRouter.
+    Si el modelo no carga NO se evalúa: caería a reglas y el reporte mezclaría sistemas (igual que con el LLM)."""
+    from ..factory import shared_router  # una carga por proceso: el runner crea un Agent por caso
+    name = "embeddings_full" if full else "embeddings"
+    router = shared_router(name)
+    if getattr(router, "model", None) is None or router.model() is None:
+        raise RuntimeError(f"El router aprendido no cargó: {getattr(router, '_error', 'falta numpy (extra ml)')}")
+    # uses_model=False: el modelo es local (sin proveedor ni tokens): el costo de inferencia medido es US$ 0
+    return System(name, router, TemplateWriter(), uses_model=False,
+                  meta={"description": f"Agente con router aprendido ({router.model().model_id}) + plantillas",
+                        "router_model": router.model().model_id,
+                        "router_prompt_version": router.model().meta.get("version")})
 
 
 SYSTEMS: dict[str, Callable[[], System]] = {
@@ -106,6 +111,7 @@ SYSTEMS: dict[str, Callable[[], System]] = {
     "rules": lambda: System("rules", RuleRouter(), TemplateWriter(), uses_model=False,
                             meta={"description": "Agente v1: grafo + RuleRouter + plantillas (política y confirmación)"}),
     "embeddings": _embeddings,
+    "embeddings_full": lambda: _embeddings(full=True),
     "llm": lambda: _llm_system(router=True, writer=True),
     "llm_router": lambda: _llm_system(router=True, writer=False),
 }

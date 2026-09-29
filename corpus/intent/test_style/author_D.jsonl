@@ -1,0 +1,185 @@
+{"text": "este oye pues fíjate que ayer fui al oxxo no perdón fue antier y compré unas cosas normales y luego veo en la app un cargo de trescientos cincuenta pesos de una tienda que ni conozco o sea yo no fui quiero reclamar eso", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-001", "hard_negative": false, "style": "voz"}
+{"text": "cargo raro", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-001", "hard_negative": false, "style": "terse"}
+{"text": "Estimados, por medio de la presente manifiesto que no reconozco el cargo por trescientos cincuenta pesos aplicado a mi cuenta el pasado martes, y solicito su aclaración.", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-001", "hard_negative": false, "style": "formal"}
+{"text": "eh buenas mire resulta que me cobraron dos veces la suscripción de netflix o sea no perdón de spotify y eso fue el martes no el miércoles el caso es que me sale doble cobro de veintidós mil pesos", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-002", "hard_negative": false, "style": "voz"}
+{"text": "cobro doble", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-002", "hard_negative": false, "style": "terse"}
+{"text": "Cordial saludo. Me permito solicitar la revisión de un cobro duplicado por veintidós mil pesos correspondiente a una suscripción mensual.", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-002", "hard_negative": false, "style": "formal"}
+{"text": "mirá che tipo estaba en el cajero de la calle corrientes no perdón en el de avenida cabildo y puse la tarjeta pedí veinte mil pesos y la máquina no me dio nada pero el débito me apareció igual", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-003", "hard_negative": false, "style": "voz"}
+{"text": "cajero no dio plata", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-003", "hard_negative": false, "style": "terse"}
+{"text": "Estimados: por la presente informo que el cajero automático no me entregó el efectivo solicitado y, sin embargo, se debitó el importe de mi cuenta. Solicito el reintegro.", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-003", "hard_negative": false, "style": "formal"}
+{"text": "então né eu comprei um tênis num site faz tipo um mês e nunca chegou e o site sumiu do ar só que a cobrança de oitenta e nove reais veio na fatura queria contestar isso", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-004", "hard_negative": false, "style": "voz"}
+{"text": "compra não chegou", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-004", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, venho por meio desta contestar a cobrança no valor de oitenta e nove reais referente a produto que não foi entregue.", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-004", "hard_negative": false, "style": "formal"}
+{"text": "eu cancelei a academia em março não peraí em abril e ainda assim continuam cobrando cento e vinte reais todo mês aí eu queria ver isso da cobrança", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-005", "hard_negative": false, "style": "voz"}
+{"text": "cobrança indevida", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-005", "hard_negative": false, "style": "terse"}
+{"text": "Prezado atendimento, solicito o estorno das mensalidades cobradas após o cancelamento do serviço, que foi formalizado no mês passado.", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-005", "hard_negative": false, "style": "formal"}
+{"text": "bueno pues mira yo di de baja el seguro del celular hace como tres meses eh o sea cuatro y me siguen descontando ciento ochenta pesos cada quincena ya me cansé quiero que revisen ese cargo", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-006", "hard_negative": false, "style": "voz"}
+{"text": "me siguen cobrando", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-006", "hard_negative": false, "style": "terse"}
+{"text": "A quien corresponda: solicito la cancelación de un cargo recurrente de ciento ochenta pesos por un servicio que ya fue dado de baja.", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-006", "hard_negative": false, "style": "formal"}
+{"text": "parce imagínese que estaba mirando el extracto y hay un pago en una tienda de Medellín por ciento cuarenta mil pesos y yo estoy en Bogotá hace semanas o sea no fui yo ese pago", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-007", "hard_negative": false, "style": "voz"}
+{"text": "no fui yo", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-007", "hard_negative": false, "style": "terse"}
+{"text": "Respetados señores, desconozco la transacción por ciento cuarenta mil pesos realizada en Medellín, ciudad en la que no me encuentro.", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-007", "hard_negative": false, "style": "formal"}
+{"text": "che mirá me llegó el resumen y aparece un cobro de rappi por ocho mil quinientos pesos no perdón nueve mil y yo el pedido lo cancelé nunca llegó nada", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-008", "hard_negative": false, "style": "voz"}
+{"text": "pedido que nunca llegó y me cobraron", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-008", "hard_negative": false, "style": "terse"}
+{"text": "Estimados, me dirijo a ustedes para impugnar un consumo por nueve mil pesos correspondiente a un pedido cancelado que no fue entregado.", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-008", "hard_negative": false, "style": "formal"}
+{"text": "oi eh mirá tipo no reconozco un cargo de cincuenta dólares na minha tarjeta então queria contestar esse débito né", "intent": "dispute_charge", "dialect": "mix", "family": "D-009", "hard_negative": false, "style": "voz"}
+{"text": "cobrança estranha cargo raro", "intent": "dispute_charge", "dialect": "mix", "family": "D-009", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, no reconozco una cobrança de cincuenta dólares en mi cuenta; solicito revisión.", "intent": "dispute_charge", "dialect": "mix", "family": "D-009", "hard_negative": false, "style": "formal"}
+{"text": "pues fíjate que el súper me cobró el mismo ticket dos veces o sea pasé la tarjeta una vez y me salen dos cargos de mil doscientos pesos y la cajera dijo que hablara al banco", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-010", "hard_negative": false, "style": "voz"}
+{"text": "dos cargos iguales", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-010", "hard_negative": false, "style": "terse"}
+{"text": "Solicito respetuosamente la aclaración de dos cargos idénticos por mil doscientos pesos efectuados en el mismo establecimiento el mismo día.", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-010", "hard_negative": false, "style": "formal"}
+{"text": "mire yo pagué un hotel con la tarjeta y me dijeron que eran trescientos mil pero en el extracto salen trescientos ochenta mil eh o sea me cobraron de más quiero que lo revisen", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-011", "hard_negative": false, "style": "voz"}
+{"text": "monto distinto al pagado", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-011", "hard_negative": false, "style": "terse"}
+{"text": "Cordialmente solicito la revisión de un cobro superior al valor acordado en un establecimiento hotelero, con una diferencia de ochenta mil pesos.", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-011", "hard_negative": false, "style": "formal"}
+{"text": "mirá yo no sé qué es esto pero me aparece un débito de una app de juegos que jamás instalé por cuatro mil pesos y así hace dos meses viene saliendo tipo todos los meses", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-012", "hard_negative": false, "style": "voz"}
+{"text": "débito que no hice", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-012", "hard_negative": false, "style": "terse"}
+{"text": "Estimados: desconozco un débito mensual de cuatro mil pesos de una aplicación de juegos; solicito su reversión.", "intent": "dispute_charge", "dialect": "es-AR", "family": "D-012", "hard_negative": false, "style": "formal"}
+{"text": "fui no restaurante ontem não peraí foi anteontem e o garçom passou a maquininha e depois me cobraram cento e cinquenta reais só que a conta era cem então tem cinquenta a mais né", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-013", "hard_negative": false, "style": "voz"}
+{"text": "valor cobrado errado", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-013", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, solicito a revisão de uma transação de cento e cinquenta reais cujo valor diverge do comprovante que recebi no estabelecimento.", "intent": "dispute_charge", "dialect": "pt-BR", "family": "D-013", "hard_negative": false, "style": "formal"}
+{"text": "ola eu vi um débito no meu extracto que no lo hice eh de setenta reais e queria reclamar isso por favor", "intent": "dispute_charge", "dialect": "mix", "family": "D-014", "hard_negative": false, "style": "voz"}
+{"text": "no reconozco ese débito", "intent": "dispute_charge", "dialect": "mix", "family": "D-014", "hard_negative": false, "style": "terse"}
+{"text": "me robaron la tarjeta y ya vi que con ella hicieron una compra de dos mil pesos en gasolinera que yo no hice entonces qué hago", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-015", "hard_negative": true, "style": "voz"}
+{"text": "perdí la tarjeta y hay un cargo que no hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-015", "hard_negative": true, "style": "terse"}
+{"text": "Informo que mi tarjeta fue sustraída y que se realizó un consumo de dos mil pesos que no reconozco; solicito su revisión.", "intent": "dispute_charge", "dialect": "es-MX", "family": "D-015", "hard_negative": true, "style": "formal"}
+{"text": "me llegó una alerta de compra en Amazon por cien dólares y yo no compré nada eh sea que no reconozco eso y ya llamé y nada", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-016", "hard_negative": true, "style": "voz"}
+{"text": "compra que no hice", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-016", "hard_negative": true, "style": "terse"}
+{"text": "Cordialmente reporto un cargo de cien dólares que no autoricé.", "intent": "dispute_charge", "dialect": "es-CO", "family": "D-016", "hard_negative": true, "style": "formal"}
+{"text": "eh pues oye creo que dejé la cartera en el camión o sea en el metro no sé ya me di cuenta hace rato y no la encuentro quiero que me bloqueen la tarjeta por favor", "intent": "block_card", "dialect": "es-MX", "family": "B-001", "hard_negative": false, "style": "voz"}
+{"text": "bloquear tarjeta", "intent": "block_card", "dialect": "es-MX", "family": "B-001", "hard_negative": false, "style": "terse"}
+{"text": "Estimados, por medio de la presente solicito el bloqueo inmediato de mi tarjeta de débito por extravío.", "intent": "block_card", "dialect": "es-MX", "family": "B-001", "hard_negative": false, "style": "formal"}
+{"text": "ay no mire me robaron el bolso en el bus del transmilenio y ahí iba todo o sea la billetera con la tarjeta pues necesito que la bloqueen ya", "intent": "block_card", "dialect": "es-CO", "family": "B-002", "hard_negative": false, "style": "voz"}
+{"text": "tarjeta robada", "intent": "block_card", "dialect": "es-CO", "family": "B-002", "hard_negative": false, "style": "terse"}
+{"text": "Cordial saludo, solicito el bloqueo de mi tarjeta crédito por hurto del bolso.", "intent": "block_card", "dialect": "es-CO", "family": "B-002", "hard_negative": false, "style": "formal"}
+{"text": "mirá me choreé la billetera en el subte no perdón me la chorearon y no sé qué hacer che dale bloqueame la tarjeta que no quiero que la usen", "intent": "block_card", "dialect": "es-AR", "family": "B-003", "hard_negative": false, "style": "voz"}
+{"text": "bloqueá la tarjeta", "intent": "block_card", "dialect": "es-AR", "family": "B-003", "hard_negative": false, "style": "terse"}
+{"text": "Estimados: solicito el bloqueo preventivo de mi tarjeta, dado que extravié la billetera esta mañana.", "intent": "block_card", "dialect": "es-AR", "family": "B-003", "hard_negative": false, "style": "formal"}
+{"text": "então né eu perdi o cartão no show ontem à noite eu acho tipo não sei se caiu ou roubaram mas não achei mais eu queria bloquear ele", "intent": "block_card", "dialect": "pt-BR", "family": "B-004", "hard_negative": false, "style": "voz"}
+{"text": "bloquear cartão", "intent": "block_card", "dialect": "pt-BR", "family": "B-004", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, solicito o bloqueio imediato do meu cartão de crédito, pois o extraviei.", "intent": "block_card", "dialect": "pt-BR", "family": "B-004", "hard_negative": false, "style": "formal"}
+{"text": "meu filho mexeu na minha carteira e acho que o cartão sumiu talvez esteja em casa mas por segurança queria cancelar o cartão sabe", "intent": "block_card", "dialect": "pt-BR", "family": "B-005", "hard_negative": false, "style": "voz"}
+{"text": "cancelar cartão", "intent": "block_card", "dialect": "pt-BR", "family": "B-005", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, por segurança solicito o cancelamento do meu cartão, que não localizo desde ontem.", "intent": "block_card", "dialect": "pt-BR", "family": "B-005", "hard_negative": false, "style": "formal"}
+{"text": "oye una duda ya no voy a usar esta tarjeta la que tiene el chip roto o sea la vieja quiero cancelarla pero primero congelarla no sé cómo se hace", "intent": "block_card", "dialect": "es-MX", "family": "B-006", "hard_negative": false, "style": "voz"}
+{"text": "congelar tarjeta", "intent": "block_card", "dialect": "es-MX", "family": "B-006", "hard_negative": false, "style": "terse"}
+{"text": "hola mirá eu perdi mi tarjeta en la playa entonces bloqueia por favor tipo agora", "intent": "block_card", "dialect": "mix", "family": "B-007", "hard_negative": false, "style": "voz"}
+{"text": "bloquear cartão tarjeta", "intent": "block_card", "dialect": "mix", "family": "B-007", "hard_negative": false, "style": "terse"}
+{"text": "uy me parece que alguien me vio digitar la clave en el cajero y ahora tengo miedo entonces mejor bloquéeme la tarjeta mientras tanto", "intent": "block_card", "dialect": "es-CO", "family": "B-008", "hard_negative": false, "style": "voz"}
+{"text": "congelen mi tarjeta", "intent": "block_card", "dialect": "es-CO", "family": "B-008", "hard_negative": false, "style": "terse"}
+{"text": "Solicito el bloqueo temporal de mi tarjeta por sospecha de que mi clave fue observada.", "intent": "block_card", "dialect": "es-CO", "family": "B-008", "hard_negative": false, "style": "formal"}
+{"text": "oye pues mira me llamó un señor que dijo que era del banco y me pidió el código que me llegó por mensaje y pues se lo di y ahorita no puedo entrar a mi app o sea creo que me hackearon", "intent": "account_takeover", "dialect": "es-MX", "family": "A-001", "hard_negative": false, "style": "voz"}
+{"text": "me hackearon la cuenta", "intent": "account_takeover", "dialect": "es-MX", "family": "A-001", "hard_negative": false, "style": "terse"}
+{"text": "Estimados, informo que proporcioné un código de verificación a una persona que se identificó como personal del banco y que ahora no puedo acceder a mi banca en línea.", "intent": "account_takeover", "dialect": "es-MX", "family": "A-001", "hard_negative": false, "style": "formal"}
+{"text": "mire pues me cambiaron la clave de la app yo no fui y además me llegó un correo de que cambiaron el número de celular o sea alguien entró a mi cuenta", "intent": "account_takeover", "dialect": "es-CO", "family": "A-002", "hard_negative": false, "style": "voz"}
+{"text": "alguien entró a mi cuenta", "intent": "account_takeover", "dialect": "es-CO", "family": "A-002", "hard_negative": false, "style": "terse"}
+{"text": "Cordial saludo. Alguien modificó mi contraseña y mi número de teléfono sin mi autorización; solicito atención urgente.", "intent": "account_takeover", "dialect": "es-CO", "family": "A-002", "hard_negative": false, "style": "formal"}
+{"text": "che mirá mi celular se quedó sin señal de golpe hace tres horas y ahora me dicen que me hicieron un cambio de chip no perdón de línea y entraron a mi home banking", "intent": "account_takeover", "dialect": "es-AR", "family": "A-003", "hard_negative": false, "style": "voz"}
+{"text": "me clonaron el chip", "intent": "account_takeover", "dialect": "es-AR", "family": "A-003", "hard_negative": false, "style": "terse"}
+{"text": "Estimados: sospecho de un cambio de SIM no autorizado y de accesos ajenos a mi banca en línea.", "intent": "account_takeover", "dialect": "es-AR", "family": "A-003", "hard_negative": false, "style": "formal"}
+{"text": "então eu recebi um SMS falando que era do banco cliquei no link e coloquei minha senha né aí agora tem gente mexendo na minha conta pelo aplicativo acho que caí num golpe", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-004", "hard_negative": false, "style": "voz"}
+{"text": "caí num golpe de phishing", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-004", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, informo que fui vítima de golpe por mensagem falsa e desconfio que terceiros acessaram meu aplicativo bancário.", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-004", "hard_negative": false, "style": "formal"}
+{"text": "hola eh alguien cambió mi senha y mi email do banco no puedo entrar más me hackearon", "intent": "account_takeover", "dialect": "mix", "family": "A-005", "hard_negative": false, "style": "voz"}
+{"text": "acceso no autorizado", "intent": "account_takeover", "dialect": "mix", "family": "A-005", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, alguien accedió a mi cuenta sin permiso.", "intent": "account_takeover", "dialect": "mix", "family": "A-005", "hard_negative": false, "style": "formal"}
+{"text": "mira este no quiero hablar con el robot o sea de verdad ya me cansé de que me contesten máquinas quiero que me atienda una persona", "intent": "human_request", "dialect": "es-MX", "family": "H-001", "hard_negative": false, "style": "voz"}
+{"text": "asesor", "intent": "human_request", "dialect": "es-MX", "family": "H-001", "hard_negative": false, "style": "terse"}
+{"text": "Estimados, agradeceré que me comuniquen con un ejecutivo de atención para tratar un asunto personalmente.", "intent": "human_request", "dialect": "es-MX", "family": "H-001", "hard_negative": false, "style": "formal"}
+{"text": "buenas eh sí mire quisiera que me llamara alguien del banco un asesor pues o sea no un bot por favor", "intent": "human_request", "dialect": "es-CO", "family": "H-002", "hard_negative": false, "style": "voz"}
+{"text": "persona real", "intent": "human_request", "dialect": "es-CO", "family": "H-002", "hard_negative": false, "style": "terse"}
+{"text": "Respetados señores, solicito que un asesor humano se comunique conmigo telefónicamente a la brevedad.", "intent": "human_request", "dialect": "es-CO", "family": "H-002", "hard_negative": false, "style": "formal"}
+{"text": "mirá pasame con alguien de carne y hueso porque con el bot no me entiendo nada tipo no quiero hablar más con esto", "intent": "human_request", "dialect": "es-AR", "family": "H-003", "hard_negative": false, "style": "voz"}
+{"text": "un humano por favor", "intent": "human_request", "dialect": "es-AR", "family": "H-003", "hard_negative": false, "style": "terse"}
+{"text": "Estimados: solicito ser derivado a un operador humano para continuar con mi consulta.", "intent": "human_request", "dialect": "es-AR", "family": "H-003", "hard_negative": false, "style": "formal"}
+{"text": "oi então eu queria falar com um atendente de verdade né não quero robô me passa pra alguém por favor", "intent": "human_request", "dialect": "pt-BR", "family": "H-004", "hard_negative": false, "style": "voz"}
+{"text": "atendente", "intent": "human_request", "dialect": "pt-BR", "family": "H-004", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, solicito o encaminhamento para um atendente humano.", "intent": "human_request", "dialect": "pt-BR", "family": "H-004", "hard_negative": false, "style": "formal"}
+{"text": "moço eu já tentei de tudo com esse robô então vou pedir uma pessoa mesmo", "intent": "human_request", "dialect": "pt-BR", "family": "H-005", "hard_negative": false, "style": "voz"}
+{"text": "quero falar com humano", "intent": "human_request", "dialect": "pt-BR", "family": "H-005", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, prefiro ser atendido por uma pessoa e não por um assistente virtual.", "intent": "human_request", "dialect": "pt-BR", "family": "H-005", "hard_negative": false, "style": "formal"}
+{"text": "mirá quero falar com um agente tipo una persona nao un robot", "intent": "human_request", "dialect": "mix", "family": "H-006", "hard_negative": false, "style": "voz"}
+{"text": "agente humano", "intent": "human_request", "dialect": "mix", "family": "H-006", "hard_negative": false, "style": "terse"}
+{"text": "Solicito hablar com um ejecutivo humano, gracias.", "intent": "human_request", "dialect": "mix", "family": "H-006", "hard_negative": false, "style": "formal"}
+{"text": "oye este quiero saber cuánto tengo de saldo en la cuenta de nómina o sea nada más ver cuánto me queda", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-001", "hard_negative": false, "style": "voz"}
+{"text": "saldo", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-001", "hard_negative": false, "style": "terse"}
+{"text": "Estimados, agradeceré me informen el saldo disponible de mi cuenta de ahorro.", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-001", "hard_negative": false, "style": "formal"}
+{"text": "mire quería preguntar si me pueden subir el cupo de la tarjeta no perdón el límite o sea que me lo aumenten un poquito", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-002", "hard_negative": false, "style": "voz"}
+{"text": "aumentar cupo", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-002", "hard_negative": false, "style": "terse"}
+{"text": "Cordialmente solicito el incremento del límite de crédito de mi tarjeta.", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-002", "hard_negative": false, "style": "formal"}
+{"text": "mirá tipo quiero saber cuánto cobran de comisión por mantener la cuenta y por las transferencias eso nomás", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-003", "hard_negative": true, "style": "voz"}
+{"text": "comisiones", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-003", "hard_negative": true, "style": "terse"}
+{"text": "Estimados: solicito información sobre las comisiones vigentes de mantenimiento de cuenta.", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-003", "hard_negative": true, "style": "formal"}
+{"text": "então eu queria pedir um empréstimo pessoal de cinco mil reais né queria saber a taxa de juros e em quantas vezes dá pra pagar", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-004", "hard_negative": false, "style": "voz"}
+{"text": "empréstimo", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-004", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, gostaria de informações sobre condições de crédito pessoal e taxas de juros.", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-004", "hard_negative": false, "style": "formal"}
+{"text": "oye ya me llegó mi tarjeta nueva pero está bloqueada no sé cómo la desbloqueo o sea la activo tú sabes", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-005", "hard_negative": true, "style": "voz"}
+{"text": "desbloquear tarjeta", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-005", "hard_negative": true, "style": "terse"}
+{"text": "Estimados, solicito instrucciones para desbloquear mi tarjeta recién recibida.", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-005", "hard_negative": true, "style": "formal"}
+{"text": "eh mire se me olvidó la clave de la app y pues no me acuerdo ni del usuario o sea no me la sé quiero recuperarla", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-006", "hard_negative": true, "style": "voz"}
+{"text": "olvidé mi clave", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-006", "hard_negative": true, "style": "terse"}
+{"text": "Solicito restablecer mi contraseña de la banca móvil, la olvidé.", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-006", "hard_negative": true, "style": "formal"}
+{"text": "mirá quiero hacer una transferencia de cincuenta mil pesos a una cuenta de mi hermano y no me sale el límite diario o no sé", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-007", "hard_negative": false, "style": "voz"}
+{"text": "transferencia", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-007", "hard_negative": false, "style": "terse"}
+{"text": "Estimados: solicito asistencia para realizar una transferencia interbancaria.", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-007", "hard_negative": false, "style": "formal"}
+{"text": "oi eu preciso do extrato dos últimos três meses pra levar no aluguel né dá pra mandar por aqui", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-008", "hard_negative": false, "style": "voz"}
+{"text": "extrato", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-008", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, solicito o envio do extrato bancário dos últimos três meses.", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-008", "hard_negative": false, "style": "formal"}
+{"text": "reconozco el cargo pero la neta no puedo pagarlo todo de una entonces quiero pasarlo a meses sin intereses o sea diferirlo", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-009", "hard_negative": true, "style": "voz"}
+{"text": "pagar en cuotas", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-009", "hard_negative": true, "style": "terse"}
+{"text": "pues la verdad estoy muy inconforme con la atención de la sucursal del centro porque me hicieron esperar tres horas y el señor fue grosero o sea quiero poner una queja", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-010", "hard_negative": false, "style": "voz"}
+{"text": "queja por mal servicio", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-010", "hard_negative": false, "style": "terse"}
+{"text": "Respetados señores, presento formal reclamo por el trato recibido en la oficina del centro.", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-010", "hard_negative": false, "style": "formal"}
+{"text": "queria abrir uma conta pra minha filha que tem dezesseis anos tipo uma conta digital sabe como faz", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-011", "hard_negative": false, "style": "voz"}
+{"text": "abrir conta", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-011", "hard_negative": false, "style": "terse"}
+{"text": "hola eh queria saber si tengo seguro de vida no cartão ou como contrato um", "intent": "out_of_scope", "dialect": "mix", "family": "O-012", "hard_negative": false, "style": "voz"}
+{"text": "seguros", "intent": "out_of_scope", "dialect": "mix", "family": "O-012", "hard_negative": false, "style": "terse"}
+{"text": "Solicito información sobre seguros disponibles.", "intent": "out_of_scope", "dialect": "mix", "family": "O-012", "hard_negative": false, "style": "formal"}
+{"text": "cambiar el PIN de la tarjeta", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-013", "hard_negative": true, "style": "terse"}
+{"text": "mirá se me olvidó el PIN del cajero no el de la app el del plástico y quiero cambiarlo", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-013", "hard_negative": true, "style": "voz"}
+{"text": "quiero invertir unos veinte mil pesos en algo seguro o sea cetes o un fondo no sé qué me recomiendan", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-014", "hard_negative": false, "style": "voz"}
+{"text": "inversiones", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-014", "hard_negative": false, "style": "terse"}
+{"text": "ok este listo pues muchas gracias ya con eso estoy bien no necesito nada más", "intent": "closing", "dialect": "es-MX", "family": "C-001", "hard_negative": false, "style": "voz"}
+{"text": "gracias", "intent": "closing", "dialect": "es-MX", "family": "C-001", "hard_negative": false, "style": "terse"}
+{"text": "Agradezco su atención; no requiero nada más por el momento. Quedo atento.", "intent": "closing", "dialect": "es-MX", "family": "C-001", "hard_negative": false, "style": "formal"}
+{"text": "tá bom então era só isso mesmo muito obrigado tchau", "intent": "closing", "dialect": "pt-BR", "family": "C-002", "hard_negative": false, "style": "voz"}
+{"text": "valeu", "intent": "closing", "dialect": "pt-BR", "family": "C-002", "hard_negative": false, "style": "terse"}
+{"text": "dale genial eso era todo gracias che chau", "intent": "closing", "dialect": "es-AR", "family": "C-003", "hard_negative": false, "style": "voz"}
+{"text": "listo chau", "intent": "closing", "dialect": "es-AR", "family": "C-003", "hard_negative": false, "style": "terse"}
+{"text": "listo mil gracias eso era todo que pena la molestia", "intent": "closing", "dialect": "es-CO", "family": "C-004", "hard_negative": false, "style": "voz"}
+{"text": "muchas gracias", "intent": "closing", "dialect": "es-CO", "family": "C-004", "hard_negative": false, "style": "terse"}
+{"text": "hola buenas tardes eh este quería ver si me podían ayudar con una cosa pero ahorita no me acuerdo bien qué era", "intent": "unknown", "dialect": "es-MX", "family": "U-001", "hard_negative": false, "style": "voz"}
+{"text": "hola", "intent": "unknown", "dialect": "es-MX", "family": "U-001", "hard_negative": false, "style": "terse"}
+{"text": "Buen día, deseo realizar una consulta.", "intent": "unknown", "dialect": "es-MX", "family": "U-001", "hard_negative": false, "style": "formal"}
+{"text": "eh pues tengo un problema o sea como un problema pero no sé bien cómo explicarlo", "intent": "unknown", "dialect": "es-CO", "family": "U-002", "hard_negative": false, "style": "voz"}
+{"text": "ayuda", "intent": "unknown", "dialect": "es-CO", "family": "U-002", "hard_negative": false, "style": "terse"}
+{"text": "Cordial saludo, tengo una inquietud.", "intent": "unknown", "dialect": "es-CO", "family": "U-002", "hard_negative": false, "style": "formal"}
+{"text": "che qué hora es allá o sea tipo qué clima hace en Mendoza hoy", "intent": "unknown", "dialect": "es-AR", "family": "U-003", "hard_negative": false, "style": "voz"}
+{"text": "qué hora es", "intent": "unknown", "dialect": "es-AR", "family": "U-003", "hard_negative": false, "style": "terse"}
+{"text": "oi então eu tô aqui né tipo queria uma coisa mas nem sei", "intent": "unknown", "dialect": "pt-BR", "family": "U-004", "hard_negative": false, "style": "voz"}
+{"text": "oi", "intent": "unknown", "dialect": "pt-BR", "family": "U-004", "hard_negative": false, "style": "terse"}
+{"text": "Prezados, gostaria de tirar uma dúvida.", "intent": "unknown", "dialect": "pt-BR", "family": "U-004", "hard_negative": false, "style": "formal"}
+{"text": "asdfg eh hola hola hmm", "intent": "unknown", "dialect": "mix", "family": "U-005", "hard_negative": false, "style": "voz"}
+{"text": "???", "intent": "unknown", "dialect": "mix", "family": "U-005", "hard_negative": false, "style": "terse"}
+{"text": "oye me recomiendas una receta de mole poblano es que tengo visitas mañana", "intent": "unknown", "dialect": "es-MX", "family": "U-006", "hard_negative": false, "style": "voz"}
+{"text": "cuál es la capital de Perú", "intent": "unknown", "dialect": "es-MX", "family": "U-006", "hard_negative": false, "style": "terse"}
+{"text": "quiero que me envíen el plástico nuevo a otra dirección porque me mudé o sea a un apartamento en el norte", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-015", "hard_negative": false, "style": "voz"}
+{"text": "envío de tarjeta", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-015", "hard_negative": false, "style": "terse"}
+{"text": "Solicito el envío de mi tarjeta de reposición a mi nuevo domicilio.", "intent": "out_of_scope", "dialect": "es-CO", "family": "O-015", "hard_negative": false, "style": "formal"}
+{"text": "quero aumentar o limite do cartão porque vou viajar mês que vem né", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-016", "hard_negative": false, "style": "voz"}
+{"text": "aumentar limite", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-016", "hard_negative": false, "style": "terse"}
+{"text": "cuánto cobran por retirar en cajeros de otro banco", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-017", "hard_negative": false, "style": "voz"}
+{"text": "comisión cajero", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-017", "hard_negative": false, "style": "terse"}
+{"text": "mirá quiero saber la tasa del préstamo personal tipo en cuántas cuotas me lo dan", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-018", "hard_negative": false, "style": "voz"}
+{"text": "tasa préstamo", "intent": "out_of_scope", "dialect": "es-AR", "family": "O-018", "hard_negative": false, "style": "terse"}
+{"text": "quero desbloquear meu cartão que acabou de chegar", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-019", "hard_negative": true, "style": "voz"}
+{"text": "desbloquear cartão", "intent": "out_of_scope", "dialect": "pt-BR", "family": "O-019", "hard_negative": true, "style": "terse"}
+{"text": "oye me puedes decir el estado de cuenta de octubre no perdón de septiembre", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-020", "hard_negative": false, "style": "voz"}
+{"text": "estado de cuenta", "intent": "out_of_scope", "dialect": "es-MX", "family": "O-020", "hard_negative": false, "style": "terse"}
+{"text": "beleza então muito obrigado pela ajuda tá resolvido", "intent": "closing", "dialect": "pt-BR", "family": "C-005", "hard_negative": false, "style": "voz"}
+{"text": "obrigado tchau", "intent": "closing", "dialect": "pt-BR", "family": "C-005", "hard_negative": false, "style": "terse"}
+{"text": "ok perfecto eso era todo gracias", "intent": "closing", "dialect": "es-MX", "family": "C-006", "hard_negative": false, "style": "voz"}
+{"text": "listo gracias", "intent": "closing", "dialect": "es-MX", "family": "C-006", "hard_negative": false, "style": "terse"}
+{"text": "mire eh hola buenas noches oiga y usted cómo se llama", "intent": "unknown", "dialect": "es-CO", "family": "U-007", "hard_negative": false, "style": "voz"}
+{"text": "buenas", "intent": "unknown", "dialect": "es-CO", "family": "U-007", "hard_negative": false, "style": "terse"}
+{"text": "mirá se me perdió la tarjeta de crédito no sé si en el taxi o en el bar bloqueala dale", "intent": "block_card", "dialect": "es-AR", "family": "B-009", "hard_negative": false, "style": "voz"}
+{"text": "bloqueo de tarjeta", "intent": "block_card", "dialect": "es-AR", "family": "B-009", "hard_negative": false, "style": "terse"}

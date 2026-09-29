@@ -15,6 +15,12 @@ llm = ["anthropic>=1.0"]  # router/writer con LLM (opcional; sin esto el agente 
 pitch = ["python-pptx>=1.0", "matplotlib>=3.8", "pyyaml>=6", "markdown>=3.5"]
 # Evaluación de inyección (#8, #9) y detector con modelo (opt-in). Sin torch: ONNX Runtime en CPU.
 security-eval = ["onnxruntime>=1.17", "tokenizers>=0.15", "huggingface_hub>=0.23", "numpy>=1.26", "pandas>=2", "pyarrow>=14"]
+# Router de intención aprendido (#42, ADR 0009). `ml` = variante lite que se despliega (solo numpy);
+# `ml-full` = char + MiniLM ONNX (evaluación offline); `ml-train` = entrenar y regenerar reports/intent_router.md.
+ml = ["numpy>=1.26"]
+ml-full = ["numpy>=1.26", "onnxruntime>=1.17", "tokenizers>=0.15", "huggingface_hub>=0.23"]
+ml-train = ["numpy>=1.26", "scikit-learn>=1.4", "matplotlib>=3.8", "model2vec>=0.4", "onnxruntime>=1.17",
+            "tokenizers>=0.15", "huggingface_hub>=0.23"]
 api = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]  # demo web: API + SPA compilada (src/bankagent/api, web/)
 
 [build-system]

@@ -1,0 +1,232 @@
+{"text": "no reconozco un cargo de 350 pesos en Netflix", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-001", "hard_negative": false, "style": "chat"}
+{"text": "Me aparece un cobro de Netflix por $350 que yo no hice, ni tengo cuenta ahí", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-001", "hard_negative": false, "style": "chat"}
+{"text": "che, tengo un débito de Netflix que no es mío, fijate que yo nunca me suscribí", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-001", "hard_negative": false, "style": "chat"}
+{"text": "apareceu uma cobrança da Netflix no meu cartão que eu não reconheço", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-001", "hard_negative": false, "style": "chat"}
+{"text": "me cobraron dos veces la misma compra en OXXO", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-002", "hard_negative": false, "style": "chat"}
+{"text": "Buenas, pagué una sola vez en el OXXO pero en mi estado de cuenta sale el cargo duplicado de 189", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-002", "hard_negative": false, "style": "largo"}
+{"text": "cobro duplicado oxxo 189 pesos", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-002", "hard_negative": false, "style": "terse"}
+{"text": "fui ao cajero automatico, no me dio la plata pero me descontaron 500", "intent": "dispute_charge", "dialect": "mix", "family": "A-003", "hard_negative": false, "style": "chat"}
+{"text": "el cajero no me entregó el dinero y igual me debitaron 200.000 de la cuenta", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-003", "hard_negative": false, "style": "chat"}
+{"text": "o caixa eletrônico não liberou as notas mas o valor de R$ 300 saiu da minha conta", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-003", "hard_negative": false, "style": "chat"}
+{"text": "saqué en el cajero, se trabó, no salió nada y el saldo bajó igual. qué hago?", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-003", "hard_negative": false, "style": "chat"}
+{"text": "Pedí algo en Rappi, nunca llegó y me cobraron 45.900", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-004", "hard_negative": false, "style": "chat"}
+{"text": "hice un pedido por rappi el sabado, el pedido fue cancelado pero el cobro sigue ahi en mi tarjeta", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-004", "hard_negative": false, "style": "typos"}
+{"text": "rappi me cobró un pedido que jamás recibí 😡", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-004", "hard_negative": false, "style": "emoji"}
+{"text": "cancelé el gimnasio hace dos meses y me lo siguen cobrando todos los meses", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-005", "hard_negative": false, "style": "chat"}
+{"text": "Di de baja la suscripción de Spotify en agosto y en septiembre me volvieron a cobrar 129", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-005", "hard_negative": false, "style": "chat"}
+{"text": "cancelei a assinatura da academia e continuam debitando todo mês no cartão", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-005", "hard_negative": false, "style": "chat"}
+{"text": "ya no tengo ese servicio, lo cancelé, y el cargo recurrente sigue saliendo, quiero que me lo devuelvan", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-005", "hard_negative": false, "style": "largo"}
+{"text": "compré en Mercado Libre por 1.200,50 y me cobraron 12.005", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-006", "hard_negative": false, "style": "chat"}
+{"text": "el monto que me cobraron no es el que pagué, la compra era de 1.200 y figura 12.000", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-006", "hard_negative": false, "style": "chat"}
+{"text": "o valor cobrado no bate com o da compra, era R$ 89,90 e veio R$ 899,00", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-006", "hard_negative": false, "style": "chat"}
+{"text": "Me cargaron un monto distinto al de la compra en la farmacia, pagué 230 y aparecen 2300", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-006", "hard_negative": false, "style": "chat"}
+{"text": "tengo 3 viajes de Uber que no hice, del 14 de septiembre, en otra ciudad", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-007", "hard_negative": false, "style": "chat"}
+{"text": "aparecen cargos de uber en bogota y yo vivo en cali, no fui yo", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-007", "hard_negative": false, "style": "typos"}
+{"text": "tem umas corridas de Uber no meu extrato que eu não fiz, nem estava na cidade", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-007", "hard_negative": false, "style": "chat"}
+{"text": "compra na Magazine Luiza de R$ 1.499,00 que eu não fiz", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-008", "hard_negative": false, "style": "terse"}
+{"text": "Olá, apareceu no meu cartão uma compra da Magazine Luiza ontem, não fui eu, quero contestar", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-008", "hard_negative": false, "style": "chat"}
+{"text": "quero contestar uma compra, magalu, 1499 reais, nunca comprei la", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-008", "hard_negative": false, "style": "typos"}
+{"text": "gracias pero sigo viendo el cargo de 350 en mi cuenta", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-009", "hard_negative": true, "style": "chat"}
+{"text": "Muchas gracias, aunque todavía no me devolvieron la plata del cobro que reclamé", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-009", "hard_negative": true, "style": "chat"}
+{"text": "obrigado, mas a cobrança indevida ainda está aparecendo na fatura", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-009", "hard_negative": true, "style": "chat"}
+{"text": "me robaron la tarjeta y ya hay un cargo que no hice en una gasolinera", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-010", "hard_negative": true, "style": "chat"}
+{"text": "perdí la tarjeta ayer y hoy veo una compra de 80.000 en un supermercado que no es mía", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-010", "hard_negative": true, "style": "chat"}
+{"text": "perdi meu cartão e já tem uma compra de R$ 250 que não reconheço", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-010", "hard_negative": true, "style": "chat"}
+{"text": "se me perdió la tarjeta y encima aparece un débito raro de 15.000 en una estación de servicio", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-010", "hard_negative": true, "style": "chat"}
+{"text": "quiero hablar con alguien porque no reconozco un cobro de Amazon", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-011", "hard_negative": true, "style": "chat"}
+{"text": "pasame con un asesor, tengo un cargo de 9.999 que no hice", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-011", "hard_negative": true, "style": "chat"}
+{"text": "quero falar com um atendente, tem uma cobrança que não é minha na fatura", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-011", "hard_negative": true, "style": "chat"}
+{"text": "necesito un humano ya, me cobraron algo que no compré", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-011", "hard_negative": true, "style": "terse"}
+{"text": "hay un cargo en mi tarjeta de una tienda que ni conozco, 'SHOP*XJ22', de 499", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-012", "hard_negative": false, "style": "chat"}
+{"text": "Me aparece un comercio raro en el extracto, algo como PAYPAL *DIGITALGO, no se que es y no lo compre", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-012", "hard_negative": false, "style": "typos"}
+{"text": "tengo un movimiento de un comercio que no conozco, no lo reconozco para nada", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-012", "hard_negative": false, "style": "chat"}
+{"text": "pagué la luz por la app y me lo cobraron dos veces, 780 cada uno", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-013", "hard_negative": false, "style": "chat"}
+{"text": "o pix do boleto de luz saiu duas vezes da minha conta", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-013", "hard_negative": false, "style": "chat"}
+{"text": "Hice un solo pago del servicio de agua y se debitó doble, necesito que reversen uno", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-013", "hard_negative": false, "style": "formal"}
+{"text": "devolví un producto a la tienda hace 3 semanas y nunca me reembolsaron, sigue el cargo", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-014", "hard_negative": false, "style": "chat"}
+{"text": "devolvi a compra na loja, eles disseram que estornaram mas o valor continua na fatura", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-014", "hard_negative": false, "style": "chat"}
+{"text": "devolví unas zapatillas en Mercado Libre y el reintegro nunca apareció, me siguen cobrando la cuota", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-014", "hard_negative": false, "style": "largo"}
+{"text": "no fui yo la que compró eso de 2.350 el 3 de septiembre", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-015", "hard_negative": false, "style": "chat"}
+{"text": "Ese movimiento del 03/09 por 2.350 no lo hice yo, lo quiero reclamar", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-015", "hard_negative": false, "style": "chat"}
+{"text": "eu não fiz essa compra do dia 3, quero o dinheiro de volta", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-015", "hard_negative": false, "style": "chat"}
+{"text": "no, no quiero bloquear la tarjeta, quiero reclamar un cargo que no hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-016", "hard_negative": true, "style": "chat"}
+{"text": "no hace falta bloquear nada, solo quiero desconocer una compra de Uber", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-016", "hard_negative": true, "style": "chat"}
+{"text": "não precisa bloquear o cartão, só quero contestar uma cobrança", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-016", "hard_negative": true, "style": "chat"}
+{"text": "me cobraron 3 veces la suscripcion de disney este mes, alguien me explica?", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-017", "hard_negative": false, "style": "typos"}
+{"text": "vino tres veces el mismo débito de Disney+ en el resumen, es un error de ellos", "intent": "dispute_charge", "dialect": "es-AR", "family": "A-017", "hard_negative": false, "style": "chat"}
+{"text": "a mesma cobrança do Disney+ veio tres vezes, quero estorno de duas", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-017", "hard_negative": false, "style": "chat"}
+{"text": "compre un vuelo, la aerolinea lo canceló y no me devolvieron el cobro de 1.200.000", "intent": "dispute_charge", "dialect": "es-CO", "family": "A-018", "hard_negative": false, "style": "typos"}
+{"text": "cancelaron mi vuelo hace un mes y todavía tengo el cargo completo en la tarjeta", "intent": "dispute_charge", "dialect": "es-MX", "family": "A-018", "hard_negative": false, "style": "chat"}
+{"text": "o voo foi cancelado pela companhia e a cobrança continua no meu cartao, ninguém estorna", "intent": "dispute_charge", "dialect": "pt-BR", "family": "A-018", "hard_negative": false, "style": "typos"}
+{"text": "compré en mercado livre e cobraram dos veces, tá errado", "intent": "dispute_charge", "dialect": "mix", "family": "A-019", "hard_negative": false, "style": "chat"}
+{"text": "me cobrarom duplicado la compra no mercado libre, preciso ayuda con eso", "intent": "dispute_charge", "dialect": "mix", "family": "A-019", "hard_negative": false, "style": "typos"}
+{"text": "perdí mi tarjeta, bloquéala por favor", "intent": "block_card", "dialect": "es-MX", "family": "A-020", "hard_negative": false, "style": "chat"}
+{"text": "No encuentro mi tarjeta de débito desde ayer, quiero bloquearla antes de que pase algo", "intent": "block_card", "dialect": "es-MX", "family": "A-020", "hard_negative": false, "style": "chat"}
+{"text": "perdi mi tarjeta en el bus, me la pueden bloquear?", "intent": "block_card", "dialect": "es-CO", "family": "A-020", "hard_negative": false, "style": "typos"}
+{"text": "perdi meu cartão, quero bloquear agora", "intent": "block_card", "dialect": "pt-BR", "family": "A-020", "hard_negative": false, "style": "terse"}
+{"text": "me robaron la cartera con todas las tarjetas", "intent": "block_card", "dialect": "es-CO", "family": "A-021", "hard_negative": false, "style": "chat"}
+{"text": "che, me afanaron la billetera en el subte, bloqueame la tarjeta ya", "intent": "block_card", "dialect": "es-AR", "family": "A-021", "hard_negative": false, "style": "chat"}
+{"text": "fui assaltado e levaram minha carteira com o cartão", "intent": "block_card", "dialect": "pt-BR", "family": "A-021", "hard_negative": false, "style": "chat"}
+{"text": "Me asaltaron saliendo del trabajo, se llevaron el bolso con la tarjeta de crédito adentro. Necesito cancelarla", "intent": "block_card", "dialect": "es-MX", "family": "A-021", "hard_negative": false, "style": "largo"}
+{"text": "quiero congelar mi tarjeta un rato, no sé dónde la dejé", "intent": "block_card", "dialect": "es-MX", "family": "A-022", "hard_negative": false, "style": "chat"}
+{"text": "Puedo pausar la tarjeta temporalmente? creo que la dejé en la casa de un amigo pero no estoy segura", "intent": "block_card", "dialect": "es-CO", "family": "A-022", "hard_negative": false, "style": "chat"}
+{"text": "dá pra bloquear o cartão temporariamente? não sei onde deixei", "intent": "block_card", "dialect": "pt-BR", "family": "A-022", "hard_negative": false, "style": "chat"}
+{"text": "el cajero se tragó mi tarjeta, bloquéenla porfa", "intent": "block_card", "dialect": "es-MX", "family": "A-023", "hard_negative": false, "style": "chat"}
+{"text": "el cajero automático me retuvo la tarjeta y no me la devolvió, quiero que la anulen", "intent": "block_card", "dialect": "es-AR", "family": "A-023", "hard_negative": false, "style": "chat"}
+{"text": "o caixa eletronico engoliu meu cartão, preciso bloquear", "intent": "block_card", "dialect": "pt-BR", "family": "A-023", "hard_negative": false, "style": "typos"}
+{"text": "creo que clonaron mi tarjeta, quiero cancelarla", "intent": "block_card", "dialect": "es-CO", "family": "A-024", "hard_negative": false, "style": "chat"}
+{"text": "usé la tarjeta en un lugar medio raro y me da miedo que la hayan copiado, mejor bloqueala", "intent": "block_card", "dialect": "es-AR", "family": "A-024", "hard_negative": false, "style": "chat"}
+{"text": "acho que clonaram meu cartão naquele posto, quero cancelar ele", "intent": "block_card", "dialect": "pt-BR", "family": "A-024", "hard_negative": false, "style": "chat"}
+{"text": "hola, perdí la tarjeta", "intent": "block_card", "dialect": "es-AR", "family": "A-025", "hard_negative": true, "style": "terse"}
+{"text": "buenas tardes, se me cayó la tarjeta en algún lado", "intent": "block_card", "dialect": "es-CO", "family": "A-025", "hard_negative": true, "style": "chat"}
+{"text": "oi boa noite, perdi o cartão", "intent": "block_card", "dialect": "pt-BR", "family": "A-025", "hard_negative": true, "style": "terse"}
+{"text": "bloquear tarjeta", "intent": "block_card", "dialect": "es-MX", "family": "A-026", "hard_negative": false, "style": "terse"}
+{"text": "necesito bloquear mi tarjeta de crédito urgente", "intent": "block_card", "dialect": "es-CO", "family": "A-026", "hard_negative": false, "style": "chat"}
+{"text": "quero bloquear meu cartão de crédito", "intent": "block_card", "dialect": "pt-BR", "family": "A-026", "hard_negative": false, "style": "terse"}
+{"text": "BLOQUEEN MI TARJETA POR FAVOR", "intent": "block_card", "dialect": "es-MX", "family": "A-026", "hard_negative": false, "style": "mayusculas"}
+{"text": "mi hijo agarró la tarjeta adicional y no la devuelve, quiero darla de baja", "intent": "block_card", "dialect": "es-AR", "family": "A-027", "hard_negative": false, "style": "chat"}
+{"text": "Quiero cancelar la tarjeta adicional que le di a mi ex, ya no quiero que la use", "intent": "block_card", "dialect": "es-MX", "family": "A-027", "hard_negative": false, "style": "chat"}
+{"text": "perdí o cartão, bloqueia por favor que não sei donde está", "intent": "block_card", "dialect": "mix", "family": "A-028", "hard_negative": false, "style": "chat"}
+{"text": "me roubaram a tarjeta no ônibus, quiero bloquearla", "intent": "block_card", "dialect": "mix", "family": "A-028", "hard_negative": false, "style": "chat"}
+{"text": "alguien cambió mi contraseña y no puedo entrar a la app", "intent": "account_takeover", "dialect": "es-MX", "family": "A-029", "hard_negative": false, "style": "chat"}
+{"text": "me cambiaron la clave de la banca en línea, yo no fui, y ya no me deja ingresar", "intent": "account_takeover", "dialect": "es-CO", "family": "A-029", "hard_negative": false, "style": "chat"}
+{"text": "alguém trocou minha senha do app e agora não consigo acessar", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-029", "hard_negative": false, "style": "chat"}
+{"text": "me llamaron del supuesto banco, les pasé el código que me llegó por SMS y ahora tengo transferencias que no hice", "intent": "account_takeover", "dialect": "es-MX", "family": "A-030", "hard_negative": true, "style": "largo"}
+{"text": "le di el código de verificación a uno que dijo ser del banco y me vaciaron la cuenta", "intent": "account_takeover", "dialect": "es-AR", "family": "A-030", "hard_negative": true, "style": "chat"}
+{"text": "passei o código do SMS para um suposto atendente e depois apareceram várias compras", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-030", "hard_negative": true, "style": "chat"}
+{"text": "me llegó un aviso de que cambiaron el correo de mi cuenta y yo no hice nada", "intent": "account_takeover", "dialect": "es-CO", "family": "A-031", "hard_negative": false, "style": "chat"}
+{"text": "Recibí notificación de cambio de número de celular en mi perfil del banco, no fui yo", "intent": "account_takeover", "dialect": "es-MX", "family": "A-031", "hard_negative": false, "style": "formal"}
+{"text": "chegou um email dizendo que o telefone da conta foi alterado, mas eu não alterei nada", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-031", "hard_negative": false, "style": "chat"}
+{"text": "mi celular se quedó sin señal de repente y ahora hay movimientos en mi cuenta, creo que me clonaron el chip", "intent": "account_takeover", "dialect": "es-AR", "family": "A-032", "hard_negative": true, "style": "largo"}
+{"text": "me hicieron sim swap, mi linea no funciona y alguien esta entrando a mi banca", "intent": "account_takeover", "dialect": "es-CO", "family": "A-032", "hard_negative": false, "style": "typos"}
+{"text": "meu chip parou de funcionar do nada e alguém entrou no meu internet banking", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-032", "hard_negative": false, "style": "chat"}
+{"text": "entré a un link de un mensaje que parecía del banco y puse mis datos, creo que fue phishing", "intent": "account_takeover", "dialect": "es-MX", "family": "A-033", "hard_negative": false, "style": "chat"}
+{"text": "caí en un mail trucho del banco y cargué usuario y clave, fijate si entraron", "intent": "account_takeover", "dialect": "es-AR", "family": "A-033", "hard_negative": false, "style": "chat"}
+{"text": "cliquei num link falso e coloquei minha senha, acho que era golpe", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-033", "hard_negative": false, "style": "chat"}
+{"text": "Di mis datos en una página falsa igualita a la del banco, qué hago ahora?", "intent": "account_takeover", "dialect": "es-CO", "family": "A-033", "hard_negative": false, "style": "chat"}
+{"text": "veo un inicio de sesión desde otro país en mi app y yo no he salido de Medellín", "intent": "account_takeover", "dialect": "es-CO", "family": "A-034", "hard_negative": false, "style": "chat"}
+{"text": "alguien está usando mi usuario de la banca, me llegan alertas de acceso desde un dispositivo que no es mío", "intent": "account_takeover", "dialect": "es-MX", "family": "A-034", "hard_negative": false, "style": "chat"}
+{"text": "tem um aparelho desconhecido conectado na minha conta do app", "intent": "account_takeover", "dialect": "pt-BR", "family": "A-034", "hard_negative": false, "style": "chat"}
+{"text": "alguien entró a mi cuenta e hizo un pix, eu não fiz nada disso", "intent": "account_takeover", "dialect": "mix", "family": "A-035", "hard_negative": true, "style": "chat"}
+{"text": "hackearon minha conta y cambiaron la senha, no consigo entrar", "intent": "account_takeover", "dialect": "mix", "family": "A-035", "hard_negative": false, "style": "typos"}
+{"text": "quiero hablar con un asesor", "intent": "human_request", "dialect": "es-MX", "family": "A-036", "hard_negative": false, "style": "terse"}
+{"text": "me pueden comunicar con un asesor humano por favor", "intent": "human_request", "dialect": "es-CO", "family": "A-036", "hard_negative": false, "style": "formal"}
+{"text": "pasame con una persona de verdad, che", "intent": "human_request", "dialect": "es-AR", "family": "A-036", "hard_negative": false, "style": "chat"}
+{"text": "me passa pra um atendente humano", "intent": "human_request", "dialect": "pt-BR", "family": "A-036", "hard_negative": false, "style": "chat"}
+{"text": "no quiero hablar con un robot", "intent": "human_request", "dialect": "es-MX", "family": "A-037", "hard_negative": false, "style": "chat"}
+{"text": "Mirá, no me sirve un bot, quiero que me atienda alguien", "intent": "human_request", "dialect": "es-AR", "family": "A-037", "hard_negative": false, "style": "chat"}
+{"text": "não quero falar com robô, quero gente", "intent": "human_request", "dialect": "pt-BR", "family": "A-037", "hard_negative": false, "style": "terse"}
+{"text": "ya me cansé del chatbot, deme una persona", "intent": "human_request", "dialect": "es-CO", "family": "A-037", "hard_negative": false, "style": "chat"}
+{"text": "¿me pueden llamar?", "intent": "human_request", "dialect": "es-MX", "family": "A-038", "hard_negative": false, "style": "terse"}
+{"text": "prefiero que me llame un ejecutivo, por aquí no me entiendo", "intent": "human_request", "dialect": "es-MX", "family": "A-038", "hard_negative": false, "style": "chat"}
+{"text": "vocês podem me ligar? prefiro resolver por telefone", "intent": "human_request", "dialect": "pt-BR", "family": "A-038", "hard_negative": false, "style": "chat"}
+{"text": "Quisiera que un funcionario me contacte por llamada, gracias", "intent": "human_request", "dialect": "es-CO", "family": "A-038", "hard_negative": false, "style": "formal"}
+{"text": "asesor", "intent": "human_request", "dialect": "es-CO", "family": "A-039", "hard_negative": false, "style": "terse"}
+{"text": "atendente", "intent": "human_request", "dialect": "pt-BR", "family": "A-039", "hard_negative": false, "style": "terse"}
+{"text": "operador por favor", "intent": "human_request", "dialect": "es-AR", "family": "A-039", "hard_negative": false, "style": "terse"}
+{"text": "hola, necesito hablar con alguien del banco", "intent": "human_request", "dialect": "es-MX", "family": "A-040", "hard_negative": true, "style": "chat"}
+{"text": "buenas, hay alguien ahí que me pueda atender? una persona digo", "intent": "human_request", "dialect": "es-AR", "family": "A-040", "hard_negative": true, "style": "chat"}
+{"text": "oi, tem alguém aí de carne e osso?", "intent": "human_request", "dialect": "pt-BR", "family": "A-040", "hard_negative": true, "style": "chat"}
+{"text": "kiero hablar con un ejecutivo ahora mismo", "intent": "human_request", "dialect": "es-MX", "family": "A-041", "hard_negative": false, "style": "typos"}
+{"text": "necesito que me transfieran con un agente, es urgente", "intent": "human_request", "dialect": "es-CO", "family": "A-041", "hard_negative": false, "style": "chat"}
+{"text": "preciso falar com um gerente urgente", "intent": "human_request", "dialect": "pt-BR", "family": "A-041", "hard_negative": false, "style": "terse"}
+{"text": "quiero falar con una persona, no con máquina", "intent": "human_request", "dialect": "mix", "family": "A-042", "hard_negative": false, "style": "chat"}
+{"text": "me pasa con un asesor, por favor, obrigado", "intent": "human_request", "dialect": "mix", "family": "A-042", "hard_negative": false, "style": "chat"}
+{"text": "no me estás entendiendo, pasame con alguien", "intent": "human_request", "dialect": "es-AR", "family": "A-042", "hard_negative": false, "style": "chat"}
+{"text": "¿cuánto me cobran por retiro en cajero de otro banco?", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-043", "hard_negative": true, "style": "chat"}
+{"text": "cuanto cobran de comision por sacar plata en un cajero ajeno", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-043", "hard_negative": true, "style": "typos"}
+{"text": "quanto vocês cobram de tarifa para saque em outro banco?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-043", "hard_negative": true, "style": "chat"}
+{"text": "quiero desbloquear la tarjeta", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-044", "hard_negative": true, "style": "terse"}
+{"text": "ya encontré mi tarjeta, cómo hago para desbloquearla?", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-044", "hard_negative": true, "style": "chat"}
+{"text": "achei o cartão, quero desbloquear ele", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-044", "hard_negative": true, "style": "chat"}
+{"text": "la bloqueé por error, necesito reactivar la tarjeta", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-044", "hard_negative": true, "style": "chat"}
+{"text": "no, no quiero bloquearla, quiero saber el saldo", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-045", "hard_negative": true, "style": "chat"}
+{"text": "no es para bloquear nada, solo quiero consultar cuánto tengo en la cuenta", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-045", "hard_negative": true, "style": "chat"}
+{"text": "não quero bloquear, só quero ver meu saldo", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-045", "hard_negative": true, "style": "chat"}
+{"text": "cuál es mi saldo?", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-046", "hard_negative": false, "style": "terse"}
+{"text": "decime cuánta plata tengo en la caja de ahorro", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-046", "hard_negative": false, "style": "chat"}
+{"text": "qual é o saldo da minha conta corrente?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-046", "hard_negative": false, "style": "chat"}
+{"text": "quiero saber cuanto debo de la tarjeta de credito este mes", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-046", "hard_negative": false, "style": "typos"}
+{"text": "reconozco el cargo pero quiero pagarlo en cuotas", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-047", "hard_negative": true, "style": "chat"}
+{"text": "la compra de 4.500 sí la hice yo, pero la quiero diferir a meses sin intereses", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-047", "hard_negative": true, "style": "chat"}
+{"text": "a compra é minha sim, só quero parcelar em 6 vezes", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-047", "hard_negative": true, "style": "chat"}
+{"text": "me explican la tasa del préstamo personal?", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-048", "hard_negative": false, "style": "chat"}
+{"text": "Quisiera información sobre un crédito de libre inversión, qué interés manejan", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-048", "hard_negative": false, "style": "formal"}
+{"text": "quero simular um empréstimo de R$ 5.000 em 12 parcelas", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-048", "hard_negative": false, "style": "chat"}
+{"text": "quero aumentar o limite do cartão", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-049", "hard_negative": false, "style": "terse"}
+{"text": "me pueden subir el cupo de la tarjeta? viajo el mes que viene", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-049", "hard_negative": false, "style": "chat"}
+{"text": "necesito más límite en la tarjeta, cómo lo pido", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-049", "hard_negative": false, "style": "chat"}
+{"text": "olvidé mi contraseña de la app", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-050", "hard_negative": true, "style": "chat"}
+{"text": "no me acuerdo la clave para entrar al home banking, cómo la recupero?", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-050", "hard_negative": true, "style": "chat"}
+{"text": "esqueci minha senha do aplicativo", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-050", "hard_negative": true, "style": "terse"}
+{"text": "cambié de celular y no puedo entrar a la app porque no me acuerdo el usuario", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-050", "hard_negative": true, "style": "chat"}
+{"text": "cómo hago una transferencia a otro banco", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-051", "hard_negative": false, "style": "chat"}
+{"text": "quiero mandarle plata a mi vieja a otra cuenta, cómo transfiero?", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-051", "hard_negative": false, "style": "chat"}
+{"text": "como faço um pix agendado?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-051", "hard_negative": false, "style": "chat"}
+{"text": "necesito el estado de cuenta de agosto", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-052", "hard_negative": false, "style": "terse"}
+{"text": "Buenos días, me pueden enviar el extracto bancario de los últimos tres meses para un trámite", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-052", "hard_negative": false, "style": "formal"}
+{"text": "preciso do extrato do mês passado em pdf", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-052", "hard_negative": false, "style": "chat"}
+{"text": "cuándo me llega la tarjeta nueva? la pedí hace 10 días", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-053", "hard_negative": false, "style": "chat"}
+{"text": "Todavía no me mandaron el plástico de reposición, fijate en qué anda el envío", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-053", "hard_negative": false, "style": "chat"}
+{"text": "meu cartão novo ainda não chegou, qual o prazo de entrega?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-053", "hard_negative": false, "style": "chat"}
+{"text": "quiero cambiar el pin de mi tarjeta", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-054", "hard_negative": false, "style": "chat"}
+{"text": "se me bloqueó el pin por poner mal la clave tres veces en el cajero", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-054", "hard_negative": true, "style": "chat"}
+{"text": "errei a senha do cartão 3 vezes e ele bloqueou, como libero?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-054", "hard_negative": true, "style": "chat"}
+{"text": "quiero abrir una cuenta de ahorros", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-055", "hard_negative": false, "style": "terse"}
+{"text": "Qué necesito para abrir una cuenta sueldo con ustedes?", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-055", "hard_negative": false, "style": "chat"}
+{"text": "quero abrir uma conta pra minha filha de 16 anos, pode?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-055", "hard_negative": false, "style": "chat"}
+{"text": "qué rendimiento da el plazo fijo a 30 días?", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-056", "hard_negative": false, "style": "chat"}
+{"text": "en qué puedo invertir 50 mil pesos, tienen cetes o fondos?", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-056", "hard_negative": false, "style": "chat"}
+{"text": "quanto rende o CDB de vocês?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-056", "hard_negative": false, "style": "terse"}
+{"text": "quiero poner una queja porque en la sucursal me atendieron pésimo", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-057", "hard_negative": false, "style": "chat"}
+{"text": "Estuve 2 horas en la fila de la oficina y el cajero fue grosero, quiero dejar un reclamo", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-057", "hard_negative": false, "style": "largo"}
+{"text": "quero reclamar do atendimento da agência, foi horrível", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-057", "hard_negative": false, "style": "chat"}
+{"text": "cuánto cuesta el seguro de la tarjeta contra robo?", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-058", "hard_negative": true, "style": "chat"}
+{"text": "tienen seguro de vida o de auto? quiero cotizar", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-058", "hard_negative": false, "style": "chat"}
+{"text": "quanto custa o seguro do cartão contra perda e roubo?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "A-058", "hard_negative": true, "style": "chat"}
+{"text": "cuanto es la anualidad de la tarjeta oro, me la quieren cobrar", "intent": "out_of_scope", "dialect": "es-MX", "family": "A-059", "hard_negative": true, "style": "typos"}
+{"text": "por qué me cobran mantenimiento de cuenta si nunca la uso? quiero saber cuánto es", "intent": "out_of_scope", "dialect": "es-AR", "family": "A-059", "hard_negative": true, "style": "chat"}
+{"text": "cual es la tarifa de manejo de la cuenta de ahorros", "intent": "out_of_scope", "dialect": "es-CO", "family": "A-059", "hard_negative": true, "style": "typos"}
+{"text": "quiero saber mi saldo, cuánto tengo na conta", "intent": "out_of_scope", "dialect": "mix", "family": "A-060", "hard_negative": false, "style": "chat"}
+{"text": "como hago para aumentar o limite de la tarjeta?", "intent": "out_of_scope", "dialect": "mix", "family": "A-060", "hard_negative": false, "style": "chat"}
+{"text": "gracias, eso era todo", "intent": "closing", "dialect": "es-MX", "family": "A-061", "hard_negative": false, "style": "chat"}
+{"text": "listo, muchas gracias por la ayuda", "intent": "closing", "dialect": "es-CO", "family": "A-061", "hard_negative": false, "style": "chat"}
+{"text": "valeu, era só isso mesmo", "intent": "closing", "dialect": "pt-BR", "family": "A-061", "hard_negative": false, "style": "chat"}
+{"text": "listo, chau", "intent": "closing", "dialect": "es-AR", "family": "A-062", "hard_negative": false, "style": "terse"}
+{"text": "dale, gracias, nos vemos", "intent": "closing", "dialect": "es-AR", "family": "A-062", "hard_negative": false, "style": "chat"}
+{"text": "valeu, tchau", "intent": "closing", "dialect": "pt-BR", "family": "A-062", "hard_negative": false, "style": "terse"}
+{"text": "perfecto, ya quedó resuelto, que tengas buen día", "intent": "closing", "dialect": "es-MX", "family": "A-063", "hard_negative": false, "style": "chat"}
+{"text": "Excelente, quedó todo claro. Muchas gracias por su atención", "intent": "closing", "dialect": "es-CO", "family": "A-063", "hard_negative": false, "style": "formal"}
+{"text": "beleza, resolvido, obrigada e bom dia", "intent": "closing", "dialect": "pt-BR", "family": "A-063", "hard_negative": false, "style": "chat"}
+{"text": "no, nada más, gracias", "intent": "closing", "dialect": "es-MX", "family": "A-064", "hard_negative": true, "style": "terse"}
+{"text": "no necesito nada más por ahora, gracias igual", "intent": "closing", "dialect": "es-AR", "family": "A-064", "hard_negative": true, "style": "chat"}
+{"text": "não, só isso, obrigado", "intent": "closing", "dialect": "pt-BR", "family": "A-064", "hard_negative": true, "style": "terse"}
+{"text": "gracias 🙏", "intent": "closing", "dialect": "es-CO", "family": "A-065", "hard_negative": false, "style": "emoji"}
+{"text": "mil gracias!! 😊", "intent": "closing", "dialect": "es-MX", "family": "A-065", "hard_negative": false, "style": "emoji"}
+{"text": "muito obrigado, tchau tchau 👋", "intent": "closing", "dialect": "mix", "family": "A-065", "hard_negative": false, "style": "emoji"}
+{"text": "hola buenas", "intent": "unknown", "dialect": "es-MX", "family": "A-066", "hard_negative": false, "style": "terse"}
+{"text": "buenas tardes", "intent": "unknown", "dialect": "es-CO", "family": "A-066", "hard_negative": false, "style": "terse"}
+{"text": "holaaa", "intent": "unknown", "dialect": "es-AR", "family": "A-066", "hard_negative": false, "style": "chat"}
+{"text": "oi, tudo bem?", "intent": "unknown", "dialect": "pt-BR", "family": "A-066", "hard_negative": false, "style": "chat"}
+{"text": "tengo un problema", "intent": "unknown", "dialect": "es-MX", "family": "A-067", "hard_negative": false, "style": "terse"}
+{"text": "tengo un problema con mi tarjeta", "intent": "unknown", "dialect": "es-CO", "family": "A-067", "hard_negative": true, "style": "chat"}
+{"text": "estou com um problema na minha conta", "intent": "unknown", "dialect": "pt-BR", "family": "A-067", "hard_negative": true, "style": "chat"}
+{"text": "che, me pasó algo raro", "intent": "unknown", "dialect": "es-AR", "family": "A-067", "hard_negative": false, "style": "chat"}
+{"text": "tengo una duda", "intent": "unknown", "dialect": "es-MX", "family": "A-068", "hard_negative": false, "style": "terse"}
+{"text": "una consulta", "intent": "unknown", "dialect": "es-AR", "family": "A-068", "hard_negative": false, "style": "terse"}
+{"text": "tenho uma dúvida rápida", "intent": "unknown", "dialect": "pt-BR", "family": "A-068", "hard_negative": false, "style": "terse"}
+{"text": "¿qué hora es?", "intent": "unknown", "dialect": "es-MX", "family": "A-069", "hard_negative": false, "style": "chat"}
+{"text": "cómo va a estar el clima mañana en Bogotá", "intent": "unknown", "dialect": "es-CO", "family": "A-069", "hard_negative": false, "style": "chat"}
+{"text": "quem ganhou o jogo do Flamengo ontem?", "intent": "unknown", "dialect": "pt-BR", "family": "A-069", "hard_negative": false, "style": "chat"}
+{"text": "asdf", "intent": "unknown", "dialect": "es-MX", "family": "A-070", "hard_negative": false, "style": "ruido"}
+{"text": "kkkkkkk", "intent": "unknown", "dialect": "pt-BR", "family": "A-070", "hard_negative": false, "style": "ruido"}
+{"text": "...", "intent": "unknown", "dialect": "es-AR", "family": "A-070", "hard_negative": false, "style": "ruido"}
+{"text": "quería saber si", "intent": "unknown", "dialect": "es-CO", "family": "A-071", "hard_negative": false, "style": "incompleto"}
+{"text": "necesito que me", "intent": "unknown", "dialect": "es-MX", "family": "A-071", "hard_negative": false, "style": "incompleto"}
+{"text": "eu queria ver se vocês", "intent": "unknown", "dialect": "pt-BR", "family": "A-071", "hard_negative": false, "style": "incompleto"}
+{"text": "me recomendás una receta de empanadas?", "intent": "unknown", "dialect": "es-AR", "family": "A-072", "hard_negative": false, "style": "chat"}
+{"text": "cuéntame un chiste", "intent": "unknown", "dialect": "es-MX", "family": "A-072", "hard_negative": false, "style": "chat"}
+{"text": "me ajuda a escrever um email pro meu chefe?", "intent": "unknown", "dialect": "pt-BR", "family": "A-072", "hard_negative": false, "style": "chat"}
+{"text": "hola, me ayudas con algo?", "intent": "unknown", "dialect": "mix", "family": "A-073", "hard_negative": false, "style": "chat"}
+{"text": "oi, preciso de ayuda por favor", "intent": "unknown", "dialect": "mix", "family": "A-073", "hard_negative": false, "style": "chat"}
+{"text": "buenas, necesito ayuda", "intent": "unknown", "dialect": "es-CO", "family": "A-073", "hard_negative": false, "style": "terse"}

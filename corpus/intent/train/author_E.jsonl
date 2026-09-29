@@ -1,0 +1,217 @@
+{"text":"No reconozco un cargo de $1,280 en Rappi del 14 de septiembre, yo no pedí nada","intent":"dispute_charge","dialect":"es-MX","family":"E-001","hard_negative":false,"style":"chat"}
+{"text":"Che, me aparece un débito de 9.400 en Mercado Libre que yo no hice, qué hago","intent":"dispute_charge","dialect":"es-AR","family":"E-001","hard_negative":false,"style":"chat"}
+{"text":"hay un movimiento en mi extracto de 87.000 en Éxito que jamás hice","intent":"dispute_charge","dialect":"es-CO","family":"E-001","hard_negative":false,"style":"largo"}
+{"text":"Tem uma compra de R$ 312 na Shopee na minha fatura que eu não reconheço","intent":"dispute_charge","dialect":"pt-BR","family":"E-001","hard_negative":false,"style":"chat"}
+{"text":"Ya bloqueé la tarjeta ayer, ahora quiero reclamar el cobro de 800 pesos en Oxxo que no hice","intent":"dispute_charge","dialect":"es-MX","family":"E-002","hard_negative":true,"style":"largo"}
+{"text":"la tarjeta ya la congelé, lo que falta es que me devuelvan los 45.000 de la compra en Homecenter que no fue mía","intent":"dispute_charge","dialect":"es-CO","family":"E-002","hard_negative":true,"style":"chat"}
+{"text":"Já bloqueei o cartão pelo app. Agora preciso contestar a cobrança de R$ 590 que não foi minha","intent":"dispute_charge","dialect":"pt-BR","family":"E-002","hard_negative":true,"style":"largo"}
+{"text":"ya la bloquié, ahora reclamo el cargo de 6500 en Fravega q no hice","intent":"dispute_charge","dialect":"es-AR","family":"E-002","hard_negative":true,"style":"typos"}
+{"text":"Me cobraron dos veces la misma compra en Walmart, 2,340 cada una","intent":"dispute_charge","dialect":"es-MX","family":"E-003","hard_negative":false,"style":"chat"}
+{"text":"me cobraron doble en la farmacia, el mismo día, 23.900 y 23.900. quiero que me devuelvan uno","intent":"dispute_charge","dialect":"es-CO","family":"E-003","hard_negative":false,"style":"chat"}
+{"text":"Foi cobrado duas vezes o mesmo pedido do iFood, R$ 64,90 repetido","intent":"dispute_charge","dialect":"pt-BR","family":"E-003","hard_negative":false,"style":"terse"}
+{"text":"Fui al cajero de la sucursal Centro, saqué 3000 y la máquina no soltó la plata pero el débito figura en la app","intent":"dispute_charge","dialect":"es-AR","family":"E-004","hard_negative":false,"style":"largo"}
+{"text":"El cajero no me dio el dinero pero sí me descontó 2,000 de mi cuenta","intent":"dispute_charge","dialect":"es-MX","family":"E-004","hard_negative":false,"style":"chat"}
+{"text":"o caixa eletrônico travou, não saiu o dinheiro e mesmo assim debitou R$ 400","intent":"dispute_charge","dialect":"pt-BR","family":"E-004","hard_negative":false,"style":"chat"}
+{"text":"Cancelé Netflix en agosto y sigue apareciendo el cobro de 219 pesos cada mes","intent":"dispute_charge","dialect":"es-MX","family":"E-005","hard_negative":false,"style":"chat"}
+{"text":"di de baja el gimnasio hace dos meses y me siguen debitando 18.500, no lo puedo creer","intent":"dispute_charge","dialect":"es-AR","family":"E-005","hard_negative":false,"style":"largo"}
+{"text":"cancelé Spotify y me siguen cobrando 16.900 todos los meses","intent":"dispute_charge","dialect":"es-CO","family":"E-005","hard_negative":false,"style":"terse"}
+{"text":"Cancelei a assinatura do Disney+ em julho e continuam cobrando R$ 33,90","intent":"dispute_charge","dialect":"pt-BR","family":"E-005","hard_negative":false,"style":"chat"}
+{"text":"Cobraram R$ 450 numa compra que era de R$ 145, o valor veio errado na fatura","intent":"dispute_charge","dialect":"pt-BR","family":"E-006","hard_negative":false,"style":"chat"}
+{"text":"en el restaurante el ticket era de 680 y en mi estado de cuenta salen 1,860. es otro monto","intent":"dispute_charge","dialect":"es-MX","family":"E-006","hard_negative":false,"style":"largo"}
+{"text":"el monto que me cobraron no es el que firmé, eran 52.000 y me pasaron 125.000","intent":"dispute_charge","dialect":"es-CO","family":"E-006","hard_negative":false,"style":"chat"}
+{"text":"Pagué unas zapatillas online hace un mes y nunca llegaron, pero la plata ya me la debitaron, 38.700","intent":"dispute_charge","dialect":"es-AR","family":"E-007","hard_negative":false,"style":"largo"}
+{"text":"Compré un celular en Linio, me cobraron 1.450.000 y el pedido jamás llegó ni contestan","intent":"dispute_charge","dialect":"es-CO","family":"E-007","hard_negative":false,"style":"largo"}
+{"text":"comprei uma geladeira na Casas Bahia, cobraram tudo e a entrega nunca veio","intent":"dispute_charge","dialect":"pt-BR","family":"E-007","hard_negative":false,"style":"chat"}
+{"text":"pedí algo en Temu, ya me lo cobraron y el paquete nunca llegó, quiero disputar eso","intent":"dispute_charge","dialect":"es-MX","family":"E-007","hard_negative":false,"style":"chat"}
+{"text":"No quiero bloquear nada, la tarjeta la tengo conmigo. Solo quiero reclamar un cargo de 1,150 en Uber que no reconozco","intent":"dispute_charge","dialect":"es-MX","family":"E-008","hard_negative":true,"style":"largo"}
+{"text":"no hace falta bloquearla, la tengo acá. el tema es un cobro de 12.300 en Rappi que no hice yo","intent":"dispute_charge","dialect":"es-AR","family":"E-008","hard_negative":true,"style":"chat"}
+{"text":"não precisa bloquear o cartão, só quero contestar a cobrança de R$ 210 da Amazon que eu não fiz","intent":"dispute_charge","dialect":"pt-BR","family":"E-008","hard_negative":true,"style":"chat"}
+{"text":"Ayer viajé a Cartagena y usé la tarjeta normal. Hoy reviso y hay tres cobros en una tienda en Miami de 200 dólares cada uno, yo nunca he ido. Me urge que los revisen.","intent":"dispute_charge","dialect":"es-CO","family":"E-009","hard_negative":false,"style":"largo"}
+{"text":"Ontem à noite recebi o alerta de uma compra de R$ 1.999 numa loja de eletrônicos. Eu estava em casa dormindo e o cartão estava na carteira. Quero contestar essa compra.","intent":"dispute_charge","dialect":"pt-BR","family":"E-009","hard_negative":false,"style":"largo"}
+{"text":"Mirá, hoy me llegó el resumen y hay un consumo en una casa de electrodomésticos de La Plata por 74.200. Yo vivo en Rosario y la tarjeta la tengo en la billetera. Necesito impugnar ese consumo.","intent":"dispute_charge","dialect":"es-AR","family":"E-009","hard_negative":false,"style":"largo"}
+{"text":"Buenas tardes, quisiera solicitar la aclaración de un cargo por $3,450 realizado el 2 de septiembre en un comercio que no reconozco.","intent":"dispute_charge","dialect":"es-MX","family":"E-010","hard_negative":false,"style":"formal"}
+{"text":"Buenos días. Me dirijo a ustedes para objetar un débito de $210.000 aplicado el pasado lunes por un comercio desconocido para mí.","intent":"dispute_charge","dialect":"es-CO","family":"E-010","hard_negative":false,"style":"formal"}
+{"text":"Boa tarde, gostaria de abrir uma contestação referente a uma cobrança de R$ 780,00 lançada em 03/09 que não foi autorizada por mim.","intent":"dispute_charge","dialect":"pt-BR","family":"E-010","hard_negative":false,"style":"formal"}
+{"text":"cargo raro 999 spotify?? no fui yo","intent":"dispute_charge","dialect":"es-MX","family":"E-011","hard_negative":false,"style":"terse"}
+{"text":"no recnozco un cobro d 55 mil en dafiti","intent":"dispute_charge","dialect":"es-CO","family":"E-011","hard_negative":false,"style":"typos"}
+{"text":"cobrança estranha de 89 reais, n foi eu","intent":"dispute_charge","dialect":"pt-BR","family":"E-011","hard_negative":false,"style":"terse"}
+{"text":"un débito de 4.200 q no hice, pq apareció?","intent":"dispute_charge","dialect":"es-AR","family":"E-011","hard_negative":false,"style":"typos"}
+{"text":"Me robaron la tarjeta en el metro y ya hay dos compras que yo no hice, una de 780 y otra de 1,900","intent":"dispute_charge","dialect":"es-MX","family":"E-012","hard_negative":false,"style":"largo"}
+{"text":"perdí la tarjeta y encima veo un cargo de 230.000 que no fue mío","intent":"dispute_charge","dialect":"es-CO","family":"E-012","hard_negative":false,"style":"chat"}
+{"text":"me afanaron la tarjeta y ya la usaron, hay un consumo de 15.000 en un kiosco que no fui yo","intent":"dispute_charge","dialect":"es-AR","family":"E-012","hard_negative":false,"style":"chat"}
+{"text":"roubaram meu cartão e já tem uma compra de R$ 700 que eu não fiz","intent":"dispute_charge","dialect":"pt-BR","family":"E-012","hard_negative":false,"style":"chat"}
+{"text":"Hola, buenas noches. Tengo un cobro de 599 pesos de una app que no instalé jamás","intent":"dispute_charge","dialect":"es-MX","family":"E-013","hard_negative":true,"style":"chat"}
+{"text":"hola! oye, me cobraron 31.000 por algo de Google que no compré, ayúdame","intent":"dispute_charge","dialect":"es-CO","family":"E-013","hard_negative":true,"style":"chat"}
+{"text":"oi, tudo bem? apareceu uma cobrança de R$ 47 na fatura que eu desconheço","intent":"dispute_charge","dialect":"pt-BR","family":"E-013","hard_negative":true,"style":"chat"}
+{"text":"Quiero hablar con alguien porque no reconozco un cargo de 2,700 en mi tarjeta","intent":"dispute_charge","dialect":"es-MX","family":"E-014","hard_negative":true,"style":"chat"}
+{"text":"necesito un asesor, hay un consumo de 44.000 en Falabella que no hice y nadie me lo explica","intent":"dispute_charge","dialect":"es-AR","family":"E-014","hard_negative":true,"style":"chat"}
+{"text":"quero falar com um atendente porque tem uma compra de R$ 260 que não reconheço","intent":"dispute_charge","dialect":"pt-BR","family":"E-014","hard_negative":true,"style":"chat"}
+{"text":"me pasaron un cobro en dólares, 79.99 USD de un sitio en el extranjero que no conozco","intent":"dispute_charge","dialect":"es-MX","family":"E-015","hard_negative":false,"style":"chat"}
+{"text":"aparece un cargo internacional de 50 USD de una página china, yo no compré nada afuera","intent":"dispute_charge","dialect":"es-CO","family":"E-015","hard_negative":false,"style":"chat"}
+{"text":"tengo un consumo en dólares, 120 USD en una web de Estados Unidos, y jamás compré ahí","intent":"dispute_charge","dialect":"es-AR","family":"E-015","hard_negative":false,"style":"chat"}
+{"text":"apareceu uma cobrança internacional de US$ 35 de um site que nunca acessei","intent":"dispute_charge","dialect":"pt-BR","family":"E-015","hard_negative":false,"style":"chat"}
+{"text":"tengo un cargo de R$ 200 que no reconozco, é da Americanas mas eu não comprei nada","intent":"dispute_charge","dialect":"mix","family":"E-016","hard_negative":false,"style":"mix"}
+{"text":"me cobraram duas veces o mesmo débito de 90 pesos, puedem revisar?","intent":"dispute_charge","dialect":"mix","family":"E-016","hard_negative":false,"style":"mix"}
+{"text":"ayer el cajero no me entregó la plata, o dinheiro no salió pero me debitó 1500","intent":"dispute_charge","dialect":"mix","family":"E-016","hard_negative":false,"style":"mix"}
+{"text":"Devolví unos zapatos a la tienda hace tres semanas y me prometieron el reembolso de 1,650, pero en mi cuenta no aparece y el cargo sigue ahí","intent":"dispute_charge","dialect":"es-MX","family":"E-017","hard_negative":false,"style":"largo"}
+{"text":"devolví el televisor a Alkosto, me dijeron que me reversaban los 899.000 y nada, el cobro sigue en mi tarjeta","intent":"dispute_charge","dialect":"es-CO","family":"E-017","hard_negative":false,"style":"chat"}
+{"text":"devolvi o tênis, a loja disse que estornaria os R$ 320 e até agora o valor continua cobrado","intent":"dispute_charge","dialect":"pt-BR","family":"E-017","hard_negative":false,"style":"chat"}
+{"text":"Perdí mi tarjeta de débito, por favor bloquéenla","intent":"block_card","dialect":"es-MX","family":"E-018","hard_negative":false,"style":"chat"}
+{"text":"che, no encuentro la tarjeta por ningún lado, bloqueámela ya","intent":"block_card","dialect":"es-AR","family":"E-018","hard_negative":false,"style":"chat"}
+{"text":"se me perdió la tarjeta de crédito en el taxi, necesito que me la bloqueen","intent":"block_card","dialect":"es-CO","family":"E-018","hard_negative":false,"style":"chat"}
+{"text":"perdi meu cartão em algum lugar, bloqueia por favor","intent":"block_card","dialect":"pt-BR","family":"E-018","hard_negative":false,"style":"chat"}
+{"text":"Me robaron la cartera con todo adentro, incluidas las tarjetas. Bloqueen todo","intent":"block_card","dialect":"es-MX","family":"E-019","hard_negative":false,"style":"largo"}
+{"text":"me afanaron la mochila con la billetera y la tarjeta, necesito frenarla","intent":"block_card","dialect":"es-AR","family":"E-019","hard_negative":false,"style":"chat"}
+{"text":"me robaron el celular y la billetera en el bus, bloquéenme la tarjeta ya","intent":"block_card","dialect":"es-CO","family":"E-019","hard_negative":false,"style":"chat"}
+{"text":"Quero bloquear meu cartão de crédito","intent":"block_card","dialect":"pt-BR","family":"E-020","hard_negative":false,"style":"terse"}
+{"text":"esqueci meu cartão num bar ontem, prefiro bloquear por segurança","intent":"block_card","dialect":"pt-BR","family":"E-020","hard_negative":false,"style":"chat"}
+{"text":"me roubaram na rua e levaram a carteira, preciso bloquear o cartão urgente","intent":"block_card","dialect":"pt-BR","family":"E-020","hard_negative":false,"style":"chat"}
+{"text":"pode travar meu cartão? acho que caiu do bolso","intent":"block_card","dialect":"pt-BR","family":"E-020","hard_negative":false,"style":"chat"}
+{"text":"Quiero cancelar mi tarjeta de crédito, ya no la voy a usar y prefiero que quede bloqueada","intent":"block_card","dialect":"es-MX","family":"E-021","hard_negative":true,"style":"chat"}
+{"text":"quiero dar de baja la tarjeta, la quiero cancelada hoy mismo","intent":"block_card","dialect":"es-AR","family":"E-021","hard_negative":true,"style":"terse"}
+{"text":"necesito cancelar la tarjeta que me llegó, ya no la quiero","intent":"block_card","dialect":"es-CO","family":"E-021","hard_negative":true,"style":"chat"}
+{"text":"Voy de viaje y dejé la tarjeta en el hotel de Cancún, prefiero congelarla hasta volver","intent":"block_card","dialect":"es-MX","family":"E-022","hard_negative":false,"style":"largo"}
+{"text":"me olvidé la tarjeta en la casa de mi ex, quiero que la congelen hasta ir a buscarla","intent":"block_card","dialect":"es-AR","family":"E-022","hard_negative":false,"style":"chat"}
+{"text":"dejé la tarjeta tirada en el gimnasio, mejor bloquéenla por si acaso","intent":"block_card","dialect":"es-CO","family":"E-022","hard_negative":false,"style":"chat"}
+{"text":"esqueci o cartão na casa da minha sogra, congela ele até eu buscar","intent":"block_card","dialect":"pt-BR","family":"E-022","hard_negative":false,"style":"chat"}
+{"text":"Buenas tardes, quisiera solicitar el bloqueo de mi tarjeta de débito terminación 4471 por extravío.","intent":"block_card","dialect":"es-MX","family":"E-023","hard_negative":false,"style":"formal"}
+{"text":"Buenos días, deseo bloquear de manera preventiva mi tarjeta de crédito, ya que no recuerdo dónde la dejé.","intent":"block_card","dialect":"es-CO","family":"E-023","hard_negative":false,"style":"formal"}
+{"text":"Bom dia, gostaria de solicitar o bloqueio do meu cartão de débito por perda.","intent":"block_card","dialect":"pt-BR","family":"E-023","hard_negative":false,"style":"formal"}
+{"text":"Creo que me clonaron la tarjeta, no hay ningún cargo raro todavía pero prefiero bloquearla ya","intent":"block_card","dialect":"es-CO","family":"E-024","hard_negative":false,"style":"largo"}
+{"text":"vi que el cajero tenía algo raro pegado y metí mi tarjeta, bloqueala por las dudas","intent":"block_card","dialect":"es-AR","family":"E-024","hard_negative":false,"style":"largo"}
+{"text":"usé el cajero de la plaza y tenía cosa extraña, quiero bloquear la tarjeta antes de que pase algo","intent":"block_card","dialect":"es-MX","family":"E-024","hard_negative":false,"style":"largo"}
+{"text":"perdí mi tarjeta, quero bloquear porfa","intent":"block_card","dialect":"mix","family":"E-025","hard_negative":false,"style":"mix"}
+{"text":"necesito bloquear meu cartão, me lo robaron en el ônibus","intent":"block_card","dialect":"mix","family":"E-025","hard_negative":false,"style":"mix"}
+{"text":"bloquear tarjeta ya!!","intent":"block_card","dialect":"es-MX","family":"E-026","hard_negative":false,"style":"terse"}
+{"text":"blokeen mi tarjeta x fa se me perdió","intent":"block_card","dialect":"es-CO","family":"E-026","hard_negative":false,"style":"typos"}
+{"text":"bloquea la tarj q me la robaron 😭","intent":"block_card","dialect":"es-AR","family":"E-026","hard_negative":false,"style":"emoji"}
+{"text":"Alguien entró a mi app del banco, vi movimientos de sesión que no fueron míos y ya no puedo ingresar","intent":"account_takeover","dialect":"es-MX","family":"E-027","hard_negative":false,"style":"largo"}
+{"text":"me hackearon la cuenta, entraron a la banca en línea desde otro celular","intent":"account_takeover","dialect":"es-CO","family":"E-027","hard_negative":false,"style":"chat"}
+{"text":"che, alguien se metió en mi home banking, me llegó aviso de un ingreso desde otro dispositivo y no fui yo","intent":"account_takeover","dialect":"es-AR","family":"E-027","hard_negative":false,"style":"largo"}
+{"text":"acho que invadiram meu app do banco, apareceu login de um aparelho que não é meu","intent":"account_takeover","dialect":"pt-BR","family":"E-027","hard_negative":false,"style":"chat"}
+{"text":"Alguien cambió mi contraseña y también el correo registrado, ya no puedo entrar a mi cuenta","intent":"account_takeover","dialect":"es-MX","family":"E-028","hard_negative":false,"style":"chat"}
+{"text":"me cambiaron el número de celular registrado en el banco y yo no lo pedí","intent":"account_takeover","dialect":"es-CO","family":"E-028","hard_negative":false,"style":"chat"}
+{"text":"mudaram a senha e o e-mail cadastrado da minha conta, não fui eu","intent":"account_takeover","dialect":"pt-BR","family":"E-028","hard_negative":false,"style":"chat"}
+{"text":"Me llamó alguien diciendo que era del banco, me pidió el código que llegó por SMS y se lo di. Ahora me da miedo","intent":"account_takeover","dialect":"es-MX","family":"E-029","hard_negative":false,"style":"largo"}
+{"text":"un tipo me llamó de parte del banco y le pasé el código de seguridad que me llegó, creo que era una estafa","intent":"account_takeover","dialect":"es-AR","family":"E-029","hard_negative":false,"style":"largo"}
+{"text":"le di la clave dinámica a un supuesto funcionario del banco por teléfono, qué hago","intent":"account_takeover","dialect":"es-CO","family":"E-029","hard_negative":false,"style":"chat"}
+{"text":"passei o código do SMS pra um suposto atendente do banco e agora acho que era golpe","intent":"account_takeover","dialect":"pt-BR","family":"E-029","hard_negative":false,"style":"chat"}
+{"text":"Mi celular se quedó sin señal de golpe y después me dijeron que alguien sacó un chip con mi número. Creo que me hicieron SIM swap","intent":"account_takeover","dialect":"es-MX","family":"E-030","hard_negative":false,"style":"largo"}
+{"text":"se me apagó la línea y alguien duplicó mi chip, temo que estén entrando a mis cuentas","intent":"account_takeover","dialect":"es-CO","family":"E-030","hard_negative":false,"style":"chat"}
+{"text":"clonaron mi chip, perdí señal y ahora me llegan mails de cambios en mi cuenta","intent":"account_takeover","dialect":"es-AR","family":"E-030","hard_negative":false,"style":"chat"}
+{"text":"Entré a un link que me llegó por WhatsApp que parecía del banco y puse mi usuario y clave. Después vi cargos de 4,000 y 6,500 que no hice","intent":"account_takeover","dialect":"es-MX","family":"E-031","hard_negative":true,"style":"largo"}
+{"text":"caí en un phishing, ingresé mis datos en una página falsa del banco y ya me sacaron 300.000","intent":"account_takeover","dialect":"es-CO","family":"E-031","hard_negative":true,"style":"chat"}
+{"text":"cliquei num link falso do banco, coloquei minha senha e já fizeram uma transferência de R$ 1.200","intent":"account_takeover","dialect":"pt-BR","family":"E-031","hard_negative":true,"style":"chat"}
+{"text":"Recebi um SMS dizendo que minha conta seria bloqueada, cliquei, coloquei os dados e agora não consigo mais entrar","intent":"account_takeover","dialect":"pt-BR","family":"E-032","hard_negative":false,"style":"largo"}
+{"text":"alguém acessou minha conta e mudou o celular cadastrado, preciso de ajuda urgente","intent":"account_takeover","dialect":"pt-BR","family":"E-032","hard_negative":false,"style":"chat"}
+{"text":"acho que roubaram minha senha do internet banking","intent":"account_takeover","dialect":"pt-BR","family":"E-032","hard_negative":false,"style":"terse"}
+{"text":"Quiero hablar con un asesor","intent":"human_request","dialect":"es-MX","family":"E-033","hard_negative":false,"style":"terse"}
+{"text":"pasame con una persona por favor","intent":"human_request","dialect":"es-AR","family":"E-033","hard_negative":false,"style":"chat"}
+{"text":"necesito que me atienda un asesor de carne y hueso","intent":"human_request","dialect":"es-CO","family":"E-033","hard_negative":false,"style":"chat"}
+{"text":"me comunican con un ejecutivo? gracias","intent":"human_request","dialect":"es-MX","family":"E-033","hard_negative":false,"style":"chat"}
+{"text":"No quiero hablar con un robot, dame una persona","intent":"human_request","dialect":"es-AR","family":"E-034","hard_negative":false,"style":"chat"}
+{"text":"con un bot no, por favor. Quiero que me atienda alguien real","intent":"human_request","dialect":"es-MX","family":"E-034","hard_negative":false,"style":"chat"}
+{"text":"esto de hablar con una máquina no me sirve, quiero un humano ya","intent":"human_request","dialect":"es-CO","family":"E-034","hard_negative":false,"style":"chat"}
+{"text":"Me passa pra um atendente humano?","intent":"human_request","dialect":"pt-BR","family":"E-035","hard_negative":false,"style":"chat"}
+{"text":"não quero falar com robô, quero uma pessoa","intent":"human_request","dialect":"pt-BR","family":"E-035","hard_negative":false,"style":"chat"}
+{"text":"pode me transferir para um atendente de verdade?","intent":"human_request","dialect":"pt-BR","family":"E-035","hard_negative":false,"style":"chat"}
+{"text":"humano pfv","intent":"human_request","dialect":"pt-BR","family":"E-035","hard_negative":false,"style":"terse"}
+{"text":"Prefiero que me llamen por teléfono, ¿pueden pedirle a un ejecutivo que me marque?","intent":"human_request","dialect":"es-CO","family":"E-036","hard_negative":false,"style":"chat"}
+{"text":"quiero que alguien me llame, no me gusta escribir","intent":"human_request","dialect":"es-MX","family":"E-036","hard_negative":false,"style":"chat"}
+{"text":"podés hacer que me llame un asesor? prefiero hablar de viva voz","intent":"human_request","dialect":"es-AR","family":"E-036","hard_negative":false,"style":"voz"}
+{"text":"Buenas tardes, solicito comunicarme con un representante de servicio al cliente.","intent":"human_request","dialect":"es-MX","family":"E-037","hard_negative":false,"style":"formal"}
+{"text":"Buenos días, quisiera que me transfieran con un agente humano, por favor.","intent":"human_request","dialect":"es-CO","family":"E-037","hard_negative":false,"style":"formal"}
+{"text":"Buenas noches, me gustaría ser atendido por un ejecutivo de la sucursal, si es posible.","intent":"human_request","dialect":"es-AR","family":"E-037","hard_negative":false,"style":"formal"}
+{"text":"Boa noite, gostaria de falar com um representante do banco, por gentileza.","intent":"human_request","dialect":"pt-BR","family":"E-037","hard_negative":false,"style":"formal"}
+{"text":"No quiero bloquear nada ni reclamar cargos, solo quiero que me pase un asesor","intent":"human_request","dialect":"es-MX","family":"E-038","hard_negative":true,"style":"chat"}
+{"text":"no tengo ningún cargo raro ni perdí la tarjeta, únicamente quiero hablar con una persona","intent":"human_request","dialect":"es-CO","family":"E-038","hard_negative":true,"style":"chat"}
+{"text":"nada de fraude ni bloqueo, quiero un humano y punto","intent":"human_request","dialect":"es-AR","family":"E-038","hard_negative":true,"style":"terse"}
+{"text":"quiero falar con un humano, no quiero al bot","intent":"human_request","dialect":"mix","family":"E-039","hard_negative":false,"style":"mix"}
+{"text":"necesito um asesor por favor, no entiendo esta cosa","intent":"human_request","dialect":"mix","family":"E-039","hard_negative":false,"style":"mix"}
+{"text":"can I talk to an agente humano? no quiero el bot","intent":"human_request","family":"E-039","dialect":"mix","hard_negative":false,"style":"mix"}
+{"text":"me pasan con alguien de verdad plis 🙏","intent":"human_request","dialect":"es-MX","family":"E-039","hard_negative":false,"style":"emoji"}
+{"text":"No quiero bloquear nada, solo quiero saber por qué me cobran comisión de manejo","intent":"out_of_scope","dialect":"es-MX","family":"E-040","hard_negative":true,"style":"chat"}
+{"text":"no es para bloquear ni reclamar, solo me explican por qué me cobran cuota de manejo?","intent":"out_of_scope","dialect":"es-CO","family":"E-040","hard_negative":true,"style":"chat"}
+{"text":"che, por qué me cobran mantenimiento de cuenta todos los meses? no es un cargo raro, quiero entender la comisión","intent":"out_of_scope","dialect":"es-AR","family":"E-040","hard_negative":true,"style":"largo"}
+{"text":"por que vocês cobram anuidade do cartão? só quero entender a tarifa, não é fraude","intent":"out_of_scope","dialect":"pt-BR","family":"E-040","hard_negative":true,"style":"chat"}
+{"text":"No es fraude, solo quiero mi estado de cuenta de agosto","intent":"out_of_scope","dialect":"es-MX","family":"E-041","hard_negative":true,"style":"chat"}
+{"text":"necesito el extracto del mes pasado para un trámite, no tengo ningún problema con cobros","intent":"out_of_scope","dialect":"es-CO","family":"E-041","hard_negative":true,"style":"chat"}
+{"text":"preciso do extrato dos últimos três meses, nenhuma cobrança estranha, é só pra comprovar renda","intent":"out_of_scope","dialect":"pt-BR","family":"E-041","hard_negative":true,"style":"chat"}
+{"text":"¿Cuánto tarda una aclaración de cargo en resolverse?","intent":"out_of_scope","dialect":"es-MX","family":"E-042","hard_negative":true,"style":"chat"}
+{"text":"en general, cuánto demora una disputa por un consumo desconocido? es por si me pasa alguna vez","intent":"out_of_scope","dialect":"es-AR","family":"E-042","hard_negative":true,"style":"largo"}
+{"text":"¿cuántos días tienen para responder un reclamo por un cargo no reconocido?","intent":"out_of_scope","dialect":"es-CO","family":"E-042","hard_negative":true,"style":"chat"}
+{"text":"quanto tempo leva pra resolver uma contestação de compra? só curiosidade","intent":"out_of_scope","dialect":"pt-BR","family":"E-042","hard_negative":true,"style":"chat"}
+{"text":"Quiero desbloquear mi tarjeta, ya la encontré","intent":"out_of_scope","dialect":"es-MX","family":"E-043","hard_negative":true,"style":"chat"}
+{"text":"desbloqueame la tarjeta que la había frenado sin querer","intent":"out_of_scope","dialect":"es-AR","family":"E-043","hard_negative":true,"style":"chat"}
+{"text":"la bloqueé pero apareció, necesito reactivarla","intent":"out_of_scope","dialect":"es-CO","family":"E-043","hard_negative":true,"style":"chat"}
+{"text":"quero desbloquear meu cartão, achei ele na bolsa","intent":"out_of_scope","dialect":"pt-BR","family":"E-043","hard_negative":true,"style":"chat"}
+{"text":"¿Cuál es mi saldo disponible?","intent":"out_of_scope","dialect":"es-MX","family":"E-044","hard_negative":false,"style":"terse"}
+{"text":"cuánta plata me queda en la cuenta de ahorros","intent":"out_of_scope","dialect":"es-CO","family":"E-044","hard_negative":false,"style":"chat"}
+{"text":"qual é o meu saldo na conta corrente?","intent":"out_of_scope","dialect":"pt-BR","family":"E-044","hard_negative":false,"style":"terse"}
+{"text":"Olvidé mi contraseña de la banca en línea, cómo la recupero","intent":"out_of_scope","dialect":"es-MX","family":"E-045","hard_negative":true,"style":"chat"}
+{"text":"me olvidé la clave del home banking, nadie me la tocó, simplemente no me acuerdo","intent":"out_of_scope","dialect":"es-AR","family":"E-045","hard_negative":true,"style":"chat"}
+{"text":"esqueci minha senha do app, como faço pra criar outra?","intent":"out_of_scope","dialect":"pt-BR","family":"E-045","hard_negative":true,"style":"chat"}
+{"text":"Quero aumentar o limite do meu cartão de crédito","intent":"out_of_scope","dialect":"pt-BR","family":"E-046","hard_negative":false,"style":"chat"}
+{"text":"quiero subir el cupo de mi tarjeta, se puede?","intent":"out_of_scope","dialect":"es-CO","family":"E-046","hard_negative":false,"style":"chat"}
+{"text":"me gustaría ampliar mi límite de crédito, ¿qué necesito?","intent":"out_of_scope","dialect":"es-MX","family":"E-046","hard_negative":false,"style":"chat"}
+{"text":"Reconozco el cargo de 8,900 de la tienda pero quiero pasarlo a meses sin intereses","intent":"out_of_scope","dialect":"es-MX","family":"E-047","hard_negative":true,"style":"chat"}
+{"text":"sí, esa compra la hice yo, solo quiero diferirla a 12 cuotas","intent":"out_of_scope","dialect":"es-CO","family":"E-047","hard_negative":true,"style":"chat"}
+{"text":"a compra foi minha sim, só quero parcelar essa fatura de R$ 1.800","intent":"out_of_scope","dialect":"pt-BR","family":"E-047","hard_negative":true,"style":"chat"}
+{"text":"¿Cómo cambio el PIN de mi tarjeta?","intent":"out_of_scope","dialect":"es-MX","family":"E-048","hard_negative":false,"style":"chat"}
+{"text":"quiero cambiar la clave del cajero, la actual es muy fácil","intent":"out_of_scope","dialect":"es-AR","family":"E-048","hard_negative":false,"style":"chat"}
+{"text":"como altero a senha do cartão?","intent":"out_of_scope","dialect":"pt-BR","family":"E-048","hard_negative":false,"style":"terse"}
+{"text":"Me explican la tasa del préstamo personal? Estoy pensando en pedir 50 mil","intent":"out_of_scope","dialect":"es-MX","family":"E-049","hard_negative":false,"style":"chat"}
+{"text":"quiero sacar un crédito de libre inversión, cuáles son las tasas","intent":"out_of_scope","dialect":"es-CO","family":"E-049","hard_negative":false,"style":"chat"}
+{"text":"che, sacan préstamos hipotecarios? qué tasa tienen","intent":"out_of_scope","dialect":"es-AR","family":"E-049","hard_negative":false,"style":"chat"}
+{"text":"quero simular um empréstimo consignado de R$ 10 mil","intent":"out_of_scope","dialect":"pt-BR","family":"E-049","hard_negative":false,"style":"chat"}
+{"text":"Me pueden enviar el plástico de mi tarjeta nueva a otro domicilio?","intent":"out_of_scope","dialect":"es-MX","family":"E-050","hard_negative":false,"style":"chat"}
+{"text":"pedí la tarjeta hace tres semanas y todavía no me llegó a casa, dónde está?","intent":"out_of_scope","dialect":"es-AR","family":"E-050","hard_negative":false,"style":"chat"}
+{"text":"meu cartão novo ainda não chegou, como rastreio a entrega?","intent":"out_of_scope","dialect":"pt-BR","family":"E-050","hard_negative":false,"style":"chat"}
+{"text":"Quiero poner un reclamo porque en la sucursal me atendieron pésimo, esperé dos horas","intent":"out_of_scope","dialect":"es-CO","family":"E-051","hard_negative":true,"style":"largo"}
+{"text":"quiero quejarme del trato del ejecutivo de la sucursal Insurgentes, fue grosero","intent":"out_of_scope","dialect":"es-MX","family":"E-051","hard_negative":true,"style":"chat"}
+{"text":"tengo un reclamo por la atención que recibí, no es por plata, es por cómo me trataron","intent":"out_of_scope","dialect":"es-AR","family":"E-051","hard_negative":true,"style":"chat"}
+{"text":"quero fazer uma reclamação sobre o atendimento da agência, fui muito mal tratado","intent":"out_of_scope","dialect":"pt-BR","family":"E-051","hard_negative":true,"style":"chat"}
+{"text":"¿Qué documentos necesito para abrir una disputa por un cargo? Todavía no tengo ninguno, es para saber","intent":"out_of_scope","dialect":"es-MX","family":"E-052","hard_negative":true,"style":"largo"}
+{"text":"cómo funciona el proceso de contracargo, me lo explicás en general?","intent":"out_of_scope","dialect":"es-AR","family":"E-052","hard_negative":true,"style":"chat"}
+{"text":"me pueden decir cuál es la diferencia entre bloquear y cancelar una tarjeta? solo pregunto","intent":"out_of_scope","dialect":"es-CO","family":"E-052","hard_negative":true,"style":"chat"}
+{"text":"como funciona o estorno de uma compra não reconhecida, em geral? não tenho nenhuma agora","intent":"out_of_scope","dialect":"pt-BR","family":"E-052","hard_negative":true,"style":"largo"}
+{"text":"Gracias, eso era todo","intent":"closing","dialect":"es-MX","family":"E-053","hard_negative":false,"style":"chat"}
+{"text":"listo, chau, gracias","intent":"closing","dialect":"es-AR","family":"E-053","hard_negative":false,"style":"chat"}
+{"text":"muchas gracias por su ayuda, que tenga buen día","intent":"closing","dialect":"es-CO","family":"E-053","hard_negative":false,"style":"formal"}
+{"text":"Valeu, tchau!","intent":"closing","dialect":"pt-BR","family":"E-054","hard_negative":false,"style":"chat"}
+{"text":"obrigado, era só isso mesmo","intent":"closing","dialect":"pt-BR","family":"E-054","hard_negative":false,"style":"chat"}
+{"text":"tá bom, muito obrigada pela ajuda, até mais","intent":"closing","dialect":"pt-BR","family":"E-054","hard_negative":false,"style":"chat"}
+{"text":"ok gracias, ya no necesito nada más 👍","intent":"closing","dialect":"es-MX","family":"E-055","hard_negative":false,"style":"emoji"}
+{"text":"perfecto, todo claro. hasta luego","intent":"closing","dialect":"es-CO","family":"E-055","hard_negative":false,"style":"chat"}
+{"text":"dale, mil gracias, nada más por hoy","intent":"closing","dialect":"es-AR","family":"E-055","hard_negative":false,"style":"chat"}
+{"text":"gracias, ya quedó resuelto, adiós","intent":"closing","dialect":"es-MX","family":"E-056","hard_negative":false,"style":"terse"}
+{"text":"gracias, todo bien, no hace falta bloquear nada, chau","intent":"closing","dialect":"es-AR","family":"E-056","hard_negative":true,"style":"chat"}
+{"text":"obrigado, não preciso de mais nada, nenhum cargo pendente","intent":"closing","dialect":"pt-BR","family":"E-056","hard_negative":true,"style":"chat"}
+{"text":"thanks, gracias por todo, tchau","intent":"closing","dialect":"mix","family":"E-057","hard_negative":false,"style":"mix"}
+{"text":"gracias, obrigado, eso es todo","intent":"closing","dialect":"mix","family":"E-057","hard_negative":false,"style":"mix"}
+{"text":"ok bye, gracias!","intent":"closing","dialect":"es-CO","family":"E-057","hard_negative":false,"style":"terse"}
+{"text":"Hola","intent":"unknown","dialect":"es-MX","family":"E-058","hard_negative":false,"style":"terse"}
+{"text":"holaa buenas tardes","intent":"unknown","dialect":"es-CO","family":"E-058","hard_negative":false,"style":"chat"}
+{"text":"buen día, cómo andan?","intent":"unknown","dialect":"es-AR","family":"E-058","hard_negative":false,"style":"chat"}
+{"text":"oi, boa tarde","intent":"unknown","dialect":"pt-BR","family":"E-058","hard_negative":false,"style":"chat"}
+{"text":"Tengo un problema","intent":"unknown","dialect":"es-MX","family":"E-059","hard_negative":false,"style":"terse"}
+{"text":"necesito ayuda con algo","intent":"unknown","dialect":"es-CO","family":"E-059","hard_negative":false,"style":"chat"}
+{"text":"tenho um problema, pode me ajudar?","intent":"unknown","dialect":"pt-BR","family":"E-059","hard_negative":false,"style":"chat"}
+{"text":"me pasó algo raro, no sé cómo explicarlo","intent":"unknown","dialect":"es-AR","family":"E-059","hard_negative":false,"style":"chat"}
+{"text":"¿Qué hora es en Tokio?","intent":"unknown","dialect":"es-MX","family":"E-060","hard_negative":false,"style":"chat"}
+{"text":"recomiéndame una pizzería por Chapinero","intent":"unknown","dialect":"es-CO","family":"E-060","hard_negative":false,"style":"chat"}
+{"text":"quién ganó el partido de anoche, River o Boca?","intent":"unknown","dialect":"es-AR","family":"E-060","hard_negative":false,"style":"chat"}
+{"text":"vai chover amanhã em São Paulo?","intent":"unknown","dialect":"pt-BR","family":"E-060","hard_negative":false,"style":"chat"}
+{"text":"asdfgh","intent":"unknown","dialect":"es-MX","family":"E-061","hard_negative":false,"style":"terse"}
+{"text":"???","intent":"unknown","dialect":"es-AR","family":"E-061","hard_negative":false,"style":"terse"}
+{"text":"jajaja ok pero no","intent":"unknown","dialect":"es-CO","family":"E-061","hard_negative":false,"style":"chat"}
+{"text":"Oi, tudo certo?","intent":"unknown","dialect":"pt-BR","family":"E-062","hard_negative":false,"style":"chat"}
+{"text":"e aí, alguém aí?","intent":"unknown","dialect":"pt-BR","family":"E-062","hard_negative":false,"style":"chat"}
+{"text":"olá, queria saber uma coisa","intent":"unknown","dialect":"pt-BR","family":"E-062","hard_negative":false,"style":"chat"}
+{"text":"Quiero saber si","intent":"unknown","dialect":"es-MX","family":"E-063","hard_negative":false,"style":"terse"}
+{"text":"mi tarjeta y","intent":"unknown","dialect":"es-CO","family":"E-063","hard_negative":true,"style":"terse"}
+{"text":"el cargo...","intent":"unknown","dialect":"es-AR","family":"E-063","hard_negative":true,"style":"terse"}
+{"text":"eu queria... deixa pra lá","intent":"unknown","dialect":"pt-BR","family":"E-063","hard_negative":false,"style":"terse"}
+{"text":"Tengo una duda","intent":"unknown","dialect":"es-AR","family":"E-064","hard_negative":false,"style":"terse"}
+{"text":"una pregunta nomás, puedo?","intent":"unknown","dialect":"es-MX","family":"E-064","hard_negative":false,"style":"chat"}
+{"text":"hola, tengo una consulta pero no sé por dónde empezar","intent":"unknown","dialect":"es-CO","family":"E-064","hard_negative":false,"style":"chat"}
