@@ -1,10 +1,25 @@
 """Redacción de respuestas.
 
 `TemplateWriter` (línea base) arma el texto solo con hechos del estado: no puede inventar cifras.
-Un `LLMWriter` futuro podrá mejorar el tono (y adaptar dialecto), pero su salida pasará por un
-verificador que compare cifras/fechas/IDs contra los hechos antes de enviarla.
+`LLMWriter` (`llm_writer.py`) mejora el tono y adapta el dialecto; su salida pasa por un verificador
+determinista que compara cifras/fechas/IDs contra los hechos y, si falla, se usa la plantilla.
 """
 from __future__ import annotations
+
+from typing import Callable, Protocol
+
+Country = Callable[[], "str | None"] | str | None
+
+
+class Writer(Protocol):
+    def write(self, key: str, lang: str, **facts) -> str: ...
+
+    def rule_text(self, rule_id: str, explain_es: str, lang: str) -> str: ...
+
+    def compose(self, key: str, lang: str, facts: dict, country: Country = None) -> tuple[str, dict | None]:
+        """Texto final + telemetría del modelo (None si no hubo modelo). `country` puede ser una función
+        (se evalúa solo si hace falta, para no consultar el perfil en cada turno)."""
+        ...
 
 T = {
     "es": {
@@ -80,6 +95,9 @@ class TemplateWriter:
 
     def write(self, key: str, lang: str, **facts) -> str:
         return T[lang][key].format(**facts)
+
+    def compose(self, key: str, lang: str, facts: dict, country: Country = None) -> tuple[str, dict | None]:
+        return self.write(key, lang, **facts), None
 
     def rule_text(self, rule_id: str, explain_es: str, lang: str) -> str:
         return RULE_PT.get(rule_id, explain_es) if lang == "pt" else explain_es
