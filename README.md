@@ -48,7 +48,9 @@ src/bankagent/
   graph.py              grafo LangGraph con transiciones declaradas y traza
   chat.py               chat de consola
   evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
+  evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
 evals/cases/            casos dev/test en JSONL + manifiesto (generados por el equipo, ver su README)
+evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
 scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)
 ```
@@ -75,6 +77,17 @@ python -m bankagent.chat --customer CLI-XXXXXXXX
 python -m bankagent.evals.cases --db data/serving.duckdb        # verifica evals/cases (test congelado, determinista)
 python -m bankagent.evals.run --db data/serving.duckdb --system b0 --system b1 --system rules --repeats 3
 ```
+
+## Evaluación humana de los handoffs
+Kit para que 4 personas califiquen ~35 paquetes de handoff en menos de 30 minutos cada una. Rúbrica, anclajes e
+instrucciones en [`evals/human/RUBRIC.md`](evals/human/RUBRIC.md).
+```bash
+PYTHONPATH=src python -m bankagent.evals.human_kit build --db data/demo/demo.duckdb --n 30 --seed 11   # regenera el kit
+PYTHONPATH=src python -m bankagent.evals.human_kit score "evals/human/sheets/*.csv"                    # -> reports/human_eval.md
+PYTHONPATH=src python -m bankagent.evals.human_kit check --db data/demo/demo.duckdb                   # -> reports/handoff_completeness.md
+```
+`check` es la contraparte automática: campos presentes y no vacíos, y la política re-evaluada con los hechos del
+paquete tiene que reproducir las reglas disparadas. Los 5 controles degradados del kit tienen que fallar.
 
 ## Cómo activar el LLM
 El agente funciona completo sin LLM (reglas + plantillas). Para activar el router y/o el writer con modelo:
