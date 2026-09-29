@@ -30,7 +30,7 @@ from .observability import emit as emit_trace
 from .policy import PolicyEngine
 from .responses import TemplateWriter, fmt_option, fmt_txn, handoff_summary
 from .tools import BankTools, ToolError
-from .understanding import Router, RuleRouter, detect_language
+from .understanding import Router, RuleRouter, detect_language, session_language
 
 DISPUTABLE_TYPES = {"Purchase", "Withdrawal", "Payment", "Transfer", "Adjustment"}
 TRANSIENT_ERRORS = {"unavailable", "timeout"}
@@ -187,7 +187,7 @@ class Agent:
         if reason:
             strikes += 1
             out = {"next": "respond", "outcome": "blocked", "reply_key": "blocked_input", "strikes": strikes,
-                   "lang": detect_language(text), "conversation": [msg], "owner": session.customer_id,
+                   "lang": detect_language(text, s.get("lang")), "conversation": [msg], "owner": session.customer_id,
                    "detail": f"injection {self.detector.name}: {reason} strikes={strikes}"}
             if strikes >= self.max_strikes:
                 out.update(next="handoff", handoff_reason="security_lockout")
@@ -206,7 +206,8 @@ class Agent:
         u = self.router.understand(redact(s["user_text"]), today, awaiting)
         out: dict[str, Any] = {"understanding": {"intent": u.intent, "confidence": u.confidence, "language": u.language,
                                                  "router": u.router, "slots": vars(u.slots)},
-                               "lang": u.language, "detail": f"{u.intent}@{u.confidence:.2f} router={u.router}",
+                               "lang": session_language(s.get("lang"), s["user_text"], u.language),
+                               "detail": f"{u.intent}@{u.confidence:.2f} router={u.router}",
                                "llm": u.llm}
         if awaiting == "confirmation":  # solo si la pregunta se hizo en el turno anterior (#49)
             if u.intent == "confirm" and u.confidence >= self.min_confidence:
@@ -264,6 +265,8 @@ class Agent:
     def select_option(self, s: State, calls) -> dict:
         opt = s["understanding"]["slots"].get("option")
         cands = s.get("candidates") or []
+        if opt == -1:  # "la última" / "o último"
+            opt = len(cands)
         if not opt or opt > len(cands):
             return {"next": "respond", "outcome": "clarify", "reply_key": "choose", "detail": "invalid option"}
         chosen = cands[opt - 1]

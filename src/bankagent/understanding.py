@@ -52,28 +52,43 @@ def _norm(text: str) -> str:
     return "".join(c for c in t if not unicodedata.combining(c))
 
 
-PT_MARKERS = {"nao", "voce", "cobranca", "cartao", "reconheco", "ontem", "obrigado", "obrigada", "compra", "meu",
-              "minha", "bloquear", "sim", "hoje", "semana passada", "estou", "fui", "cobrado", "cobraram", "tenho"}
-ES_MARKERS = {"no", "usted", "cobro", "tarjeta", "reconozco", "ayer", "gracias", "mi", "bloquear", "si", "hoy",
-              "semana pasada", "estoy", "me cobraron", "tengo", "cargo"}
+# Marcadores de idioma: solo palabras que distinguen es de pt (no "compra", "bloquear", "dolares", que son de ambos).
+# Un mensaje sin marcadores o empatado ("ok", "1", "confirmo") no decide: hereda el idioma de la sesión (#39).
+PT_MARKERS = {"nao", "voce", "voces", "cobranca", "cartao", "cartoes", "reconheco", "desconheco", "desconhecido",
+              "ontem", "obrigado", "obrigada", "valeu", "meu", "minha", "meus", "minhas", "sim", "hoje", "semana passada",
+              "estou", "cobrado", "cobraram", "tenho", "quero", "falar", "atendente", "um", "uma", "essa", "esse",
+              "isso", "fatura", "lancamento", "contestacao", "pode", "tambem", "oi", "ola", "tchau", "preciso",
+              "gostaria", "ajuda", "reais", "estranha", "estranho", "apareceu", "fiz", "sei", "acho", "certeza",
+              "bloqueie", "roubaram", "roubado", "roubada", "clonaram", "pessoa", "nem", "ja", "agora", "conta",
+              "dinheiro", "autorizei", "vou", "qual", "obrigadao", "beleza", "tudo", "fazer", "duas", "dois", "vezes",
+              "alguem", "cobrou"}
+ES_MARKERS = {"no", "usted", "cobro", "tarjeta", "reconozco", "desconozco", "ayer", "gracias", "mi", "mis", "si",
+              "hoy", "semana pasada", "estoy", "me cobraron", "tengo", "cargo", "quiero", "hablar", "persona", "asesor",
+              "una", "un", "el", "los", "las", "yo", "esa", "ese", "eso", "cuenta", "hice", "pero", "ahora", "hola",
+              "buenas", "che", "vos", "sos", "tenes", "queres", "podes", "hacelo", "necesito", "ayuda", "movimiento",
+              "autorice", "robaron", "clonaron", "ninguna", "ninguno", "dinero", "pesos", "cual",
+              "muchas", "porfa", "hacer", "listo", "dale", "ya", "tambien"}
 
 # Un "*" final indica prefijo (bloque* = bloquear, bloqueen, bloqueala, bloqueie...).
 # Ajustes 2026-09-28 (issue #13): variantes de es-AR/es-CO/pt-BR y errores comunes vistos SOLO en el split dev.
 KEYWORDS: dict[str, list[str]] = {
     "dispute_charge": ["no reconozco", "no reconosco", "nao reconheco", "no reconheco", "cargo", "cobro", "cobranca",
                        "cobraram", "me cobraron", "disput*", "contestar", "fraude", "no hice", "no lo hice", "nao fiz",
-                       "no fui yo", "nao fui eu", "desconozco", "desconocer", "no autorice", "no es mio", "nao e minha"],
+                       "no fui yo", "nao fui eu", "desconozco", "desconocer", "no autorice", "no es mio", "nao e minha",
+                       # pt-BR natural (#39): "vi um lançamento desconhecido", "compra estranha na fatura"
+                       "desconhec*", "nao autorizei", "nao autorizad*", "estranh*", "contestacao",
+                       "nao reconhe*", "no reconoc*", "no autoric*", "cargo raro", "cobro raro", "movimiento raro",
+                       "yo no fui", "pero yo no fui"],
     "block_card": ["bloque*", "robaron", "roubaram", "roubad*", "perdi*", "extravi*", "afanaron"],
-    "confirm": ["si", "sim", "confirmo", "de acuerdo", "dale", "ok", "correcto", "pode", "claro", "va", "orale",
-                "adelante", "listo", "de una", "obvio", "isso", "beleza", "hazlo", "procede"],
-    "deny": ["no", "nao", "cancelar", "mejor no", "melhor nao", "nel", "deja", "dejalo", "deixa"],
     "out_of_scope": ["credito", "prestamo", "emprestimo", "hipoteca", "inversion", "invertir", "investimento", "investir",
                      "aplicacao", "seguro", "tasa", "saldo", "plazo fijo", "cdt", "cupo", "limite", "direccion", "endereco"],
 }
 # "tarjeta de crédito" nombra el producto, no pide un crédito
 PRODUCT_NAMES = re.compile(r"(tarjeta|cartao|targeta) de (credito|debito)")
+# -1 = la última de la lista ("la última", "o último"); el grafo la resuelve contra las opciones mostradas.
 ORDINALS = {"primera": 1, "primeira": 1, "segunda": 2, "tercera": 3, "terceira": 3, "cuarta": 4, "quarta": 4,
-            "quinta": 5}
+            "quinta": 5, "primero": 1, "primeiro": 1, "segundo": 2, "tercero": 3, "terceiro": 3, "cuarto": 4,
+            "quinto": 5, "ultim*": -1}
 MONTHS = {m: i for i, m in enumerate(["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
                                       "septiembre", "octubre", "noviembre", "diciembre"], 1)}
 MONTHS.update({m: i for i, m in enumerate(["janeiro", "fevereiro", "marco", "abril", "maio", "junho", "julho", "agosto",
@@ -118,7 +133,8 @@ AFFIRM = ["si", "sim", "claro", "dale", "ok", "okay", "okey", "confirmo", "confi
 DENY = ["no", "nao", "nop", "nope", "nel", "cancelar", "cancela", "cancelalo", "mejor no", "melhor nao", "nem pensar",
         "de ninguna manera", "para nada", "ninguna", "ninguno", "nenhuma", "nenhum", "negativo", "no quiero",
         "nao quero", "todavia no", "ainda nao", "dejalo", "deja asi", "olvidalo", "no gracias", "nao obrigado",
-        "nao obrigada", "de jeito nenhum", "jamas", "nunca", "no hagas nada", "nao faca nada", "no la abras",
+        "nao obrigada", "de jeito nenhum", "jamas", "nunca", "no hagas nada", "nao faca nada", "no la abras", "deja",
+        "deixa", "deixa pra la",
         "no abras", "nao abra", "ni loca", "ni loco", "ni en pedo", "ni a palos"]
 HEDGE = ["no se", "nose", "nao sei", "sei la", "creo", "creo que si", "tal vez", "talvez", "quizas", "quiza", "capaz",
          "puede ser", "pode ser", "no estoy seguro", "no estoy segura", "no estoy muy seguro", "nao tenho certeza",
@@ -191,12 +207,28 @@ COUNTRIES = {"brasil": "Brazil", "brazil": "Brazil", "mexico": "México", "colom
              "espana": "Spain", "estados unidos": "USA", "eeuu": "USA", "eua": "USA"}
 
 
-def detect_language(text: str) -> Literal["es", "pt"]:
+def language_scores(text: str) -> tuple[int, int]:
+    """(marcadores pt, marcadores es) del mensaje."""
     t = _norm(text)
     words = set(re.findall(r"[a-z]+", t))
     pt = sum(1 for m in PT_MARKERS if (m in t if " " in m else m in words))
     es = sum(1 for m in ES_MARKERS if (m in t if " " in m else m in words))
+    return pt, es
+
+
+def detect_language(text: str, prior: str | None = None) -> Literal["es", "pt"]:
+    """Idioma del mensaje; si no hay evidencia (empate), el de la sesión (`prior`) o español."""
+    pt, es = language_scores(text)
+    if pt == es:
+        return "pt" if prior == "pt" else "es"
     return "pt" if pt > es else "es"
+
+
+def session_language(prior: str | None, text: str, proposed: str) -> str:
+    """Idioma pegajoso de la conversación: un mensaje sin evidencia propia ("ok", "1", "confirmo") hereda el de
+    la sesión en vez de volver a español por defecto. Con evidencia, manda lo que propuso el router."""
+    pt, es = language_scores(text)
+    return (prior or proposed) if pt == es else proposed
 
 
 def _has(t: str, kw: str) -> bool:
