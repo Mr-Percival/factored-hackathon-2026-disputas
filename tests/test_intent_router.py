@@ -171,3 +171,39 @@ def test_full_model_if_cached():
     except Exception as e:  # noqa: BLE001 - sin caché del modelo preentrenado (CI sin red): se omite
         pytest.skip(f"modelo preentrenado no disponible: {e}")
     assert m.predict("no reconozco un cargo de 350").label == "dispute_charge"
+
+
+# ------------------------------------------------------------------ #64: composición modelo + reglas
+def test_abstention_backs_off_to_an_unambiguous_non_action_rule(router):
+    """El modelo no sabe ("seguro" no está en su vocabulario) y RuleRouter ve un tema fuera de alcance: se usa la
+    regla en vez de pedir aclaración, y la traza lo dice."""
+    u = router.understand("quiero dar de baja un seguro", TODAY, None)
+    assert u.intent == "out_of_scope" and "rules:abstain" in u.router and u.llm["backoff"] == "abstain"
+    assert u.llm["abstained"]  # la telemetría conserva lo que dijo el modelo
+
+
+def test_abstention_never_backs_off_into_an_action(router):
+    """Ceder a RuleRouter hacia disputa/bloqueo subía la acción equivocada de 1.0% a 3.9% en validación fuera de
+    fold (train): ante la abstención esas rutas siguen pidiendo aclaración."""
+    u = router.understand("quiero desconocer una transferencia de 4.240,50 dólares", TODAY, None)
+    assert u.intent == "unknown" and u.llm["abstained"] and "backoff" not in u.llm
+    assert u.slots.amount == 4240.5  # los slots siguen siendo de RuleRouter
+
+
+def test_confident_model_is_not_overridden(router):
+    """El modelo seguro decide aunque RuleRouter vea otra cosa (acá: disputa con monto)."""
+    u = router.understand("retiren el cargo de 500 que no hice", TODAY, None)
+    assert u.intent == "cancel_dispute" and u.router == "embed:stub" and "backoff" not in u.llm
+
+
+@lite_present
+def test_lite_model_disputes_transfers_and_withdrawals():
+    """Regresión #64: el train no tenía disputas de transferencias ni de retiros; "disputar una transferencia" salía
+    fuera de alcance (p=0.94) y "disputar un retiro" como retirar una disputa. Frases escritas para este test (no
+    están en el corpus)."""
+    m = load_intent_model(DEFAULT_DIR)
+    for text in ("Quiero disputar una transferencia de $4.240.000, ¿me colaboran?",
+                 "Buenas tardes, quiero disputar un retiro por como $480 USD el 23 de abril",
+                 "Quero contestar uma transferência de $ 20.564.762",
+                 "no reconozco una transferencia de 61 dólares del 8 de junio"):
+        assert m.predict(text).label == "dispute_charge", text

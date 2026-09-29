@@ -9,6 +9,7 @@
 | BANKAGENT_CORS_ORIGINS | (vacío) | orígenes extra permitidos, separados por coma (dev: http://localhost:5173) |
 | BANKAGENT_COOKIE_SECURE | auto | 1/0 fuerza el atributo Secure; auto = según el esquema de la petición |
 | BANKAGENT_RATE_LIMIT_PER_MIN | 30 | mensajes por minuto por sesión (o IP) |
+| BANKAGENT_ROUTER | embeddings | intención: `embeddings` (router aprendido lite, ADR 0009) o `rules`. Si el modelo no carga, cada turno responde RuleRouter y dice `rules(fallback:model_unavailable)` |
 | BANKAGENT_WEB_DIST | web/dist | SPA compilada que sirve FastAPI en producción |
 | BANKAGENT_DOCS | 1 | 0 = sin /api/docs ni /api/openapi.json |
 """

@@ -7,7 +7,7 @@ Un paquete está COMPLETO si pasa todos los chequeos que le aplican según su mo
   (así un hecho alterado o una regla equivocada se detectan sin mirar el texto);
 - en motivos técnicos: evidencia de las herramientas (tool_failure) o acciones registradas (action_not_verified).
 
-    python -m bankagent.evals.human_kit check --db data/demo/demo.duckdb
+    python -m bankagent.evals.human_kit check --db data/demo/demo.duckdb [--router rules --router embeddings]
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from ..tools import BankTools
 
 REQUIRED = ("reason", "created_at", "language", "request", "verified_facts", "policy", "actions_taken", "evidence",
             "unresolved_questions", "summary")
-TECHNICAL_REASONS = ("out_of_scope", "tool_failure", "security_lockout", "action_not_verified", "no_active_card",
+TECHNICAL_REASONS = ("out_of_scope", "tool_failure", "security_lockout", "security_review", "action_not_verified", "no_active_card",
                      # motivos conversacionales (#40)
                      "consent_unclear", "customer_request", "account_takeover", "clarification_exhausted",
                      "dispute_status", "cancel_dispute")
@@ -88,7 +88,7 @@ def is_complete(p: dict, policy: PolicyEngine) -> bool:
     return all(ok for _, ok, _ in check_packet(p, policy))
 
 
-def scenario_packets(db: str, scenarios_path: str) -> list[tuple[str, dict]]:
+def scenario_packets(db: str, scenarios_path: str, router: str = "rules") -> list[tuple[str, dict]]:
     """Corre los escenarios de docs/demo/demo_customers.json con el agente real y junta todos los handoffs."""
     from ..factory import build_agent
 
@@ -99,7 +99,7 @@ def scenario_packets(db: str, scenarios_path: str) -> list[tuple[str, dict]]:
         identity = IdentityService()
         tools = BankTools(db, identity)
         try:
-            agent = build_agent(tools, router="rules", writer="templates")
+            agent = build_agent(tools, router=router, writer="templates")
             token = identity.login(sc["customer_id"])
             for i, turn in enumerate(sc["turns"], 1):
                 if turn.get("action") == "expire_session":

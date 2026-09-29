@@ -1,0 +1,64 @@
+{"text": "quiero disputar una transferencia de $4,500 que yo no hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-001", "hard_negative": false, "style": "chat"}
+{"text": "Buenas, necesito desconocer una transferencia de $1.200.000 que no autoricé", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-001", "hard_negative": false, "style": "chat"}
+{"text": "che, me salió una transferencia de $350.000 que no hice yo, la quiero desconocer", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-001", "hard_negative": false, "style": "chat"}
+{"text": "quero contestar uma transferência de R$ 2.300 que eu não fiz", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-001", "hard_negative": false, "style": "chat"}
+{"text": "me aparece un retiro de $800 del 3 de mayo que no reconozco", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-002", "hard_negative": false, "style": "chat"}
+{"text": "tengo un retiro en cajero de $500.000 que yo no hice, ¿me colaboran?", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-002", "hard_negative": false, "style": "chat"}
+{"text": "me figura una extracción de $80.000 del cajero que no hice, fijate", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-002", "hard_negative": false, "style": "voz"}
+{"text": "apareceu um saque de US$ 300 no dia 12 que eu não fiz", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-002", "hard_negative": false, "style": "chat"}
+{"text": "Buenas tardes, quiero disputar un retiro por $2,000 del lunes, no lo reconozco", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-003", "hard_negative": true, "style": "formal"}
+{"text": "Quiero hacer el reclamo por un retiro de $150.000 que no fui yo", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-003", "hard_negative": true, "style": "chat"}
+{"text": "quiero reclamar un retiro de guita que no hice, $40.000 el finde", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-003", "hard_negative": true, "style": "chat"}
+{"text": "quero contestar um saque de R$ 900 que não reconheço", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-003", "hard_negative": true, "style": "chat"}
+{"text": "me hicieron un pago de $1,350 a un comercio que no conozco, no lo autoricé", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-004", "hard_negative": false, "style": "chat"}
+{"text": "Hola, me sale un pago de $95.000 que yo no hice", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-004", "hard_negative": false, "style": "chat"}
+{"text": "tengo un pago de $12.000 que no reconozco, no sé de dónde salió", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-004", "hard_negative": false, "style": "chat"}
+{"text": "tem um pagamento de US$ 45 que eu não reconheço na conta", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-004", "hard_negative": false, "style": "chat"}
+{"text": "salió una transferencia a una cuenta que no conozco, yo no la mandé", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-005", "hard_negative": true, "style": "chat"}
+{"text": "me aparece una transferencia a otra persona que yo no hice, ¿me ayudan?", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-005", "hard_negative": true, "style": "chat"}
+{"text": "me aparece una transferencia a un CBU que no es mío, no la hice", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-005", "hard_negative": true, "style": "chat"}
+{"text": "saiu um pix da minha conta pra uma pessoa que eu não conheço, não fui eu", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-005", "hard_negative": true, "style": "chat"}
+{"text": "no reconozco la transferencia de $6,700 del viernes", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-006", "hard_negative": false, "style": "terse"}
+{"text": "transferencia de 2 millones que no hice, ayuda", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-006", "hard_negative": false, "style": "terse"}
+{"text": "transferencia de $900.000 que no reconozco del martes", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-006", "hard_negative": false, "style": "terse"}
+{"text": "não reconheço a transferência de R$ 5 mil de sexta", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-006", "hard_negative": false, "style": "terse"}
+{"text": "me llegó un retiro de como $600 el 8 de junio y yo no hice ese retiro", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-007", "hard_negative": false, "style": "voz"}
+{"text": "me salió un retiro de unos $300.000 ayer y yo no retiré nada", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-007", "hard_negative": false, "style": "voz"}
+{"text": "ayer me sacaron $60.000 del cajero y yo no fui, tengo la tarjeta conmigo", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-007", "hard_negative": false, "style": "voz"}
+{"text": "ontem fizeram um saque de uns R$ 700 e eu não saquei nada", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-007", "hard_negative": false, "style": "voz"}
+{"text": "quiero desconocer un pago de $2,562 del 23/03", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-008", "hard_negative": false, "style": "chat"}
+{"text": "necesito disputar un pago de $480.000 del 23 de abril que no reconozco", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-008", "hard_negative": false, "style": "formal"}
+{"text": "quiero desconocer un débito de $25.000 del 2/05, no es mío", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-008", "hard_negative": false, "style": "chat"}
+{"text": "quero contestar um débito de R$ 380 do dia 02/05", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-008", "hard_negative": false, "style": "chat"}
+{"text": "me cobraron dos veces la misma transferencia de $1,000, una no la hice", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-009", "hard_negative": true, "style": "chat"}
+{"text": "me aparece duplicado un pago de $70.000, solo hice uno", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-009", "hard_negative": true, "style": "chat"}
+{"text": "se debitó dos veces la transferencia de $15.000, yo mandé una sola", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-009", "hard_negative": true, "style": "chat"}
+{"text": "o pix de R$ 120 saiu duas vezes, só fiz um", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-009", "hard_negative": true, "style": "chat"}
+{"text": "Solicito la aclaración de una transferencia de $3,200 que no reconozco", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-010", "hard_negative": false, "style": "formal"}
+{"text": "Cordial saludo, deseo presentar un reclamo por una transferencia de $2.000.000 no autorizada", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-010", "hard_negative": false, "style": "formal"}
+{"text": "Buenas, quiero iniciar un reclamo por una transferencia que no realicé de $500.000", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-010", "hard_negative": false, "style": "formal"}
+{"text": "Prezados, gostaria de contestar uma transferência de R$ 4.000 não autorizada", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-010", "hard_negative": false, "style": "formal"}
+{"text": "kiero disputar una tranferencia de 3 mil q no ise", "intent": "dispute_charge", "dialect": "es-MX", "family": "H-011", "hard_negative": false, "style": "typos"}
+{"text": "tengo un retiro q no hise de 200 mil", "intent": "dispute_charge", "dialect": "es-CO", "family": "H-011", "hard_negative": false, "style": "typos"}
+{"text": "me sacaron plata con una transferencia q no hice, 90 lucas", "intent": "dispute_charge", "dialect": "es-AR", "family": "H-011", "hard_negative": false, "style": "typos"}
+{"text": "tem um saque q nao fiz de 500 reais", "intent": "dispute_charge", "dialect": "pt-BR", "family": "H-011", "hard_negative": false, "style": "typos"}
+{"text": "quiero hacer una transferencia a otra cuenta, ¿cómo le hago?", "intent": "out_of_scope", "dialect": "es-MX", "family": "H-012", "hard_negative": true, "style": "chat"}
+{"text": "¿Cómo hago una transferencia a otro banco desde la app?", "intent": "out_of_scope", "dialect": "es-CO", "family": "H-012", "hard_negative": true, "style": "chat"}
+{"text": "¿cómo transfiero plata a otro CBU?", "intent": "out_of_scope", "dialect": "es-AR", "family": "H-012", "hard_negative": true, "style": "chat"}
+{"text": "como faço uma transferência pra outro banco?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "H-012", "hard_negative": true, "style": "chat"}
+{"text": "¿cuál es el límite de retiro diario en cajero?", "intent": "out_of_scope", "dialect": "es-MX", "family": "H-013", "hard_negative": true, "style": "chat"}
+{"text": "¿Cuánto me cobran por retirar en un cajero de otro banco?", "intent": "out_of_scope", "dialect": "es-CO", "family": "H-013", "hard_negative": true, "style": "chat"}
+{"text": "¿cuánto puedo extraer por día del cajero?", "intent": "out_of_scope", "dialect": "es-AR", "family": "H-013", "hard_negative": true, "style": "chat"}
+{"text": "qual o limite de saque por dia?", "intent": "out_of_scope", "dialect": "pt-BR", "family": "H-013", "hard_negative": true, "style": "chat"}
+{"text": "quiero programar un pago automático de la luz", "intent": "out_of_scope", "dialect": "es-MX", "family": "H-014", "hard_negative": true, "style": "chat"}
+{"text": "¿puedo pagar la factura del celular con la tarjeta?", "intent": "out_of_scope", "dialect": "es-CO", "family": "H-014", "hard_negative": true, "style": "chat"}
+{"text": "quiero adherir el pago de la luz al débito automático", "intent": "out_of_scope", "dialect": "es-AR", "family": "H-014", "hard_negative": true, "style": "chat"}
+{"text": "quero agendar um pagamento de boleto", "intent": "out_of_scope", "dialect": "pt-BR", "family": "H-014", "hard_negative": true, "style": "chat"}
+{"text": "quiero retirar la disputa que abrí por la transferencia, ya me acordé que sí la hice", "intent": "cancel_dispute", "dialect": "es-MX", "family": "H-015", "hard_negative": true, "style": "chat"}
+{"text": "Deseo retirar el reclamo del retiro en cajero, ya lo reconocí", "intent": "cancel_dispute", "dialect": "es-CO", "family": "H-015", "hard_negative": true, "style": "formal"}
+{"text": "bajá el reclamo de la transferencia, era mía", "intent": "cancel_dispute", "dialect": "es-AR", "family": "H-015", "hard_negative": true, "style": "chat"}
+{"text": "quero cancelar a contestação do pix, fui eu mesmo", "intent": "cancel_dispute", "dialect": "pt-BR", "family": "H-015", "hard_negative": true, "style": "chat"}
+{"text": "¿en qué va la disputa de la transferencia que reporté?", "intent": "dispute_status", "dialect": "es-MX", "family": "H-016", "hard_negative": true, "style": "chat"}
+{"text": "¿Cómo va el reclamo del retiro que no reconocí?", "intent": "dispute_status", "dialect": "es-CO", "family": "H-016", "hard_negative": true, "style": "chat"}
+{"text": "¿qué pasó con el reclamo de la transferencia que hice la semana pasada?", "intent": "dispute_status", "dialect": "es-AR", "family": "H-016", "hard_negative": true, "style": "chat"}
+{"text": "como está a contestação do saque que eu abri?", "intent": "dispute_status", "dialect": "pt-BR", "family": "H-016", "hard_negative": true, "style": "chat"}

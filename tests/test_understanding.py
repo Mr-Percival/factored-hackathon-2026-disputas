@@ -45,3 +45,22 @@ def test_dialect_intents(text, intent):
 def test_short_answers(text, awaiting, intent, option):
     u = R.understand(text, TODAY, awaiting)
     assert u.intent == intent and u.slots.option == option
+
+
+# #64: el mismo "sí, pero sin bloqueo" en cada tratamiento. "no me bloquee" (usted, es-CO) era "unclear" y ese grupo
+# de dialecto no terminaba igual que los otros tres (con ambos routers: la confirmación la decide RuleRouter).
+@pytest.mark.parametrize("text", ["Sí, pero no bloquees la tarjeta",                     # tú (es-MX)
+                                  "Sí, pero no me bloquee la tarjeta, por favor",       # usted (es-CO)
+                                  "Sí, pero no me bloqueen la tarjeta",                 # ustedes
+                                  "Sí, pero no me bloqueés la tarjeta que la uso",      # vos (es-AR)
+                                  "Sim, mas não bloqueia o cartão",                     # você (pt-BR)
+                                  "Sim, mas não me bloqueie o cartão"])
+def test_partial_consent_in_every_form_of_address(text):
+    u = R.understand(text, TODAY, "confirmation")
+    assert u.intent == "confirm" and u.sub_action_denials == ["block_card"]
+
+
+def test_card_last_four_is_an_option_not_an_amount():
+    u = R.understand("la que termina en 3718", TODAY, "option")
+    assert u.intent == "select_option" and u.slots.last4 == "3718" and u.slots.amount is None
+    assert R.understand("o final 4279", TODAY, "option").slots.last4 == "4279"

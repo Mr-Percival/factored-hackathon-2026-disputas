@@ -154,15 +154,18 @@ consentimiento siguen saliendo de `RuleRouter`. Corre sin API paga, pesa 0.2 MB 
 ```bash
 pip install -e ".[ml]"                                 # numpy
 python -m bankagent.chat --customer CLI-XXXXXXXX --router embeddings   # /trace: embed:char, p, abstención
-BANKAGENT_ROUTER=embeddings uvicorn bankagent.api.main:app   # demo web con el router aprendido (por defecto: rules)
+uvicorn bankagent.api.main:app                         # demo web: router aprendido por defecto (BANKAGENT_ROUTER=rules = línea base)
+python scripts/verify_demo.py --db data/demo/demo.duckdb --router embeddings   # y --router rules: ambos 14/14
 pip install -e ".[ml-train]" && PYTHONPATH=src python scripts/train_intent.py   # re-entrenar y regenerar el reporte
 ```
 Sobre el mismo test congelado, contra RuleRouter, la variante que se despliega (lite) obtiene:
-- **Intención** (corpus propio, split por autor, n=306): macro-F1 0.868 [0.83, 0.90] contra 0.548. Los mensajes
-  que disparan una acción equivocada bajan de 18.6% a 2.6%.
-- **Punta a punta** (`evals/cases/test`, 115 casos): 106/115 resultados correctos contra 102/115, y 2 transferencias
-  faltantes contra 7. En los dos sistemas hubo 0 resultados inseguros.
-- **Costo en el deploy:** +10 MB de RSS y unos +6 ms por turno.
+- **Intención** (corpus propio, split por autor, n=306): macro-F1 0.877 [0.83, 0.91] contra 0.548. Los mensajes
+  que disparan una acción equivocada bajan de 18.6% a 1.6%.
+- **Punta a punta** (`evals/cases/test`, 115 casos; segunda medición, tras correcciones guiadas solo por dev y la
+  demo): 109/115 resultados correctos contra 104/115, 0 transferencias faltantes contra 7 y 0 contenciones con
+  resultado incorrecto contra 10. En los dos sistemas hubo 0 resultados inseguros.
+- **Costo en la API** (base de la demo, 1 worker): mismo RSS (99 MB listo, 184 MB tras 40 turnos) y turno HTTP p50
+  19 ms con los dos routers.
 
 La variante con MiniLM (`--router embeddings_full`) es mejor, pero ocupa ~700 MB de RAM y no entra en el deploy
 gratuito, así que solo se usa offline. Si el modelo no carga, responde RuleRouter y la traza lo dice.
@@ -198,6 +201,7 @@ Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-rou
 - [x] Evaluación: casos reservados (dev/test por cliente y por redacción), runner con métricas de la rúbrica, equidad por dialecto
 - [x] Inyección con datasets públicos: detección (regex vs. clasificador) y daño de punta a punta ([reporte](reports/injection_eval.md), [ADR 0005](docs/adr/0005-deteccion-inyeccion.md))
 - [x] Componente aprendido en el camino crítico: router de intención local. Se evaluó contra RuleRouter a nivel intención y de punta a punta ([ADR 0009](docs/adr/0009-router-aprendido.md))
+- [x] La demo usa el router aprendido por defecto (fallback visible a reglas si el modelo no carga), tras corregir con dev y conversaciones propias los paquetes de handoff incompletos y el desacuerdo por dialecto ([ADR 0009 · Decisión de demo](docs/adr/0009-router-aprendido.md#decisión-de-demo))
 - [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos (LLM apagado: sin API paga)
 - [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
 - [x] Interfaz web (FastAPI + React) en un contenedor, construido y probado en CI

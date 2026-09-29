@@ -28,6 +28,7 @@ HANDOFF_REASONS = {
     "consent_unclear": "La confirmación del cliente no fue clara: no se ejecutó ninguna acción",
     "dispute_status": "Consulta el estado de una disputa que no está en este canal",
     "cancel_dispute": "El cliente quiere retirar una disputa",
+    "security_review": "Pedido derivado después de intentos bloqueados: lo revisa seguridad",
 }
 HANDOFF_KNOWN_KEYS = {"reason", "created_at", "language", "request", "verified_facts", "policy", "actions_taken",
                       "evidence", "unresolved_questions"}

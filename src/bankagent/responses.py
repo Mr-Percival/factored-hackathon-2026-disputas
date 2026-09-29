@@ -134,6 +134,7 @@ HANDOFF_LABELS = {  # motivos que no son reglas de política (las reglas traen s
     "tool_failure": "Falla técnica persistente al consultar datos; no se pudo verificar.",
     "action_not_verified": "La acción se ejecutó pero no se pudo verificar en el sistema.",
     "security_lockout": "Conversación pausada por intentos bloqueados (seguridad).",
+    "security_review": "Pedido derivado después de intentos bloqueados en la misma conversación (seguridad).",
     "no_active_card": "El cliente pidió un bloqueo pero no tiene tarjetas activas.",
 }
 
@@ -145,6 +146,8 @@ def handoff_summary(packet: dict) -> str:
     rules = (packet.get("policy") or {}).get("rules_fired") or []
     hit = next((r for r in rules if r.get("id") == reason), None)
     parts = [f"{reason}: {hit['explain'] if hit else HANDOFF_LABELS.get(reason, 'Motivo no especificado.')}"]
+    if packet.get("trigger"):
+        parts.append(f"La conversación derivó por {packet['trigger']}")
     facts = packet.get("verified_facts") or {}
     t = facts.get("transaction")
     if t:

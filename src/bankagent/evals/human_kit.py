@@ -231,12 +231,12 @@ def _sabotage(tools: BankTools, kind: str | None) -> None:
         tools.block_card = unverified(tools.block_card)
 
 
-def run_case(db: str, spec: dict, max_turns: int = 6) -> dict | None:
+def run_case(db: str, spec: dict, max_turns: int = 6, router: str = "rules") -> dict | None:
     """Conversación real con el agente. Devuelve el paquete si hubo el handoff esperado (y sobre la txn esperada)."""
     identity = IdentityService()
     tools = BankTools(db, identity)
     try:
-        agent = build_agent(tools, router="rules", writer="templates")
+        agent = build_agent(tools, router=router, writer="templates")
         _sabotage(tools, spec["sabotage"])
         token, lang = identity.login(spec["customer_id"]), spec["lang"]
         queue, said = list(spec["turns"]), []
@@ -665,11 +665,13 @@ def score(paths: list[str], key_path: str, out: str = REPORT, dry_run: bool = Fa
 
 # ============================================================================ check
 def check(db: str | None, scenarios: str = SCENARIOS, packets_json: str | None = None, key_path: str | None = None,
-          out: str = COMPLETENESS_REPORT) -> dict:
+          out: str = COMPLETENESS_REPORT, routers: tuple[str, ...] = ("rules",)) -> dict:
     policy = PolicyEngine()
     groups: dict[str, list[tuple[str, dict]]] = {}
     if db:
-        groups["escenarios de demo (docs/demo/demo_customers.json)"] = scenario_packets(db, scenarios)
+        for router in routers:
+            groups[f"escenarios de demo (docs/demo/demo_customers.json) · router {router}"] = \
+                scenario_packets(db, scenarios, router)
     packets_json = packets_json or os.path.join(OUT, "packets", "packets.json")
     key_path = key_path or os.path.join(OUT, "_key", "answer_key.json")
     if os.path.exists(packets_json):
@@ -713,6 +715,8 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--packets", default=None)
     c.add_argument("--key", default=None)
     c.add_argument("--out", default=COMPLETENESS_REPORT)
+    c.add_argument("--router", action="append", choices=["rules", "embeddings"],
+                   help="router con que se corren los escenarios (repetible; por defecto rules y embeddings)")
     a = ap.parse_args(argv)
     if a.cmd == "build":
         kit = build(a.db, a.n, a.seed, a.controls, a.out, tuple(x.strip() for x in a.raters.split(",") if x.strip()))
@@ -723,7 +727,7 @@ def main(argv: list[str] | None = None) -> int:
         score(paths, a.key, a.out, a.dry_run)
         print(f"reporte -> {a.out}")
     else:
-        res = check(a.db, a.scenarios, a.packets, a.key, a.out)
+        res = check(a.db, a.scenarios, a.packets, a.key, a.out, tuple(a.router or ("rules", "embeddings")))
         for name, (ok, n) in res.items():
             print(f"{name}: {ok}/{n} completos ({100 * ok / n:.1f}%)" if n else f"{name}: 0 paquetes")
         print(f"reporte -> {a.out}")

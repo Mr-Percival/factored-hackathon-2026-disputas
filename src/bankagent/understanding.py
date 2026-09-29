@@ -39,6 +39,9 @@ class Slots:
     # Tarjeta que nombró el cliente: últimos 4 dígitos, o "?" si escribió un número completo (se enmascara antes de
     # llegar aquí). El grafo solo ofrece bloquear una tarjeta PROPIA que coincida (red team #33).
     card_hint: str | None = None
+    # "la que termina en 4152" / "o final 4152": últimos 4 dígitos de una tarjeta mostrada como opción. El grafo
+    # la resuelve SOLO contra las opciones de ese turno (tarjetas del propio cliente).
+    last4: str | None = None
 
 
 @dataclass
@@ -119,8 +122,11 @@ _NUM = r"(\d+|" + "|".join(NUMBER_WORDS) + r")"
 # "3 cargos", "dos cobros", "duas compras": cantidad de movimientos, no monto
 COUNT = re.compile(_NUM + r" (cargos|cobros|compras|movimientos|transacciones|consumos|cobrancas|lancamentos|"
                           r"debitos|veces|vezes)\b")
+# "la que termina en 3718" / "o final 4279" / "terminada em 1021": últimos 4 dígitos de una tarjeta ofrecida
+LAST4 = re.compile(r"\b(?:termina(?:da|do)?|terminad[ao]|final|finalizad[ao])\s+(?:en\s+|em\s+)?\**(\d{4})\b")
 # Referencias a la tarjeta o IDs: nunca son montos ("mi tarjeta 4152", "terminada en 4152", "DSP-123")
-NOT_AMOUNTS = re.compile(r"\b(tarjeta|cartao|terminad[ao] en|terminad[ao] em|final|finalizad[ao] em)\s+(\*+)?\d{4}\b"
+NOT_AMOUNTS = re.compile(r"\b(tarjeta|cartao|terminad[ao] en|terminad[ao] em|termina en|termina em|final|"
+                         r"finalizad[ao] em)\s+(\*+)?\d{4}\b"
                          r"|\*+\d{2,4}|\b(dsp|trx|cli|hnd)-?[a-z0-9]{3,}\b")
 
 
@@ -182,6 +188,13 @@ SUB_ACTION_DENIALS: dict[str, list[str]] = {
 }
 # Objeto opcional que sigue al rechazo ("no me bloquees LA TARJETA"): se consume con la frase.
 _DENIAL_OBJECT = r"(?:\s+(?:la|mi|el|o|a|meu|minha|my|the|su|tu)?\s*(?:tarjeta|targeta|cartao|card|plastico))?"
+# Negación + cualquier conjugación de "bloquear" con o sin pronombres, en todos los tratamientos (tú, usted, vos,
+# ustedes, você): "no me bloquee la tarjeta" (usted, es-CO) quedaba afuera de la lista y el "sí" se volvía duda (#64).
+_CLITIC = r"(?:(?:me|te|le|nos|les|se|la|lo|las|los|o|a) )*"
+SUB_ACTION_DENIAL_PATTERNS: dict[str, list[str]] = {
+    "block_card": [rf"(?:no|nao) (?:quiero que |quero que |hace falta |precisa )?{_CLITIC}bloque[a-z]*"
+                   r"(?: (?:la|mi|el|o|a|meu|minha) (?:tarjeta|cartao|plastico))?"],
+}
 # Frases que eligen SOLO la acción principal: son a la vez un sí (disputa) y un no (bloqueo).
 ONLY_MAIN_ACTION = ["solo la disputa", "nada mas la disputa", "unicamente la disputa", "solamente la disputa",
                     "solo abrir la disputa", "solo abri la disputa", "solo abre la disputa", "solo el reclamo",
@@ -285,7 +298,7 @@ def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
     None = el mensaje no contiene ninguna señal de respuesta (el router sigue con las otras intenciones)."""
     rest, denials = t, []
     for action, phrases in SUB_ACTION_DENIALS.items():
-        rest, hit = _strip(rest, [re.escape(x) + _DENIAL_OBJECT for x in phrases])
+        rest, hit = _strip(rest, [re.escape(x) + _DENIAL_OBJECT for x in phrases] + SUB_ACTION_DENIAL_PATTERNS.get(action, []))
         if hit:
             denials.append(action)
     rest, only_main = _strip(rest, [re.escape(x) for x in ONLY_MAIN_ACTION])
@@ -473,7 +486,7 @@ HUMAN_REQUEST = [r"asesor\w*", r"humano\w*", r"humana\w*", r"operador\w*", r"eje
 CASE_ID = re.compile(r"\bdsp-?[a-z0-9]{3,}\b")
 # Palabras completas: "estado" no debe coincidir con "Estados Unidos", ni "caso" con "en caso de que".
 DISPUTE_REF = r"(disputa|reclamo|reclamacion|mi caso|contestacao|dsp-?[a-z0-9]{3,})(?![a-z])"
-_STATUS = r"(en que va|como va|el estado|estatus|status|seguimiento|novedades|andamento|como esta|que paso con)(?![a-z])"
+_STATUS = r"(en que va|en que quedo|como va|el estado|estatus|status|seguimiento|novedades|andamento|como esta|que paso con)(?![a-z])"
 DISPUTE_STATUS = [rf"{_STATUS}.*{DISPUTE_REF}", rf"{DISPUTE_REF}.*{_STATUS}",
                   rf"cuando (me )?(responden|resuelven|contestan).*{DISPUTE_REF}"]
 CANCEL_DISPUTE = [rf"(cancel\w*|retir\w*|anul\w*|desist\w*|quitar|borrar) (la |mi |a |minha |el |o )?{DISPUTE_REF}",
@@ -519,6 +532,9 @@ class RuleRouter:
         if awaiting == "option":
             if any(_has(t, k) for k in NONE_OF_THESE) and len(t) <= 60:  # antes que los dígitos: "ninguna de las 3"
                 return Understanding("none_of_these", 0.9, lang)
+            m = LAST4.search(t)
+            if m and len(t) <= 60:  # "la que termina en 3718": elige por los últimos 4 dígitos, no es un monto
+                return Understanding("select_option", 0.9, lang, Slots(last4=m.group(1)))
             m = re.search(r"\b([1-9])\b", t)
             if m and len(t) <= 40:
                 return Understanding("select_option", 0.95, lang, Slots(option=int(m.group(1))))

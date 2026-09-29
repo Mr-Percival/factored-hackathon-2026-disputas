@@ -287,15 +287,16 @@ class Agent:
                 "pending_action": narrowed, "consent_retries": retries + 1,
                 "detail": f"consent unclear retry={retries + 1}"}
 
-    def find_transaction(self, s: State, calls) -> dict:
-        sl = s["understanding"]["slots"]
+    def _search_claim(self, s: State, calls) -> tuple[list[dict], dict | None]:
+        """Movimientos disputables del PROPIO cliente que coinciden con lo que dijo (monto ±10%, fechas, país,
+        comercio). Devuelve (candidatas ordenadas, reclamo); reclamo None = el mensaje no trae datos de búsqueda."""
+        sl = (s.get("understanding") or {}).get("slots") or {}
         amt = sl.get("amount")
         # Comercio: se compara el texto con los comercios del PROPIO cliente (lista por sesión, sin fuga).
         names = self._call(calls, "list_merchants", s["token"])
         merchants = match_merchant(sl.get("merchant") or redact(s["user_text"]), names)
-        has_data = amt or sl.get("date_from") or sl.get("country") or merchants
-        if not has_data:  # sin monto, fecha, país ni comercio: se pide un dato antes de listar movimientos al azar
-            return {**self._clarify(s, "need_details", awaiting="details"), "detail": "no search data"}
+        if not (amt or sl.get("date_from") or sl.get("country") or merchants):
+            return [], None
         found = self._call(calls, "search_transactions", s["token"],
                            date_from=sl.get("date_from"), date_to=sl.get("date_to"),
                            amount_min=amt * 0.9 if amt else None, amount_max=amt * 1.1 if amt else None,
@@ -303,11 +304,27 @@ class Agent:
                            country=sl.get("country"), limit=50)
         found = [t for t in found if t["transaction_type"] in DISPUTABLE_TYPES
                  and (not merchants or t.get("merchant_name") in merchants)]
-        found = rank_candidates(found, amt, self.policy.as_of, self.policy.window_days)[:5]
-        if not found:
-            return {**self._clarify(s, "no_match", awaiting="details"), "detail": "0 candidates"}
         claim = {"amount": amt, "date_from": sl.get("date_from"), "date_to": sl.get("date_to"),
                  "country": sl.get("country"), "merchant": merchants, "count": sl.get("count")}
+        return rank_candidates(found, amt, self.policy.as_of, self.policy.window_days)[:5], claim
+
+    def _evaluate(self, s: State, calls, txn_id: str):
+        """Hechos verificados del movimiento y del cliente + decisión de política (solo lectura, no actúa)."""
+        txn = self._call(calls, "get_transaction", s["token"], txn_id)  # hecho verificado
+        customer = self._call(calls, "get_profile", s["token"])
+        history = self._call(calls, "dispute_history", s["token"])
+        d = self.policy.decide_dispute(txn, customer, history)
+        decision = {"outcome": d.outcome, "policy_version": d.policy_version,
+                    "rules": [vars(h) for h in d.hits], "facts": {"customer_status": customer["customer_status"],
+                                                                  "segment": customer["segment"], **history}}
+        return txn, decision, d
+
+    def find_transaction(self, s: State, calls) -> dict:
+        found, claim = self._search_claim(s, calls)
+        if claim is None:  # sin monto, fecha, país ni comercio: se pide un dato antes de listar movimientos al azar
+            return {**self._clarify(s, "need_details", awaiting="details"), "detail": "no search data"}
+        if not found:
+            return {**self._clarify(s, "no_match", awaiting="details"), "detail": "0 candidates"}
         if len(found) == 1:
             return {"next": "decide", "txn": found[0], "candidates": [], "detail": "1 candidate", "claim": claim,
                     "match_method": "single_candidate"}
@@ -315,8 +332,11 @@ class Agent:
                 "awaiting": "option", "detail": f"{len(found)} candidates"}
 
     def select_option(self, s: State, calls) -> dict:
-        opt = s["understanding"]["slots"].get("option")
-        cands = s.get("candidates") or []
+        sl = s["understanding"]["slots"]
+        opt, cands = sl.get("option"), s.get("candidates") or []
+        if sl.get("last4"):  # "la que termina en 3718": solo entre las tarjetas ofrecidas en este turno
+            opt = next((i for i, c in enumerate(cands, 1)
+                        if c.get("kind") == "card" and str(c.get("product_number", "")).endswith(sl["last4"])), 0)
         if opt == -1:  # "la última" / "o último"
             opt = len(cands)
         if not opt or opt > len(cands):
@@ -331,13 +351,7 @@ class Agent:
                 "match_method": "customer_choice"}
 
     def decide(self, s: State, calls) -> dict:
-        txn = self._call(calls, "get_transaction", s["token"], s["txn"]["transaction_id"])  # hecho verificado
-        customer = self._call(calls, "get_profile", s["token"])
-        history = self._call(calls, "dispute_history", s["token"])
-        d = self.policy.decide_dispute(txn, customer, history)
-        decision = {"outcome": d.outcome, "policy_version": d.policy_version,
-                    "rules": [vars(h) for h in d.hits], "facts": {"customer_status": customer["customer_status"],
-                                                                  "segment": customer["segment"], **history}}
+        txn, decision, d = self._evaluate(s, calls, s["txn"]["transaction_id"])
         base = {"txn": txn, "decision": decision, "detail": f"{d.outcome} rules={[h.id for h in d.hits]}"}
         if d.outcome == "handoff":
             return {**base, "next": "handoff", "handoff_reason": d.deciding_rule.id}
@@ -410,14 +424,48 @@ class Agent:
 
     def handoff(self, s: State, calls) -> dict:
         reason = s.get("handoff_reason") or "unspecified"
-        packet = build_packet(s, self.policy, reason)  # esquema versionado: src/bankagent/handoff.py (#44)
+        trigger, facts, reply_key = None, {}, None
+        if reason in CLAIM_LOOKUP_REASONS:
+            facts = self._claim_facts(s, calls)
+            d = facts.get("decision")
+            if s.get("strikes", 0) and reason not in SECURITY_REASONS:
+                # Hubo intentos bloqueados en esta conversación (datos ajenos, instrucciones al agente) y ahora pide
+                # algo que el agente deriva: va a seguridad, no a la cola general. NO bloquea el hilo (el bloqueo es
+                # al 3.er intento, invariante I6); el cliente recibe la misma respuesta que habría recibido.
+                trigger, reason, reply_key = reason, "security_review", reason
+            elif d and d["outcome"] == "handoff" and reason not in SECURITY_REASONS:
+                # El cargo que el cliente nombró exige por sí mismo revisión humana (H0x): el caso va a la cola,
+                # prioridad y SLA de esa regla, con sus hechos; lo que disparó el handoff queda como `trigger`.
+                trigger, reason = reason, d["rules"][0]["id"]
+        # la búsqueda de este mismo nodo también es evidencia (y sus fallas, fallas) del paquete
+        own = [{"turn": s.get("turn"), "node": "handoff", "tools": list(calls)}] if calls else []
+        packet = build_packet({**s, **facts, "trace": list(s.get("trace", [])) + own}, self.policy, reason,
+                              trigger)  # esquema versionado: src/bankagent/handoff.py (#44)
         # el id del caso queda en la traza -> en el log de auditoría encadenado (liga paquete y registro)
         out = {"next": "respond", "outcome": "handoff", "handoff": packet, "awaiting": None, "pending_action": None,
-               "candidates": [], "reply_key": reason if reason in HANDOFF_REPLIES else "handoff",
-               "detail": f"{reason} {packet['handoff_id']} queue={packet['queue']} priority={packet['priority']}"}
+               "candidates": [], "reply_key": reply_key or (reason if reason in HANDOFF_REPLIES else "handoff"), **facts,
+               "detail": f"{reason} {packet['handoff_id']} queue={packet['queue']} priority={packet['priority']}"
+                         + (f" trigger={trigger}" if trigger else "")}
         if reason == "account_takeover":  # mientras seguridad toma el caso, se OFRECE (no se hace) el bloqueo
             out.update(self._offer_card_block(s, calls))
         return out
+
+    def _claim_facts(self, s: State, calls) -> dict:
+        """Handoff decidido por la conversación (pedido de humano, fuera de alcance, toma de cuenta...) cuando el
+        mensaje TAMBIÉN nombra un cargo: se busca ese cargo entre los movimientos del cliente (solo lectura) para que
+        el paquete lleve el reclamo y, si hay una única coincidencia, el movimiento verificado, los hechos del
+        cliente y la decisión de política. Nunca actúa ni cambia la ruta del grafo; una falla de herramienta deja
+        el paquete como estaba (la falla queda en la evidencia)."""
+        try:
+            found, claim = self._search_claim(s, calls)
+            if claim is None:
+                return {}
+            if len(found) != 1:
+                return {"claim": claim}
+            txn, decision, _ = self._evaluate(s, calls, found[0]["transaction_id"])
+        except (ToolError, AuthError):
+            return {}
+        return {"claim": claim, "txn": txn, "decision": decision, "match_method": "single_candidate"}
 
     def _offer_card_block(self, s: State, calls) -> dict:
         cards = [c for c in self._call(calls, "list_cards", s["token"]) if c["product_status"] == "Active"]
@@ -489,6 +537,11 @@ HANDOFF_REPLIES = {"tool_failure", "out_of_scope", "security_lockout", "consent_
 # Intenciones de conversación que siempre pasan a un humano, con su motivo de handoff (#40).
 CONVERSATION_HANDOFFS = {"human_request": "customer_request", "account_takeover": "account_takeover",
                          "cancel_dispute": "cancel_dispute"}
+# Handoffs decididos por la conversación (no por la política ni por una falla): si el mensaje nombra un cargo, el
+# nodo handoff lo busca para que el paquete llegue con hechos verificados (#64).
+CLAIM_LOOKUP_REASONS = {"customer_request", "account_takeover", "cancel_dispute", "out_of_scope", "dispute_status",
+                        "clarification_exhausted"}
+SECURITY_REASONS = {"account_takeover", "security_lockout"}  # su cola/prioridad nunca la reemplaza una regla H0x
 
 
 # Estado del hilo que persiste entre turnos: no se devuelve a quien no está autorizado a verlo.
