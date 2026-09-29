@@ -52,7 +52,7 @@ flowchart LR
 | Decisión | Responsable | Tipo |
 |---|---|---|
 | ¿La sesión es válida? ¿El dato es suyo? | `identity.py` + `tools.py` | Código |
-| ¿El mensaje es un ataque? | `guard.py` | Código (patrones) → clasificador evaluado *(próximo)* |
+| ¿El mensaje es un ataque? | `guard.py` (`InjectionDetector`) | Patrones (default) · clasificador ONNX opt-in, evaluado en [ADR 0005](adr/0005-deteccion-inyeccion.md) |
 | ¿Qué quiere el cliente? | `Router` (interfaz) | Reglas (línea base) · LLM · otro modelo |
 | ¿Cuál es la transacción? | `search_transactions` + aclaración | Código; pregunta si hay más de una |
 | ¿Procede la disputa o va a un humano? | `policy.yaml` | Reglas con ID |
@@ -91,7 +91,7 @@ flowchart TD
     respond --> END([fin del turno])
 ```
 
-El estado persiste entre turnos (checkpointer por conversación). Así funcionan las aclaraciones ("¿cuál de estas?") y las confirmaciones ("¿confirmas?").
+El estado persiste entre turnos (checkpointer por conversación). Así funcionan las aclaraciones ("¿cuál de estas?") y las confirmaciones ("¿confirmas?"). Dos reglas acotan ese estado (#31): una confirmación solo vale en el turno **inmediatamente** posterior a la pregunta (si en medio hubo otro turno, se descarta), y la conversación queda atada al cliente de su primer turno autenticado (la sesión de otro cliente recibe `forbidden`). Todos los caminos posibles del grafo están en [`graph-paths.md`](graph-paths.md).
 
 ## 4. Una disputa de punta a punta
 
@@ -155,6 +155,6 @@ flowchart LR
     TO --> PO --> VE
 ```
 
-**Defensa en profundidad:** aunque el guard no detecte un ataque, el ataque no tiene con qué hacer daño. El cliente sale del token y no del texto, cada acción requiere confirmación y se verifica, y la política no está en el prompt. Por eso reportamos por separado la **detección** (el guard) y el **daño** (registros señuelo).
+**Defensa en profundidad:** aunque el guard no detecte un ataque, el ataque no tiene con qué hacer daño. El cliente sale del token y no del texto, cada acción requiere confirmación y se verifica, y la política no está en el prompt. Por eso reportamos por separado la **detección** (el guard) y el **daño** (registros señuelo): ver [`reports/injection_eval.md`](../reports/injection_eval.md).
 
 Amenazas, controles, tests y riesgo residual (OWASP Top 10 LLM 2025): [`threat-model.md`](threat-model.md).

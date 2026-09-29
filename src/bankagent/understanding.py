@@ -111,9 +111,9 @@ AFFIRM = ["si", "sim", "claro", "dale", "ok", "okay", "okey", "confirmo", "confi
           "correcto", "adelante", "hacelo", "hazlo", "hacerlo", "de una", "listo", "procede", "proceda", "abrela",
           "abrila", "abrelo", "abre la disputa", "abri la disputa", "abrir la disputa", "por favor", "porfa",
           "afirmativo", "exacto", "perfecto", "obvio", "por supuesto", "claro que si", "vamos", "andale", "orale",
-          "simon", "va", "sale", "vale", "yes", "yep", "bueno", "quiero", "si quiero", "si por favor", "dale nomas",
+          "simon", "va", "sale", "vale", "yes", "yep", "bueno", "si quiero", "si por favor", "dale nomas",
           "isso", "com certeza", "pode", "pode sim", "pode fazer", "pode abrir", "manda ver", "bora", "fechado",
-          "beleza", "ta bom", "esta bem", "tudo bem", "certo", "confirmar", "abre", "abra", "quero", "sim quero",
+          "beleza", "ta bom", "esta bem", "tudo bem", "certo", "confirmar", "abre", "abra", "sim quero",
           "e isso", "isso mesmo", "claro que sim", "por favor faca", "faca", "faz", "faz isso"]
 DENY = ["no", "nao", "nop", "nope", "nel", "cancelar", "cancela", "cancelalo", "mejor no", "melhor nao", "nem pensar",
         "de ninguna manera", "para nada", "ninguna", "ninguno", "nenhuma", "nenhum", "negativo", "no quiero",

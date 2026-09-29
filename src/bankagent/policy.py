@@ -53,11 +53,16 @@ class Decision:
 
 
 class PolicyEngine:
-    def __init__(self, path: str = POLICY):
+    def __init__(self, path: str = POLICY, as_of: dt.date | dt.datetime | str | None = None):
+        """`as_of` reemplaza la fecha "hoy" del YAML (D05 y fechas relativas del router). Lo usa el replay
+        histórico (`bankagent.evals.replay`) para juzgar cada queja a la fecha en que se creó."""
         with open(path, encoding="utf-8") as f:
             self.cfg = yaml.safe_load(f)
         self.version = self.cfg["version"]
-        self.as_of = dt.date.fromisoformat(self.cfg["as_of"])
+        as_of = as_of if as_of is not None else self.cfg["as_of"]
+        if isinstance(as_of, str):
+            as_of = dt.date.fromisoformat(as_of[:10])
+        self.as_of = as_of.date() if isinstance(as_of, dt.datetime) else as_of
         self.rules = [(r, _compile(r["when"])) for r in self.cfg["dispute"]["rules"]]
         self._offer_block = _compile(self.cfg["actions"]["block_card"]["offer_when"])
         self.conversation = self.cfg.get("conversation", {})
