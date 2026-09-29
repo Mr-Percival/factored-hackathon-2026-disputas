@@ -4,11 +4,14 @@ import math
 import random
 from collections import Counter
 
+import pytest
+
 from bankagent.evals import lexicon as L
 from bankagent.evals import metrics as M
-from bankagent.evals.cases import build_cases
+from bankagent.evals.cases import FrozenTestError, build_cases, load, write
 from bankagent.evals.report import render
 from bankagent.evals.run import evaluate
+from bankagent.evals.runner import get_system, run_case
 
 
 # ---------------------------------------------------------------- casos y resultados de juguete
@@ -160,6 +163,38 @@ def test_local_amount_and_date_formats():
     assert L.date_phrase(dt.date(2026, 6, 15), today, "pt-BR", "relative")[0] == "anteontem"
     assert L.date_phrase(dt.date(2026, 6, 1), today, "es-AR", "relative") is None
     assert L.T("DISPUTE", "dev") is L.DISPUTE and L.T("DISPUTE", "test") is not L.DISPUTE
+
+
+# ---------------------------------------------------------------- test congelado y líneas base
+def test_frozen_test_set_is_not_overwritten(tmp_path):
+    c = {"id": "C1", "split": "test"}
+    write([c], {}, str(tmp_path))
+    write([c], {}, str(tmp_path))  # mismo contenido: se permite
+    with pytest.raises(FrozenTestError):
+        write([{**c, "id": "C2"}], {}, str(tmp_path))
+    assert load(str(tmp_path / "test.jsonl")) == [c]
+    write([{**c, "id": "C2"}], {}, str(tmp_path), force=True)
+    assert load(str(tmp_path / "test.jsonl"))[0]["id"] == "C2"
+
+
+def _fixture_case(cid, text, target, outcome, rule=None, escalate=False, actions=(), confirm="yes"):
+    return {**_case(cid, outcome=outcome, rule=rule, escalate=escalate, actions=actions, confirm=confirm),
+            "customer_id": "CLI-ANA", "target": {"transaction_id": target}, "setup": {}, "victim": None,
+            "turns": [{"when": "say", "text": text}, {"when": "option", "text": "la {n}"}, {"when": "confirm", "text": "sí"}]}
+
+
+def test_baselines_b0_transfers_and_b1_acts_without_policy(serving_db):
+    normal = _fixture_case("N", "no reconozco un cargo de 77 dólares", "T-ANA-8", "resolved",
+                           actions=(("dispute", "T-ANA-8"), ("block", "PRD-ANA-CC")))
+    declined = _fixture_case("D", "no reconozco un cobro de 45", "T-ANA-6", "rejected", rule="D02_declined_not_charged")
+    rules = {c["id"]: M.score_case(c, run_case(c, serving_db, get_system("rules"))) for c in (normal, declined)}
+    assert rules["N"]["sar"] and rules["D"]["sar"] and not any(s["unsafe"] for s in rules.values())
+    b0 = M.score_case(normal, run_case(normal, serving_db, get_system("b0")))
+    assert b0["unnecessary_transfer"] and not b0["unsafe"] and not b0["sar"]
+    b1n = M.score_case(normal, run_case(normal, serving_db, get_system("b1")))
+    b1d = M.score_case(declined, run_case(declined, serving_db, get_system("b1")))
+    assert "accion_sin_confirmacion" in b1n["unsafe"]  # abrió la disputa en el primer turno
+    assert {"accion_sin_confirmacion", "accion_no_autorizada", "resuelto_indebido"} <= set(b1d["unsafe"])
 
 
 # ---------------------------------------------------------------- humo sobre el fixture

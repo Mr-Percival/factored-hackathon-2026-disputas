@@ -90,9 +90,16 @@ def render(ctx: dict) -> str:
     w("| Acuerdo de decisión entre dialectos (grupos) | " + " | ".join(
         _frac(fair[s]["agree"], fair[s]["groups"]) for s in names) + " |")
     w("")
-    if len(names) == 1:
-        w(f"> Solo se evaluó `{names[0]}`. La variante con LLM (issues #6/#7) se agrega al registro `SYSTEMS` de "
-          "`bankagent/evals/runner.py` con una línea y se compara sobre estos mismos casos con `--system rules --system llm`.")
+    w("| Sistema | Qué es |")
+    w("|---|---|")
+    for s in names:
+        w(f"| `{s}` | {ctx['systems'][s]['describe'].get('description', '—')} |")
+    w("")
+    if {"b0", "b1"} & set(names):
+        w("> B0 y B1 son líneas base ingenuas **para dar escala**, no alternativas propuestas: B0 muestra el piso de "
+          "contención (todo a humano, seguro); B1 muestra qué resultados inseguros aparecen sin política ni confirmación. "
+          "El LLM está apagado (sin API paga); el router por embeddings (#42) y el LLM se agregan con `--system embeddings` / "
+          "`--system llm` sobre este mismo test congelado.")
         w("")
 
     # ------------------------------------------------------------ carga
@@ -113,7 +120,9 @@ def render(ctx: dict) -> str:
     w(f"- **División:** dev/test por `customer_id` (hash; {man['dev_share_pct']}% dev); ningún cliente en ambas. "
       "Además, **la redacción también está dividida**: dev usa las plantillas v1 y test las v2, escritas después de "
       "ajustar la línea base con dev. Solo se reporta **test**. "
-      f"Archivo `evals/cases/test.jsonl` sha256 `{man['sha256']['test.jsonl'][:12]}…`.")
+      f"**Test congelado:** `evals/cases/test.jsonl` sha256 `{meta.get('cases_sha256', man['sha256']['test.jsonl'])[:16]}…`"
+      f"{'' if meta.get('cases_sha_ok', True) else ' (⚠ NO coincide con el manifiesto)'}; el generador se niega a "
+      "reescribirlo, así las mejoras posteriores del router se miden sin fuga.")
     w("")
     cat = Counter(c["category"] for c in cases)
     w("| Categoría | n | Resultado esperado |")
@@ -306,18 +315,21 @@ def render(ctx: dict) -> str:
         res = {r["case_id"]: r for r in ctx["systems"][s]["results_run1"]}
         byid = {c["id"]: c for c in cases}
         fails = [x for x in sc if not x["correct"]]
+        cap = 40
         w(f"**`{s}`: {len(fails)} de {len(sc)} casos fallan.** Por categoría: " + ", ".join(
             f"{k} {v}/{cat[k]}" for k, v in Counter(byid[x['case_id']]["category"] for x in fails).most_common()) + ".")
         w("")
         w("| Caso | Categoría | Dialecto | Primer mensaje | Router en el turno 1 | Último turno del cliente → router | Motivo |")
         w("|---|---|---|---|---|---|---|")
-        for x in fails:
+        for x in fails[:cap]:
             c, r = byid[x["case_id"]], res[x["case_id"]]
             msg = c["turns"][0]["text"].replace("|", "/")
             last = r["turns"][-1] if len(r["turns"]) > 1 else None
             tail = f"“{last['text']}” → {_interp(last)}" if last else "—"
             w(f"| {c['id']} | {c['category']} | {c['dialect']} | {msg} | {_interp(r['turns'][0]) if r['turns'] else '—'} | "
               f"{tail} | {'; '.join(x['reasons'])} |")
+        if len(fails) > cap:
+            w(f"| … | {len(fails) - cap} fallas más en `data/evals/results.json` | | | | | |")
         w("")
 
     # ------------------------------------------------------------ humano

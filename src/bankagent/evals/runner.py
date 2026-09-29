@@ -6,9 +6,10 @@
   Es una SIMULACIÓN de conversación, no tráfico real.
 - Las acciones se leen del almacén ops (disputas y bloqueos realmente escritos), no de la respuesta.
 
-Sistemas: `SYSTEMS` mapea un nombre a una fábrica. Para agregar la variante con LLM basta una línea:
-    SYSTEMS["llm"] = lambda: System("llm", LLMRouter(...), LLMWriter(...), uses_model=True)
-o pasar `--system paquete.modulo:fabrica` al runner.
+Sistemas: `SYSTEMS` mapea un nombre a una fábrica (`--system b0|b1|rules|embeddings|llm|llm_router`).
+Un router nuevo que implemente `Router` se agrega con una línea:
+    SYSTEMS["embeddings"] = lambda: System("embeddings", EmbeddingsRouter(...), TemplateWriter(), uses_model=False)
+o se pasa `--system paquete.modulo:fabrica` (o `ruta/archivo.py:fabrica`) al runner.
 """
 from __future__ import annotations
 
@@ -43,6 +44,13 @@ class System:
     writer: object
     uses_model: bool = False
     meta: dict = field(default_factory=dict)
+    # fábrica del agente a partir de (tools, policy); None = el Agent del grafo con router y writer
+    build: Callable | None = None
+
+    def make_agent(self, tools: BankTools, policy: PolicyEngine):
+        if self.build:
+            return self.build(tools, policy)
+        return Agent(tools, policy, router=self.router, writer=self.writer)
 
     def describe(self) -> dict:
         info = {"system": self.name, "router": getattr(self.router, "name", type(self.router).__name__),
@@ -70,8 +78,34 @@ def _llm_system(router: bool, writer: bool) -> System:
                   uses_model=True)
 
 
+def _b0() -> System:
+    from .baselines import TransferAllRouter
+    return System("b0", TransferAllRouter(), TemplateWriter(),
+                  meta={"description": "B0: transfiere a humano todo pedido no trivial (mismo grafo)"})
+
+
+def _b1() -> System:
+    from .baselines import NaiveAutomationAgent
+    return System("b1", RuleRouter(), TemplateWriter(), build=NaiveAutomationAgent,
+                  meta={"description": "B1: automatización ingenua, sin política ni confirmación"})
+
+
+def _embeddings() -> System:
+    """Router aprendido por embeddings (#42). Cuando exista, completar aquí la importación."""
+    try:
+        from ..embeddings_router import EmbeddingsRouter  # type: ignore[import-not-found]
+    except ImportError as e:
+        raise RuntimeError("El router por embeddings (#42) todavía no está en el repo") from e
+    return System("embeddings", EmbeddingsRouter(), TemplateWriter(),
+                  meta={"description": "Agente con router por embeddings + plantillas"})
+
+
 SYSTEMS: dict[str, Callable[[], System]] = {
-    "rules": lambda: System("rules", RuleRouter(), TemplateWriter(), uses_model=False),
+    "b0": _b0,
+    "b1": _b1,
+    "rules": lambda: System("rules", RuleRouter(), TemplateWriter(), uses_model=False,
+                            meta={"description": "Agente v1: grafo + RuleRouter + plantillas (política y confirmación)"}),
+    "embeddings": _embeddings,
     "llm": lambda: _llm_system(router=True, writer=True),
     "llm_router": lambda: _llm_system(router=True, writer=False),
 }
@@ -211,7 +245,7 @@ def run_case(case: dict, db: str, factory: Callable[[], System], run: int = 1) -
     system = factory()
     identity = IdentityService(ttl_seconds=900)
     tools = BankTools(db, identity)
-    agent = Agent(tools, PolicyEngine(), router=system.router, writer=system.writer)
+    agent = system.make_agent(tools, PolicyEngine())
     cid = case["customer_id"]
     setup = case.get("setup") or {}
     token = "token-invalido" if setup.get("token") == "invalid" else identity.login(cid)

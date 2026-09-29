@@ -507,16 +507,29 @@ def build_cases(db: str, seed: int = SEED, unique_customers: bool = True) -> tup
     return cases, manifest
 
 
-def write(cases: list[dict], manifest: dict, out: str) -> None:
+class FrozenTestError(RuntimeError):
+    """El conjunto test está congelado: regenerarlo con otro contenido invalidaría las comparaciones."""
+
+
+def _serialize(cases: list[dict], split: str) -> bytes:
+    return "".join(json.dumps(c, ensure_ascii=False, default=str) + "\n" for c in cases if c["split"] == split).encode()
+
+
+def write(cases: list[dict], manifest: dict, out: str, force: bool = False) -> None:
     os.makedirs(out, exist_ok=True)
+    test_path = os.path.join(out, "test.jsonl")
+    new_test = _serialize(cases, "test")
+    if os.path.exists(test_path) and not force:
+        with open(test_path, "rb") as f:
+            if f.read() != new_test:
+                raise FrozenTestError(f"{test_path} está congelado y el contenido generado difiere. No se escribió nada. "
+                                      "Si de verdad hay que reemplazarlo (invalida la comparación con reportes previos), "
+                                      "usar --force y documentarlo en evals/cases/README.md.")
     for split in ("dev", "test"):
-        path = os.path.join(out, f"{split}.jsonl")
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            for c in cases:
-                if c["split"] == split:
-                    f.write(json.dumps(c, ensure_ascii=False, default=str) + "\n")
-        with open(path, "rb") as f:
-            manifest.setdefault("sha256", {})[f"{split}.jsonl"] = hashlib.sha256(f.read()).hexdigest()
+        data = new_test if split == "test" else _serialize(cases, split)
+        with open(os.path.join(out, f"{split}.jsonl"), "wb") as f:
+            f.write(data)
+        manifest.setdefault("sha256", {})[f"{split}.jsonl"] = hashlib.sha256(data).hexdigest()
     with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
         f.write("\n")
@@ -532,9 +545,10 @@ def main():
     ap.add_argument("--db", default=os.path.join(ROOT, "data", "serving.duckdb"))
     ap.add_argument("--out", default=os.path.join(ROOT, "evals", "cases"))
     ap.add_argument("--seed", type=int, default=SEED)
+    ap.add_argument("--force", action="store_true", help="reemplaza un test.jsonl congelado (invalida comparaciones)")
     a = ap.parse_args()
     cases, manifest = build_cases(a.db, a.seed)
-    write(cases, manifest, a.out)
+    write(cases, manifest, a.out, a.force)
     print(json.dumps({k: manifest[k] for k in ("n", "shortfall", "policy_cross_check")}, ensure_ascii=False))
 
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import platform
@@ -96,9 +97,14 @@ def main():
     ap.add_argument("--human-db", default=os.path.join(ROOT, "data", "bank.duckdb"))
     a = ap.parse_args()
     systems = a.system or ["rules"]
-    cases = load(os.path.join(a.cases, f"{a.split}.jsonl"))
+    cases_path = os.path.join(a.cases, f"{a.split}.jsonl")
+    cases = load(cases_path)
     with open(os.path.join(a.cases, "manifest.json"), encoding="utf-8") as f:
         manifest = json.load(f)
+    with open(cases_path, "rb") as f:
+        sha = hashlib.sha256(f.read()).hexdigest()
+    if sha != manifest["sha256"][f"{a.split}.jsonl"]:
+        print(f"ATENCIÓN: {cases_path} no coincide con el hash del manifiesto (¿se editó a mano?)", file=sys.stderr)
     ctx = evaluate(a.db, cases, systems, a.repeats, progress=True)
     import langgraph  # noqa: F401  (versión para el reporte)
     from importlib.metadata import version
@@ -108,7 +114,8 @@ def main():
         "dirty": bool(_git("status", "--porcelain", "--untracked-files=no")),
         "generated_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "repeats": a.repeats, "manifest": manifest,
         "policy_version": PolicyEngine().version, "python": platform.python_version(),
-        "langgraph": version("langgraph"), "db_name": os.path.basename(a.db),
+        "langgraph": version("langgraph"), "db_name": os.path.basename(a.db), "cases_sha256": sha,
+        "cases_sha_ok": sha == manifest["sha256"][f"{a.split}.jsonl"],
     }
     ctx["human"] = human_baseline(a.human_db)
     if a.split != "test":
