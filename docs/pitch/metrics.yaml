@@ -1,0 +1,15 @@
+# Métricas del pitch que dependen de otros reportes.
+# Cuando un reporte se publique, copiar el valor aquí (texto corto, tal cual va en la slide) y regenerar:
+#     PYTHONPATH=src python scripts/make_deck.py
+# `value: null` => la slide muestra [[PENDIENTE: ...]] y make_deck.py lo lista al final.
+# Nunca poner un número que no esté en el reporte citado en `source`.
+
+eval_agent:        {value: null, source: "reports/eval.md (#12)", desc: "éxito de tarea del agente (LLM) en casos reservados"}
+eval_baseline:     {value: null, source: "reports/eval.md (#12)", desc: "éxito de tarea de la línea base (reglas + plantillas)"}
+eval_cases:        {value: null, source: "reports/eval.md (#12)", desc: "n.º de casos reservados y cómo se generaron"}
+inj_detection:     {value: null, source: "reports/injection_eval.md (#8/#9)", desc: "recall de detección de inyección (clasificador vs patrones)"}
+inj_fpr:           {value: null, source: "reports/injection_eval.md (#8/#9)", desc: "falsos positivos sobre mensajes legítimos"}
+inj_harm:          {value: null, source: "reports/injection_eval.md (#8)", desc: "daño: fugas del señuelo / acciones no confirmadas"}
+fairness:          {value: null, source: "reports/eval.md (#13)", desc: "misma decisión entre variantes MX/CO/AR/pt-BR"}
+capacity:          {value: null, source: "reports/capacity.md (#19)", desc: "latencia p95 y costo por conversación"}
+demo_url:          {value: null, source: "deploy (#15)", desc: "URL de la demo desplegada"}
