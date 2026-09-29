@@ -8,7 +8,7 @@ y si no debe resolver pasa el caso a un humano con el paquete completo. **El mod
 
 | Para el jurado | |
 |---|---|
-| Demo en vivo | [[PENDIENTE: deploy]] (mientras tanto: [Demo web](#demo-web) en local, un contenedor) |
+| Demo en vivo | **[https://agente-disputas.onrender.com](https://agente-disputas.onrender.com)** (Render, plan gratis; si tarda ~1 min es el arranque en frío) |
 | Cada punto del enunciado con su evidencia | [`docs/rubric-evidence.md`](docs/rubric-evidence.md) |
 | Arquitectura y diagramas | [`docs/architecture.md`](docs/architecture.md) · decisiones: [`docs/adr/`](docs/adr/README.md) |
 | Deck (6 slides + notas) | [`docs/pitch/deck.pdf`](docs/pitch/deck.pdf) · [`deck.pptx`](docs/pitch/deck.pptx) · [`deck.md`](docs/pitch/deck.md) |

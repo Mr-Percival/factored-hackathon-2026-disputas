@@ -48,7 +48,7 @@ Diagrama: guard → entender (router aprendido local: intención; reglas: datos 
 ![escena 2](screens/escena2.png)
 ![escena 3](screens/escena3.png)
 
-<sub>Demo en vivo: [[PENDIENTE: deploy]] · clientes de docs/demo/demo_customers.json (verificados 14/14) · guion: docs/demo-script.md</sub>
+<sub>Demo en vivo: agente-disputas.onrender.com · clientes de docs/demo/demo_customers.json (verificados 14/14) · guion: docs/demo-script.md</sub>
 
 **Notas del orador:** Tres conversaciones del mismo flujo, con clientes reales del dataset del organizador. Primera, en México: el cliente no reconoce un cargo de 151 dólares en Gasolinera Express; hay un único candidato, la política lo permite y el agente ofrece la disputa y el bloqueo por separado. Con «sí, ambas» abre la disputa y bloquea la tarjeta; solo dice 'listo' si la verificación lo confirma. Segunda, en Colombia: 242.000 pesos coincide con dos cargos, así que pregunta en vez de adivinar. Tercera, en portugués: un cargo con score de fraude 95.1 activa la regla H03 y pasa a un analista con la traza, los hechos verificados y la regla. Y si alguien escribe 'ignora tus instrucciones', el guard lo bloquea antes del router; aunque no lo hiciera, el cliente sale del token, no del texto.
 
@@ -100,7 +100,7 @@ Respaldo: _Los datos tienen límites reales; cada uno cambió una decisión de d
 - Router aprendido local con fallback visible a reglas
 - Red team de 3 rondas e invariantes con Hypothesis, en CI
 - Auditoría encadenada · dependencias con hash · CI → GHCR → Render
-- Demo desplegada: [[PENDIENTE: deploy]]
+- Demo desplegada: agente-disputas.onrender.com
 
 **Falta para producción**
 
@@ -117,7 +117,3 @@ Respaldo: _Los datos tienen límites reales; cada uno cambió una decisión de d
 **Notas del orador:** Cerramos con lo que falta, sin maquillaje. El núcleo ya está: permisos, política, consentimiento por acción, acciones verificadas, un router aprendido con fallback, pipeline con linaje, auditoría encadenada y un deploy automático que verifica los escenarios antes de publicar. Para producción faltan piezas conocidas: un proveedor de identidad real con MFA y step-up antes de bloquear una tarjeta, estado compartido para escalar horizontalmente, auditoría inmutable, evaluar el LLM cuando haya presupuesto y un test nuevo escrito por otra persona. Y con datos reales, recalibrar el umbral. La arquitectura no cambia: cambian los adaptadores.
 
 ---
-
-## Pendientes
-
-- [[PENDIENTE: URL de la demo desplegada — deploy (#15)]]
