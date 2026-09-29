@@ -148,7 +148,7 @@ python scripts/verify_demo.py --db data/demo/demo.duckdb --raw data/raw         
 | Tamaño de `data/demo/demo.duckdb` | **4.5 MB** (509 clientes · 1,317 productos · 14,665 transacciones · 244 quejas) |
 | Tiempo de construcción | ≈ 110–135 s (lee todos los CSV de `data/raw` y filtra) |
 | Selección de clientes | ≈ 10–15 s (13 escenarios, 9 corridas del agente sobre la base completa) |
-| Verificación | 13/13 OK en la base completa y en la de demo, con el umbral de fraude vigente (30, PR #18) y con el anterior (60) |
+| Verificación | 14/14 OK en la base completa y en la de demo con la política 2026-09-29.3 (consentimiento por acción, #38); antes, 13/13 con el umbral de fraude vigente (30, PR #18) y con el anterior (60) |
 
 **Huella de la entrega usada** (sha256 de `ruta|tamaño` por tabla, misma fórmula que `source_fingerprint` del
 manifiesto del pipeline en el PR #18):
