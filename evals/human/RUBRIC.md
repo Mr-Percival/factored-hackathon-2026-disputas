@@ -15,7 +15,8 @@ derivar: evalúas si **con este paquete puedes atender el caso sin volver a preg
    `e_falta_critico` con `si` o `no` y, si pusiste `si`, `e_que_falta` con una frase corta.
 4. **No abras `evals/human/_key/`** ni compares notas con el resto hasta que todos terminen. Algunos paquetes pueden
    estar incompletos o tener errores: califica lo que ves.
-5. El campo `request` se muestra tal como llega hoy en el paquete (puede incluir respuestas del agente).
+5. El campo `request` trae solo los mensajes del cliente (formato `handoff/v1`); la conversación completa, con quién
+   habla, está en `transcript`. Los campos opcionales vacíos no se muestran: no los cuentes como faltantes.
 6. No vuelvas a leer paquetes anteriores ni corrijas notas ya puestas. La primera impresión es el dato.
 7. Al terminar, guarda la planilla como CSV (UTF-8; si Excel la guarda con `;`, también sirve) con el mismo nombre y súbela en un commit
    (`git add evals/human/sheets/rater_<X>.csv`) o envíasela a quien corre el `score`.
