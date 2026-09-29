@@ -12,6 +12,7 @@ Factored AI & Data Hackathon 2026 · Flujo elegido: **intake de cargos no recono
 - Modelo de amenazas (OWASP Top 10 LLM 2025): [`docs/threat-model.md`](docs/threat-model.md)
 - Propiedades demostradas (I1–I8 con Hypothesis sobre conversaciones aleatorias + verificación estática de todos los caminos del grafo): [`docs/threat-model.md#propiedades-demostradas`](docs/threat-model.md#propiedades-demostradas) · caminos: [`docs/graph-paths.md`](docs/graph-paths.md)
 - Guion de la demo con clientes reales verificados: [`docs/demo-script.md`](docs/demo-script.md)
+- **Demo web** (FastAPI + React, un contenedor): sección [Demo web](#demo-web) · decisión en [ADR 0008](docs/adr/0008-frontend-web.md)
 - Operación: topología de producción, capacidad medida, monitoreo, runbook y trabajo restante: [`docs/operations.md`](docs/operations.md)
 
 ## Por qué este flujo (resumen del EDA)
@@ -58,6 +59,7 @@ src/bankagent/
   graph.py              grafo LangGraph con transiciones declaradas y traza
   graph_check.py        verificación estática de EDGES: caminos, alcanzabilidad, predecesores de `act`
   chat.py               chat de consola
+  api/                  API FastAPI de la demo web: sesión por cookie, escenarios, turnos con traza, SPA
   evals/                casos reservados (generador), runner con cliente simulado, métricas y reporte
   evals/human_kit.py    evaluación humana de handoffs (build / score / check) + verificador de completitud
   evals/replay.py       replay de quejas históricas por el agente + modo sombra (SIMULACIÓN) -> reports/replay.md
@@ -65,7 +67,9 @@ evals/cases/            casos dev/test en JSONL + manifiesto (generados por el e
 evals/human/            tarjetas de handoff, planillas ciegas por evaluador y RUBRIC.md (clave en _key/)
 evals/fixtures/         fixtures del equipo: portugués traducido y mensajes bancarios (con procedencia)
 tests/                  fixture de prueba etiquetado + tests de flujo, seguridad, pipeline, evaluación y equidad
-scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo)
+scripts/                descarga S3, EDA y demo (select_demo_customers / verify_demo / export_openapi)
+web/                    SPA React 19 + TypeScript + Vite (ver web/README.md)
+Dockerfile              imagen única: build de web/ + runtime Python con la API
 ```
 
 ## Setup reproducible
@@ -95,6 +99,40 @@ pip install -e ".[security-eval]"
 python -m bankagent.evals.injection                   # -> reports/injection_eval.md
 BANKAGENT_INJECTION_DETECTOR=combined python -m bankagent.chat --customer CLI-XXXXXXXX   # guard regex OR clasificador
 ```
+
+## Demo web
+Tres paneles: **escenarios** (login simulado y guion de un clic por turno), **chat** y **"Por qué respondió así"**
+(qué entendió el router, traza del grafo con herramientas e intentos, reglas de la política con su versión, hechos
+verificados) + **consola del asesor humano**, que se abre sola con cada handoff. Siempre en modo reglas + plantillas
+(sin LLM, sin costo). En pantallas angostas los paneles pasan a pestañas. Detalle del frontend: [`web/README.md`](web/README.md).
+
+```bash
+# Desarrollo: API con recarga + Vite con proxy (un solo origen para la cookie)
+pip install -e ".[dev,api]"
+uvicorn bankagent.api.main:app --reload                 # :8000 (sin BANKAGENT_DB: base del fixture)
+cd web && npm ci && npm run dev                          # http://localhost:5173
+
+# Con la base de demo de clientes reales (los escenarios pasan a ser docs/demo/demo_customers.json)
+BANKAGENT_DB=data/demo/demo.duckdb uvicorn bankagent.api.main:app
+
+# Producción: un contenedor con API + SPA (opcional: cp data/demo/demo.duckdb docker/demo-db/ antes del build)
+docker build -t bankagent-web . && docker run --rm -p 8000:8000 bankagent-web   # http://localhost:8000
+```
+
+| Endpoint | Qué hace |
+|---|---|
+| `GET /api/scenarios` | escenarios de demo desde JSON (se cambian sin tocar código) |
+| `POST /api/sessions` `{customer_id}` | login simulado restringido a la allowlist de escenarios; cookie HttpOnly + SameSite=Strict |
+| `POST /api/conversations` · `POST /api/conversations/{id}/messages` `{text}` | nueva conversación · turno: respuesta, resultado, qué entendió, decisión, handoff y traza |
+| `POST /api/sessions/expire` | control de demo: vence el token del agente |
+| `GET /healthz` · `GET /readyz` | liveness · base alcanzable y política cargada |
+| `GET /api/docs` | OpenAPI (Swagger UI) |
+
+Configuración por entorno (todas opcionales, ver `src/bankagent/api/config.py`): `BANKAGENT_DB`, `BANKAGENT_SCENARIOS`,
+`BANKAGENT_ALLOW_ANY_CUSTOMER=1` (solo local con datos reales), `BANKAGENT_AUDIT_PATH`, `BANKAGENT_CORS_ORIGINS` (solo
+dev), `BANKAGENT_COOKIE_SECURE`, `BANKAGENT_RATE_LIMIT_PER_MIN`, `BANKAGENT_DOCS=0`. El token del agente nunca sale del
+servidor; el navegador solo tiene un id opaco. Corre con **un worker** porque el estado de la conversación vive en
+memoria ([ADR 0008](docs/adr/0008-frontend-web.md)).
 
 ## Evaluación humana de los handoffs
 Kit para que 4 personas califiquen ~35 paquetes de handoff en menos de 30 minutos cada una. Rúbrica, anclajes e
@@ -139,4 +177,5 @@ Qué se envía al proveedor y por qué: [ADR 0004](docs/adr/0004-llm-acotado-rou
 - [x] Inyección con datasets públicos: detección (regex vs. clasificador) y daño de punta a punta ([reporte](reports/injection_eval.md), [ADR 0005](docs/adr/0005-deteccion-inyeccion.md))
 - [ ] Evaluación: agente con LLM contra la línea base sobre los mismos casos (LLM apagado: sin API paga)
 - [x] Log de auditoría con cadena de hashes, límite de intentos, modelo de amenazas
-- [ ] Interfaz web, deploy, slides y video
+- [x] Interfaz web (FastAPI + React) en un contenedor, construido y probado en CI
+- [ ] Deploy público y video

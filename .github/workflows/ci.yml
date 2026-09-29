@@ -20,8 +20,49 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install -e ".[dev]"
+      - run: pip install -e ".[dev,api]"
       - run: pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+
+  # Construye la imagen de la demo y comprueba que arranca y responde (no se publica).
+  image:
+    runs-on: ubuntu-latest
+    needs: [test, web]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t bankagent-web:ci .
+      - name: smoke test del contenedor
+        run: |
+          docker run -d --name demo -p 8000:8000 bankagent-web:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8000/readyz && break
+            sleep 2
+          done
+          curl -fsS http://localhost:8000/healthz
+          curl -fsS http://localhost:8000/api/scenarios > /dev/null
+          curl -fsS -o /dev/null -D headers.txt http://localhost:8000/
+          grep -qi "content-security-policy: default-src 'self'" headers.txt
+          docker inspect --format '{{.Config.User}}' demo | grep -qx app
+      - if: always()
+        run: docker logs demo || true
 
   secrets:
     runs-on: ubuntu-latest

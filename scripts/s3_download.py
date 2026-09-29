@@ -5,8 +5,11 @@
 """
 import argparse, os, boto3
 from concurrent.futures import ThreadPoolExecutor
-for l in open(".env"):
-    k, v = l.strip().split("=", 1); os.environ[k] = v
+# Credenciales: .env en local; en CI vienen como variables de entorno (secretos del repo). Nunca en el código.
+if os.path.exists(".env"):
+    for l in open(".env"):
+        if "=" in l:
+            k, v = l.strip().split("=", 1); os.environ.setdefault(k, v)
 s3 = boto3.client("s3"); B = os.environ["DATA_BUCKET"]
 FULL = {"branches", "customers", "products", "service_agents", "marketing_campaigns", "daily_exchange_rates",
         "transactions", "call_center_interactions", "call_transcripts", "satisfaction_surveys", "complaints"}
