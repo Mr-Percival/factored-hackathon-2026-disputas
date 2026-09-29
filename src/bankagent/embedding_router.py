@@ -86,7 +86,7 @@ RULE_EVIDENCE = 0.85  # confianza de RuleRouter con una sola intención ganadora
 
 
 def rule_backoff(base: Understanding, model_intent: str) -> str | None:
-    """Cuándo responde la regla aunque se consultó el modelo (#57): el modelo se ABSTIENE y RuleRouter tiene una
+    """Cuándo responde la regla aunque se consultó el modelo (#64): el modelo se ABSTIENE y RuleRouter tiene una
     intención inequívoca que NO es de acción (fuera de alcance, pedido de humano, toma de cuenta, estado o retiro de
     una disputa, cierre). Abstenerse significa "no sé": en vez de pedir aclaración ("quero fazer um emprestimo",
     "quiero dar de baja un seguro" -> p≈0.5), se usa la evidencia léxica de la línea base.

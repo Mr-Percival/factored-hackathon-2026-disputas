@@ -182,7 +182,7 @@ SUB_ACTION_DENIALS: dict[str, list[str]] = {
     ],
 }
 # Negación + cualquier conjugación de "bloquear" con o sin pronombres, en todos los tratamientos (tú, usted, vos,
-# ustedes, você): "no me bloquee la tarjeta" (usted, es-CO) quedaba afuera de la lista y el "sí" se volvía duda (#57).
+# ustedes, você): "no me bloquee la tarjeta" (usted, es-CO) quedaba afuera de la lista y el "sí" se volvía duda (#64).
 _CLITIC = r"(?:(?:me|te|le|nos|les|se|la|lo|las|los|o|a) )*"
 SUB_ACTION_DENIAL_PATTERNS: dict[str, list[str]] = {
     "block_card": [rf"(?:no|nao) (?:quiero que |quero que |hace falta |precisa )?{_CLITIC}bloque[a-z]*"

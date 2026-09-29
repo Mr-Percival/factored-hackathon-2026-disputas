@@ -173,7 +173,7 @@ def test_full_model_if_cached():
     assert m.predict("no reconozco un cargo de 350").label == "dispute_charge"
 
 
-# ------------------------------------------------------------------ #57: composición modelo + reglas
+# ------------------------------------------------------------------ #64: composición modelo + reglas
 def test_abstention_backs_off_to_an_unambiguous_non_action_rule(router):
     """El modelo no sabe ("seguro" no está en su vocabulario) y RuleRouter ve un tema fuera de alcance: se usa la
     regla en vez de pedir aclaración, y la traza lo dice."""
@@ -198,7 +198,7 @@ def test_confident_model_is_not_overridden(router):
 
 @lite_present
 def test_lite_model_disputes_transfers_and_withdrawals():
-    """Regresión #57: el train no tenía disputas de transferencias ni de retiros; "disputar una transferencia" salía
+    """Regresión #64: el train no tenía disputas de transferencias ni de retiros; "disputar una transferencia" salía
     fuera de alcance (p=0.94) y "disputar un retiro" como retirar una disputa. Frases escritas para este test (no
     están en el corpus)."""
     m = load_intent_model(DEFAULT_DIR)

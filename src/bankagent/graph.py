@@ -523,7 +523,7 @@ HANDOFF_REPLIES = {"tool_failure", "out_of_scope", "security_lockout", "consent_
 CONVERSATION_HANDOFFS = {"human_request": "customer_request", "account_takeover": "account_takeover",
                          "cancel_dispute": "cancel_dispute"}
 # Handoffs decididos por la conversación (no por la política ni por una falla): si el mensaje nombra un cargo, el
-# nodo handoff lo busca para que el paquete llegue con hechos verificados (#57).
+# nodo handoff lo busca para que el paquete llegue con hechos verificados (#64).
 CLAIM_LOOKUP_REASONS = {"customer_request", "account_takeover", "cancel_dispute", "out_of_scope", "dispute_status",
                         "clarification_exhausted"}
 SECURITY_REASONS = {"account_takeover", "security_lockout"}  # su cola/prioridad nunca la reemplaza una regla H0x

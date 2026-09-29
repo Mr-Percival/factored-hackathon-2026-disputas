@@ -165,7 +165,7 @@ def test_review_attacks_are_detected(text):
 
 
 def test_card_option_by_last_four_digits(env):
-    """#57: "la que termina en 4242" elige la tarjeta ofrecida (antes 4242 se leía como un MONTO y el router
+    """#64: "la que termina en 4242" elige la tarjeta ofrecida (antes 4242 se leía como un MONTO y el router
     aprendido lo convertía en una disputa nueva). Solo resuelve contra las opciones del turno."""
     tok, th = env.login("CLI-ANA"), env.thread()
     r = env.agent.chat(th, tok, "perdí mi tarjeta")

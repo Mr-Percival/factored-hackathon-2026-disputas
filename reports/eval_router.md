@@ -4,7 +4,7 @@
 
 > **Qué es esto:** una medición OFFLINE sobre casos generados por el equipo con un cliente SIMULADO por guion, contra datos sintéticos del organizador. No es tráfico real ni una prueba con usuarios.
 
-> **Segunda medición (PR #57, después de correcciones).** La primera medición de este test (PR #53: `rules` 102/115,
+> **Segunda medición (PR #64, después de correcciones).** La primera medición de este test (PR #53: `rules` 102/115,
 > `embeddings` 106/115, 2 paquetes de handoff incompletos, acuerdo por dialecto 10/11 vs 9/11) motivó correcciones
 > que se diagnosticaron **solo** con el split dev (`evals/cases/dev.jsonl` y un dev ampliado con otras semillas del
 > mismo generador, solo clientes y plantillas de dev), los escenarios de la demo, el kit humano y conversaciones

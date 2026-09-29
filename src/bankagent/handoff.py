@@ -85,7 +85,7 @@ def _questions(reason: str, r: dict, txn: dict | None, rules: list[dict], trigge
     return qs
 
 
-# Qué pidió la conversación cuando un cargo con regla H0x toma el caso (`trigger`, #57)
+# Qué pidió la conversación cuando un cargo con regla H0x toma el caso (`trigger`, #64)
 TRIGGER_TEXT = {"customer_request": "pidió hablar con una persona", "out_of_scope": "planteó un tema fuera de alcance",
                 "account_takeover": "reportó un posible acceso indebido a su cuenta",
                 "cancel_dispute": "pidió retirar una disputa", "dispute_status": "preguntó por el estado de una disputa",

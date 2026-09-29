@@ -47,7 +47,7 @@ def test_short_answers(text, awaiting, intent, option):
     assert u.intent == intent and u.slots.option == option
 
 
-# #57: el mismo "sí, pero sin bloqueo" en cada tratamiento. "no me bloquee" (usted, es-CO) era "unclear" y ese grupo
+# #64: el mismo "sí, pero sin bloqueo" en cada tratamiento. "no me bloquee" (usted, es-CO) era "unclear" y ese grupo
 # de dialecto no terminaba igual que los otros tres (con ambos routers: la confirmación la decide RuleRouter).
 @pytest.mark.parametrize("text", ["Sí, pero no bloquees la tarjeta",                     # tú (es-MX)
                                   "Sí, pero no me bloquee la tarjeta, por favor",       # usted (es-CO)
