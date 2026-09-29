@@ -41,6 +41,14 @@ html, body { margin:0; background:#fff; color:var(--ink);
 .slide .body.stack { flex-direction:column; gap:32px; }
 .slide .body.stack .col.wide img { width:100%; max-height:420px; }
 .slide .body.stack ul { columns:2; column-gap:64px; font-size:28px; }
+.slide .gallery { display:flex; gap:32px; }
+.slide .gallery p { flex:1; margin:0; }
+.slide .gallery img { width:100%; max-height:330px; border:1px solid #e3e2de; }
+.slide .body.stack.scenes ol { font-size:25px; line-height:1.4; }
+.slide .body.stack.scenes li { margin:0 0 10px; }
+.slide .body.split ul { font-size:26px; line-height:1.35; }
+.slide .body.split li { margin:0 0 12px; }
+.slide .body.split p strong { color:var(--ink); font-size:30px; }
 .slide img { max-width:100%; max-height:600px; object-fit:contain; border-radius:8px; }
 .slide ul, .slide ol { font-size:32px; line-height:1.45; padding-left:1.1em; margin:0; }
 .slide li { margin:0 0 18px; }
@@ -85,6 +93,8 @@ def split_slides(md: str):
         if m:
             notes, p = m.group(1).strip(), p[:m.start()].rstrip()
         title = p.splitlines()[0][3:].strip()
+        if title == "Pendientes":  # lista de trabajo de make_deck.py, no es una slide
+            continue
         slides.append((title, p, notes))
     return slides
 
@@ -104,7 +114,16 @@ def render_slide(i: int, total: int, body_md: str) -> str:
     text = "\n".join(l for l in text.splitlines() if not re.match(r"^(Gráfico|Gráfico de respaldo|Diagrama|Respaldo):", l))
     md = lambda s: markdown.markdown(s, extensions=["tables"])  # noqa: E731
     cols = [f'<div class="col">{md(text)}</div>']
+    split = "**Falta para producción**" in text
+    if split:  # listo / falta: dos columnas
+        left, right = text.split("**Falta para producción**", 1)
+        cols = [f'<div class="col">{md(left)}</div>', f'<div class="col">{md("**Falta para producción**" + right)}</div>']
     wide = False
+    if len(imgs) > 1:  # capturas de las escenas de la demo: una fila encima del texto
+        gallery = f'<div class="gallery">{"".join(md(im) for im in imgs)}</div>'
+        out = (f'<section class="slide"><div class="num">{i} / {total}</div>{md(chr(10).join(head))}'
+               f'<div class="body stack scenes">{gallery}<div class="col">{md(text)}</div></div>{"".join(subs)}</section>')
+        return re.sub(r"\[\[PENDIENTE:([^\]]*)\]\]", r'<span class="pending">[[PENDIENTE:\1]]</span>', out)
     if imgs:
         src = re.search(r"\(([^)]+)\)", imgs[0]).group(1)
         try:  # imágenes panorámicas (diagramas) a todo el ancho, encima del texto
@@ -115,7 +134,7 @@ def render_slide(i: int, total: int, body_md: str) -> str:
             pass
         cols.insert(0, f'<div class="col{" wide" if wide else ""}">{md(imgs[0])}</div>')
     out = (f'<section class="slide"><div class="num">{i} / {total}</div>{md(chr(10).join(head))}'
-           f'<div class="body{" stack" if wide else ""}">{"".join(cols)}</div>{"".join(subs)}</section>')
+           f'<div class="body{" stack" if wide else ""}{" split" if split else ""}">{"".join(cols)}</div>{"".join(subs)}</section>')
     return re.sub(r"\[\[PENDIENTE:([^\]]*)\]\]", r'<span class="pending">[[PENDIENTE:\1]]</span>', out)
 
 

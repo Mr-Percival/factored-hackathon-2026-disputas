@@ -6,6 +6,8 @@
 # Material del organizador: el diccionario de datos incluye credenciales de AWS.
 # Ningún PDF entra al repo; se comparte por el Drive del hackathon.
 *.pdf
+# Única excepción: el deck del pitch, generado por el equipo (scripts/make_deck_pdf.py).
+!docs/pitch/deck.pdf
 
 # Datos (se regeneran con scripts/s3_download.py + bankagent.pipeline)
 data/

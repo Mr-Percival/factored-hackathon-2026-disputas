@@ -6,6 +6,8 @@
 - Los números del problema salen de docs/pitch/chart_data.json (agregados de make_charts.py).
 - Las métricas de evaluación/capacidad salen de docs/pitch/metrics.yaml; si faltan, la slide muestra
   [[PENDIENTE: ...]] y el script las lista al final (no se inventa ningún número).
+- Escenas de la slide 3: clientes, mensajes y cifras de docs/demo/demo_customers.json (el mismo guion que la demo
+  y el video); el conteo de tests sale de `pytest --collect-only -q`.
 - Capturas de la demo: docs/pitch/screens/escena{1,2,3}.png; si no existen, se dibuja un marcador.
 """
 from __future__ import annotations
@@ -64,6 +66,16 @@ def m(metrics: dict, key: str) -> str:
     if tag not in pending:
         pending.append(tag)
     return f"[[PENDIENTE: {item['source'].split(' ')[0]}]]"
+
+
+def demo_scenes() -> dict:
+    """Escenarios del guion real (docs/demo/demo_customers.json) por id."""
+    d = json.load(open(os.path.join(ROOT, "docs", "demo", "demo_customers.json"), encoding="utf-8"))
+    return {sc["id"]: sc for sc in d["scenarios"]}
+
+
+def money(x: float, cur: str) -> str:
+    return f"{x:,.2f} {cur}"
 
 
 def facts(data: dict) -> dict:
@@ -178,6 +190,9 @@ def build(data, metrics, n_tests):
     f = facts(data)
     titles = json.load(open(os.path.join(CHARTS, "titles.json"), encoding="utf-8"))
     demo_url = m(metrics, "demo_url")
+    sc = demo_scenes()
+    n, a_, fr, inj = sc["normal_mx"], sc["ambiguous_co"], sc["fraud_pt"], sc["injection"]
+    nt, ft = n["transaction"], fr["transaction"]
     return [
         {  # 1 ----------------------------------------------------------------
             "kicker": "El problema, con datos",
@@ -199,66 +214,78 @@ def build(data, metrics, n_tests):
         },
         {  # 2 ----------------------------------------------------------------
             "kicker": "Qué construimos",
-            "title": "El modelo interpreta y redacta; el código decide y actúa",
+            "title": "El modelo interpreta; el código decide y actúa",
             "diagram": True,
             "layers": [("Datos", "Contrato por tabla, cuarentena, upsert incremental y linaje por corrida"),
                        ("Herramientas", "Única puerta a los datos: el cliente sale del token de sesión, nunca del texto"),
                        ("Política", "policy.yaml versionado: reglas con ID (D01…H04) que explican cada decisión"),
-                       ("Agente", "LangGraph con transiciones declaradas; una transición no declarada falla cerrada")],
-            "foot": "Detalle: docs/architecture.md · ADR 0002 (grafo determinista con LLM acotado)",
-            "md_extra": ["Diagrama: guard → entender (LLM) → buscar → decidir (policy.yaml) → actuar con confirmación "
-                         "y verificación / handoff → responder (LLM). Render de respaldo: `charts/arq_4_capas.png`, "
+                       ("Agente", "LangGraph con transiciones declaradas; 19 caminos verificados, lo no declarado falla cerrado")],
+            "foot": "Detalle: docs/architecture.md · ADR 0002 (grafo determinista) · ADR 0009 (router aprendido)",
+            "md_extra": ["Diagrama: guard → entender (router aprendido local: intención; reglas: datos y consentimiento) → "
+                         "buscar → decidir (policy.yaml) → actuar con confirmación y verificación / handoff → responder "
+                         "(plantillas es/pt; writer LLM opcional, apagado). Render de respaldo: `charts/arq_4_capas.png`, "
                          "`charts/arq_grafo.png`."],
             "notes": (
-                "Un solo agente en LangGraph con pasos explícitos. El modelo aparece solo en dos lugares: entender qué quiere "
-                "el cliente y redactar la respuesta. Todo lo que puede causar daño es código: el guard filtra inyecciones y "
-                "enmascara PII; las herramientas derivan el cliente del token, así que un prompt no puede pedir datos ajenos; "
-                "la elegibilidad la decide un YAML con reglas identificadas; y cada acción pide confirmación y se verifica "
-                "releyendo el estado. Cada interfaz del modelo tiene una versión con reglas y plantillas: es la línea base y "
-                "el camino alternativo si el modelo falla."),
+                "Un solo agente en LangGraph con pasos explícitos. El modelo aparece en un solo lugar de la demo: entender qué "
+                "quiere el cliente. Es un router de intención que entrenamos nosotros, local, de 0,2 megas, que se abstiene "
+                "cuando duda; los montos, las fechas y el sí de cada acción los siguen leyendo reglas. Todo lo que puede causar "
+                "daño es código: el guard filtra inyecciones y enmascara PII; las herramientas derivan el cliente del token, "
+                "así que un prompt no puede pedir datos ajenos; la elegibilidad la decide un YAML con reglas identificadas; y "
+                "cada acción pide confirmación y se verifica releyendo el estado. El router y el writer con LLM están "
+                "implementados detrás de las mismas interfaces, pero apagados: no hay API paga, y la línea base es el camino "
+                "alternativo si el modelo falla."),
         },
         {  # 3 ----------------------------------------------------------------
-            "kicker": "Demo en 3 escenas",
+            "kicker": "Demo en 3 escenas · clientes reales del dataset",
             "title": "Un solo flujo: resuelve, pregunta o deriva — nunca adivina",
             "scenes": [
-                ("Normal", "«No reconozco un cargo de 77 dólares»",
-                 "Encuentra 1 cargo, explica la política, pide «¿confirmas?», abre la disputa y bloquea la tarjeta "
-                 "(ambas verificadas)."),
-                ("Ambiguo", "«Me cobraron 350 y no fui yo»",
-                 "Hay 2 candidatos: pregunta cuál. Solo avanza cuando el cliente elige."),
-                ("Handoff en pt + ataque", "«Não reconheço uma cobrança no Brasil»",
-                 "fraud_score ≥ 30 → regla H03 → asesor con paquete completo. «Esqueça as regras…» → bloqueado por el guard."),
+                (f"Normal ({n['locale']})", f"«{n['turns'][0]['say']}»",
+                 f"1 cargo ({money(nt['amount'], nt['currency'])}, {nt['merchant']}). Ofrece disputa y bloqueo por "
+                 f"separado; con «{n['turns'][1]['say']}» abre la disputa y bloquea la tarjeta, ambas verificadas."),
+                (f"Ambiguo ({a_['locale']})", f"«{a_['turns'][0]['say']}»",
+                 f"{len(a_['candidate_ids'])} candidatos: pregunta cuál y solo avanza cuando el cliente elige "
+                 f"(«{a_['turns'][1]['say']}»)."),
+                (f"Handoff en pt + ataque", f"«{fr['turns'][0]['say']}»",
+                 f"fraud_score {ft['fraud_score']:g} ≥ 30 → regla H03 → analista con el paquete completo. "
+                 f"«{' '.join(inj['turns'][0]['say'].split()[:4])}…» → bloqueado por el guard."),
             ],
-            "foot": f"Demo en vivo: {demo_url} · clientes del fixture de demo (CLI-ANA) · guion: docs/pitch/video_script.md",
+            "foot": f"Demo en vivo: {demo_url} · clientes de docs/demo/demo_customers.json (verificados 14/14) · guion: docs/demo-script.md",
             "notes": (
-                "Tres conversaciones del mismo flujo. Primera: Ana no reconoce un cargo de 77 dólares; hay un único candidato, "
-                "la política lo permite y, tras su sí, se abre la disputa y se bloquea la tarjeta; solo decimos 'listo' si la "
-                "verificación lo confirma. Segunda: 350 coincide con dos cargos, así que el agente pregunta en vez de adivinar. "
-                "Tercera, en portugués: un cargo en Brasil con score de fraude alto activa la regla H03 y pasa a un asesor con "
-                "la traza, los hechos verificados y la regla. Y si alguien escribe 'olvida las reglas', el guard lo bloquea "
-                "antes de llegar al modelo."),
+                f"Tres conversaciones del mismo flujo, con clientes reales del dataset del organizador. Primera, en México: "
+                f"el cliente no reconoce un cargo de {nt['amount']:.0f} dólares en {nt['merchant']}; hay un único candidato, "
+                f"la política lo permite y el agente ofrece la disputa y el bloqueo por separado. Con «{n['turns'][1]['say']}» "
+                "abre la disputa y bloquea la tarjeta; solo dice 'listo' si la verificación lo confirma. Segunda, en Colombia: "
+                f"{a_['turns'][0]['say'].split('de ')[1].split(' que')[0]} coincide con dos cargos, así que pregunta en vez de "
+                "adivinar. Tercera, en portugués: un cargo con score de fraude "
+                f"{ft['fraud_score']:g} activa la regla H03 y pasa a un analista con la traza, los hechos verificados y la regla. "
+                "Y si alguien escribe 'ignora tus instrucciones', el guard lo bloquea antes del router; aunque no lo hiciera, "
+                "el cliente sale del token, no del texto."),
         },
         {  # 4 ----------------------------------------------------------------
             "kicker": "Cómo sabemos que funciona",
-            "title": "Evaluación honesta: contra una línea base y en casos reservados",
+            "title": "Evaluación honesta: contra líneas base, en casos reservados",
             "metrics": [
-                ("Agente vs línea base", m(metrics, "eval_agent"), f"línea base: {m(metrics, 'eval_baseline')}",
-                 f"Éxito de tarea en casos reservados · {m(metrics, 'eval_cases')}"),
-                ("Inyección: detección", m(metrics, "inj_detection"), f"falsos positivos: {m(metrics, 'inj_fpr')}",
-                 "Datasets públicos etiquetados (split de prueba) + muestra en pt generada por el equipo"),
-                ("Inyección: daño", m(metrics, "inj_harm"), "medido aparte de la detección",
-                 "Aunque el guard falle, el cliente sale del token y toda acción se confirma"),
-                ("Equidad por dialecto", m(metrics, "fairness"), "misma decisión MX · CO · AR · pt-BR",
+                ("Agente de la demo", m(metrics, "eval_agent"), m(metrics, "eval_agent_detail"),
+                 f"{m(metrics, 'eval_rules')} · {m(metrics, 'eval_baseline')}"),
+                ("Componente aprendido", m(metrics, "ml_router"), m(metrics, "ml_router_detail"),
+                 "Router de intención local vs reglas · corpus propio, split por autor (n=306)"),
+                ("Inyección y red team", "0 daños", m(metrics, "inj_harm"),
+                 f"Red team adaptativo: {m(metrics, 'redteam')}; el daño real se corrigió en la raíz"),
+                ("Equidad por dialecto", m(metrics, "fairness"), "grupos con la misma decisión MX · CO · AR · pt-BR",
                  "No enrutamos por acento: el EDA no muestra efecto (FCR 76.7% vs 76.6%)"),
             ],
-            "foot": (f"{n_tests} tests automatizados en CI (sin datos ni API keys): flujos normal/ambiguo/handoff, sesión vencida, "
-                     "acceso ajeno, inyección directa e indirecta, cliente señuelo"),
+            "foot": (f"Test congelado: {m(metrics, 'eval_cases')} (segunda medición, fuga leve declarada) · "
+                     f"{n_tests} tests en CI, sin datos ni API keys"),
             "notes": (
-                "No entrenamos sobre las transcripciones del dataset: solo hay 42 textos de cliente distintos, así que "
-                "cualquier métrica sería inválida. Evaluamos donde hay etiquetas válidas. Uno: el agente contra la línea base "
-                "de reglas en casos reservados, generados por el equipo y declarados como tales. Dos: la detección de "
-                "inyección con datasets públicos, y por separado el daño, porque aunque el detector falle el ataque no tiene "
-                "con qué dañar. Tres: equidad; el mismo caso escrito en dialectos distintos debe dar la misma decisión."),
+                "No entrenamos sobre las transcripciones del dataset: solo hay 42 textos de cliente distintos. Medimos donde "
+                "hay etiquetas válidas. Uno: el agente de la demo contra la línea base de reglas y contra dos líneas base "
+                "ingenuas, en casos reservados generados por el equipo y declarados como tales; automatizar sin política da "
+                "82 resultados inseguros de 115, el nuestro cero. Dos: el componente aprendido, el router de intención, "
+                "contra las reglas, en un corpus propio dividido por autor. Tres: seguridad; con datasets públicos, "
+                f"{m(metrics, 'inj_detection')}, pero lo que importa es el daño, que medimos aparte: cero, aun con el guard "
+                "apagado. Y un red team propio de tres rondas sí encontró daño real, que corregimos en la raíz. Cuatro: "
+                "equidad; el mismo caso en dialectos distintos debe dar la misma decisión. Somos explícitos: el test ya se "
+                "midió dos veces y declaramos una fuga leve."),
         },
         {  # 5 ----------------------------------------------------------------
             "kicker": "Datos e ingeniería que lo sostienen",
@@ -282,24 +309,26 @@ def build(data, metrics, n_tests):
             "title": "Qué está listo en el sandbox y qué falta para producción",
             "ready": ["Permisos por sesión: token con expiración, sin IDs en el texto",
                       "Política versionada con reglas identificadas y umbral calibrado",
-                      "Acciones con confirmación y verificación; handoff con contexto",
-                      "Pipeline incremental: contratos, cuarentena, linaje",
-                      "Log de auditoría con cadena de hashes y modelo de amenazas OWASP LLM (PR #20)",
+                      "Consentimiento por acción, acciones verificadas, handoff versionado",
+                      "Router aprendido local con fallback visible a reglas",
+                      "Red team de 3 rondas e invariantes con Hypothesis, en CI",
+                      "Auditoría encadenada · dependencias con hash · CI → GHCR → Render",
                       f"Demo desplegada: {demo_url}"],
             "missing": ["IdP real (OIDC) con MFA y step-up antes de actuar",
-                        "Gateway: rate limiting, límite de mensaje, WAF (#15)",
-                        "Auditoría en almacenamiento WORM y claves en KMS",
-                        "Lockfile con hashes y acciones fijadas por SHA (#17)",
-                        "Verificador de cifras e IDs para el writer con LLM (#7)",
-                        "Recalibrar el umbral con datos reales y medir fraude entre cargos disputados",
-                        f"Capacidad: {m(metrics, 'capacity')}"],
+                        "Estado compartido (checkpointer, sesiones) para escalar",
+                        "Auditoría WORM, claves en KMS, gateway con WAF",
+                        "Evaluar el LLM (hoy apagado) y un test v3 escrito por otra persona",
+                        "Calificaciones humanas de los handoffs (kit listo)",
+                        "Recalibrar el umbral con datos reales",
+                        f"Capacidad hoy: {m(metrics, 'capacity')}"],
             "foot": f"{REPO} · docs/threat-model.md · docs/adr/",
             "notes": (
-                "Cerramos con lo que falta, sin maquillaje. El núcleo que no depende del modelo ya está: permisos, política, "
-                "acciones verificadas, pipeline con linaje y auditoría encadenada. Para producción faltan piezas conocidas: un "
-                "proveedor de identidad real con MFA y step-up antes de bloquear una tarjeta, un gateway con límites, "
-                "auditoría en almacenamiento inmutable, cadena de suministro fijada y un verificador de salida para el LLM. "
-                "Y con datos reales, recalibrar el umbral. La arquitectura no cambia: cambian los adaptadores."),
+                "Cerramos con lo que falta, sin maquillaje. El núcleo ya está: permisos, política, consentimiento por acción, "
+                "acciones verificadas, un router aprendido con fallback, pipeline con linaje, auditoría encadenada y un deploy "
+                "automático que verifica los escenarios antes de publicar. Para producción faltan piezas conocidas: un "
+                "proveedor de identidad real con MFA y step-up antes de bloquear una tarjeta, estado compartido para escalar "
+                "horizontalmente, auditoría inmutable, evaluar el LLM cuando haya presupuesto y un test nuevo escrito por otra "
+                "persona. Y con datos reales, recalibrar el umbral. La arquitectura no cambia: cambian los adaptadores."),
         },
     ]
 
@@ -319,9 +348,9 @@ def render_pptx(slides, path):
                 text(s, 9.6, y + 0.12, 3.0, 0.62, big, size=34, bold=True, color=BLUE)
                 text(s, 9.6, y + 0.78, 3.0, 0.6, small, size=12.5, color=INK)
         elif i == 2:
-            nodes = [("Guard", "inyección · PII", "code"), ("Entender", "intención + datos", "llm"),
+            nodes = [("Guard", "inyección · PII", "code"), ("Entender", "intención: modelo local", "llm"),
                      ("Buscar", "transacción / tarjeta", "code"), ("Decidir", "policy.yaml", "code"),
-                     ("Actuar / Handoff", "confirmado + verificado", "code"), ("Responder", "es / pt", "llm")]
+                     ("Actuar / Handoff", "confirmado + verificado", "code"), ("Responder", "plantillas es / pt", "code")]
             w, gap, x0, y0 = 1.72, 0.36, 0.6, 2.15
             for k, (name, sub, kind) in enumerate(nodes):
                 x = x0 + k * (w + gap)
@@ -338,7 +367,7 @@ def render_pptx(slides, path):
             del lg
             text(s, 0.98, 3.35, 5, 0.3, "Código: decide y actúa (auditable, testeable)", size=13, color=INK_2)
             box(s, 6.3, 3.4, 0.28, 0.2, fill=WHITE, line=ORANGE, shape=MSO_SHAPE.RECTANGLE)
-            text(s, 6.68, 3.35, 6, 0.3, "Modelo: interpreta y redacta (con alternativa de reglas/plantillas)",
+            text(s, 6.68, 3.35, 6, 0.3, "Modelo: interpreta (router aprendido local; si no carga, reglas)",
                  size=13, color=INK_2)
             for k, (name, desc) in enumerate(sd["layers"]):
                 x = 0.6 + k * 3.08
@@ -368,7 +397,7 @@ def render_pptx(slides, path):
                 text(s, x + 0.2, 4.05, 2.5, 0.6, sub, size=13, color=INK)
                 text(s, x + 0.2, 4.75, 2.5, 1.2, how, size=12, color=INK_2)
             text(s, 0.6, 6.3, 12.1, 0.55, sd["foot"], size=14, color=INK)
-            sd = dict(sd, foot="Detalle: reports/eval.md · reports/injection_eval.md · ADR 0003")
+            sd = dict(sd, foot="Detalle: reports/eval_router.md · eval.md · intent_router.md · injection_eval.md · redteam.md")
         elif i == 5:
             image(s, os.path.join(CHARTS, sd["chart"]), 0.5, 2.0, w=7.9)
             text(s, 8.75, 2.05, 4.0, 0.4, "Límite del dato → decisión", size=15, bold=True, color=INK_3)
@@ -404,6 +433,10 @@ def render_md(slides, path):
             out.append(f"- **{name}:** {desc.replace(chr(10), ' ')}")
         for k, (name, msg, desc) in enumerate(sd.get("scenes", []), 1):
             out.append(f"{k}. **{name}** — {msg}: {desc}")
+        shots = [k for k in range(1, len(sd.get("scenes", [])) + 1)
+                 if os.path.exists(os.path.join(PITCH, "screens", f"escena{k}.png"))]
+        if shots:
+            out += [""] + [f"![escena {k}](screens/escena{k}.png)" for k in shots]
         if "metrics" in sd:
             out += ["| Pregunta | Resultado | Contexto | Cómo se mide |", "|---|---|---|---|"]
             out += [f"| {a} | **{b}** | {c} | {d} |" for a, b, c, d in sd["metrics"]]
