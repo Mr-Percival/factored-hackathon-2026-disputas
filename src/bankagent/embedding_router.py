@@ -92,6 +92,10 @@ def rule_backoff(base: Understanding, model_intent: str) -> str | None:
     "quiero dar de baja un seguro" -> p≈0.5), se usa la evidencia léxica de la línea base.
     Hacia disputa/bloqueo NO se cede: en validación fuera de fold (train, dejando un autor afuera) ceder también esas
     subía los mensajes con acción equivocada de 1.0% a 3.9% (> objetivo preregistrado de 1%); así, 0 acciones nuevas."""
+    # Seguridad primero (mismo orden que conversation_intent): "clonaron mi tarjeta" con evidencia léxica inequívoca
+    # va a seguridad aunque el modelo vea una disputa. Ceder hacia un handoff nunca agrega una acción (v3 #70).
+    if base.intent == "account_takeover" and base.confidence >= RULE_EVIDENCE and model_intent != "account_takeover":
+        return "security"
     if model_intent != "unknown" or base.confidence < RULE_EVIDENCE:
         return None
     if base.intent in ACTION_INTENTS or base.intent in ("unknown", "unclear"):

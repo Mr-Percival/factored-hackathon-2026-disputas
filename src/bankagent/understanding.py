@@ -156,11 +156,16 @@ def _tokens(s: str) -> list[str]:
     return [w for w in re.findall(r"[a-z0-9]+", _norm(s)) if len(w) >= 3]
 
 
+# Nombres de productos del banco: sus palabras no nombran un comercio ("mi cuenta de AHORRO" no es "Super Ahorro").
+ACCOUNT_PRODUCTS = re.compile(r"(?<![a-z])(?:cuenta|caja|conta|caderneta) (?:de )?(?:ahorros?|poupanca|corriente|"
+                              r"corrente|nomina|sueldo|salario)(?![a-z])|(?<![a-z])poupanca(?![a-z])")
+
+
 def match_merchant(text: str, names: list[str]) -> list[str]:
     """Comercios del cliente nombrados en el texto. Coincide si TODAS las palabras significativas del comercio
     están en el mensaje (con tolerancia a plural/typo leve por prefijo de 5 letras). Por qué exigir todas:
     "tienda" no debe elegir entre "Tienda General" y "Tienda Don José"; "Gasolinera Express" sí es uno."""
-    words = set(_tokens(text))
+    words = set(_tokens(ACCOUNT_PRODUCTS.sub(" ", _norm(text))))
     out = []
     for name in names:
         sig = [w for w in _tokens(name) if w not in MERCHANT_STOPWORDS] or _tokens(name)
@@ -188,7 +193,7 @@ SUB_ACTION_DENIALS: dict[str, list[str]] = {
     ],
 }
 # Objeto opcional que sigue al rechazo ("no me bloquees LA TARJETA"): se consume con la frase.
-_DENIAL_OBJECT = r"(?:\s+(?:la|mi|el|o|a|meu|minha|my|the|su|tu)?\s*(?:tarjeta|targeta|cartao|card|plastico))?"
+_DENIAL_OBJECT = r"(?:\s+(?:nada|(?:la|mi|el|o|a|meu|minha|my|the|su|tu)?\s*(?:tarjeta|targeta|cartao|card|plastico)))?"
 # ...y su motivo, si lo da ("no bloquees la tarjeta QUE LA USO PARA TODO"): es parte del rechazo, no otra respuesta.
 # Ronda 3: el motivo se analiza aparte (si trae un sí/no/duda, la respuesta no es clara) y solo se acepta después de
 # un rechazo del bloqueo, no después de "solo la disputa" ("solo la disputa, que la abra mi abogado mañana").
@@ -200,7 +205,12 @@ _CONTRAST = r"(?:(?:pero|mas|but|aunque)\s+)?"
 _CLITIC = r"(?:(?:me|te|le|nos|les|se|la|lo|las|los|o|a) )*"
 SUB_ACTION_DENIAL_PATTERNS: dict[str, list[str]] = {
     "block_card": [rf"(?:no|nao) (?:quiero que |quero que |hace falta |precisa )?{_CLITIC}bloque[a-z]*"
-                   r"(?: (?:la|mi|el|o|a|meu|minha) (?:tarjeta|cartao|plastico))?"],
+                   r"(?: (?:nada|(?:la|mi|el|o|a|meu|minha) (?:tarjeta|cartao|plastico)))?",
+                   # objeto antes del verbo: "la tarjeta no me la bloqueen", "o cartão não bloqueia"
+                   rf"(?:(?:la|mi|el|o|a|meu|minha) )?(?:tarjeta|cartao|plastico) (?:no|nao) {_CLITIC}bloque[a-z]*",
+                   # el bloqueo nombrado y negado después: "bloqueo no, gracias", "bloquear não precisa"
+                   r"(?:(?:el|o) )?(?:bloqueo|bloqueio|bloquear)(?: (?:de )?(?:la|mi|o|meu|a) (?:tarjeta|cartao))?,? "
+                   r"(?:no|nao)(?: (?:gracias|obrigad[oa]|precisa|hace falta|es necesario|por favor|porfa))?"],
 }
 # Frases que eligen SOLO la acción principal: son a la vez un sí (disputa) y un no (bloqueo).
 ONLY_MAIN_ACTION = ["solo la disputa", "nada mas la disputa", "unicamente la disputa", "solamente la disputa",
@@ -208,12 +218,46 @@ ONLY_MAIN_ACTION = ["solo la disputa", "nada mas la disputa", "unicamente la dis
                     "solo disputa", "la disputa nada mas", "so a contestacao", "somente a contestacao",
                     "apenas a contestacao", "so contestar", "so a disputa", "apenas contestar",
                     "only the dispute", "just the dispute", "dispute only", "only dispute"]
+# La misma idea como gramática: "solo/nada más/só/apenas" + (abrir) + la disputa en cualquiera de sus nombres.
+ONLY_MAIN_RX = (r"(?:solo|solamente|unicamente|nada mas|so|somente|apenas|only|just) (?:(?:abrir|abre|abra|abri|abran)"
+                r" )?(?:(?:la|el|a|o|the) )?(?:disputa|reclamo|reclamacion|aclaracion|contestacao|reclamacao|dispute)")
 BOTH_ACTIONS = ["ambas", "ambos", "las dos", "los dos", "as duas", "os dois", "las dos cosas", "as duas coisas",
-                "ambas cosas", "hace las dos", "haz las dos", "pode fazer as duas"]
+                "ambas cosas", "hace las dos", "haz las dos", "pode fazer as duas", "pras duas", "pros dois",
+                "ambas coisas", "as duas acoes"]
+# "a todo" / "tudo" también cubre las dos acciones ofrecidas, pero solo junto a un sí explícito ("va, sí a todo").
+BOTH_WITH_YES = ["a todo", "todo", "tudo", "a tudo", "para todo", "pra tudo"]
+# Gramática del consentimiento (v3 ciego, #70): sí + mención de las acciones OFRECIDAS + cortesía. El cliente suele
+# repetir lo que autoriza ("sí, ábranme la aclaración y bloqueen la tarjeta"); el sí puro lo re-preguntaba. Solo se
+# aceptan imperativos/infinitivos y sustantivos de las dos acciones, nunca la 1.ª persona ("yo la bloqueo", "ya la
+# abrí": lo hace el cliente, no es un pedido) ni otras palabras: todo lo demás sigue siendo contenido -> unclear.
+# Imperativo/infinitivo de abrir/reclamar/disputar/contestar: es un pedido, cuenta como sí ("ábranla", "reclamalo").
+DISPUTE_VERB = re.compile(
+    r"(?<![a-z])(?:abr(?:e|i|a|an|am|ir)(?:me|nos|le|les)?(?:la|lo|las|los)?"
+    r"|reclam(?:a|e|en|ar)(?:me|nos|le)?(?:la|lo)?"
+    r"|disput(?:e|en|em|ar)(?:la|lo)?|disputa(?:la|lo)"
+    r"|contest(?:a|e|em|ar)(?:la|lo)?)(?![a-z])")
+# Sustantivos: nombran la acción, pero solos no son un sí ("disputa y bloqueo" necesita el sí).
+DISPUTE_NOUN = re.compile(r"(?<![a-z])(?:disputa|reclamacion|reclamacao|reclamo|aclaracion|desconocimiento|"
+                          r"contestacao)(?![a-z])")
+BLOCK_MENTION = re.compile(
+    r"(?<![a-z])(?:bloque(?:a|e|en|ar|ia|ie|iem)(?:me|nos|le)?(?:la|lo)?|bloqueo|bloqueio)(?![a-z])")
+CARD_OBJECT = re.compile(r"(?<![a-z])(?:tarjeta|targeta|cartao|plastico|card)(?: de (?:credito|debito))?(?![a-z])")
+# Palabras de enlace que solo cuentan dentro de un sí que nombra las acciones ("sí AL reclamo", "hágale CON las dos").
+CONSENT_GLUE = ["el", "los", "las", "al", "a", "con", "com", "pra", "pras", "para", "de", "del", "do", "da", "o", "os",
+                "as", "me", "nos", "mi", "mis", "meu", "minha", "su", "sus", "cosas", "coisas", "una", "uma", "un", "um",
+                "por si acaso", "por las dudas", "por via das duvidas", "just in case", "de novo", "tambem", "tambien"]
+_GLUE_RX = re.compile(r"(?<![a-z])(?:" + "|".join(re.escape(w) for w in sorted(CONSENT_GLUE, key=len, reverse=True))
+                      + r")(?![a-z])")
+# La acción la hace (o ya la hizo) el cliente: no autoriza nada ("sí, yo la bloqueo", "ya la abrí", "eu contesto").
+SELF_ACTION = re.compile(
+    r"(?<![a-z])(?:yo|eu)(?: (?:ya|ja|mismo|misma|mesmo|mesma))?(?: (?:me|la|lo|le|a|o|se))* "
+    r"(?:abr|bloque|reclam|disput|contest|aclar)"
+    r"|(?<![a-z])(?:ya|ja) (?:(?:la|lo|a|o) )?(?:bloquee|bloquei|abri|reclame|reclamei|contestei|dispute|disputei)(?![a-z])"
+    r"|(?<![a-z])(?:la|lo) (?:bloqueo|reclamo|disputo|abro|contesto)(?![a-z])")
 AFFIRM = ["si", "sim", "claro", "dale", "ok", "okay", "okey", "confirmo", "confirmado", "confirma", "de acuerdo",
           "correcto", "adelante", "hacelo", "hazlo", "hacerlo", "de una", "listo", "procede", "proceda", "abrela",
           "abrila", "abrelo", "abre la disputa", "abri la disputa", "abrir la disputa", "por favor", "porfa",
-          "afirmativo", "exacto", "perfecto", "obvio", "por supuesto", "claro que si", "vamos", "andale", "orale",
+          "afirmativo", "de una vez", "exacto", "perfecto", "obvio", "por supuesto", "claro que si", "vamos", "andale", "orale",
           "simon", "va", "sale", "vale", "yes", "yep", "bueno", "si quiero", "si por favor", "dale nomas",
           "isso", "com certeza", "pode", "pode sim", "pode fazer", "pode abrir", "manda ver", "bora", "fechado",
           "beleza", "ta bom", "esta bem", "tudo bem", "certo", "confirmar", "abre", "abra", "sim quero",
@@ -280,14 +324,14 @@ def _content(t: str) -> str:
                    or (unicodedata.category(c) == "So" and c not in POSITIVE_SYMBOLS))
 
 
-def _strip_denials(t: str, patterns: list[str]) -> tuple[str, bool, list[str]]:
+def _strip_denials(t: str, patterns: list[str], ordered: bool = False) -> tuple[str, bool, list[str]]:
     """Como `_strip`, pero guarda los motivos ("que la uso para todo") para analizarlos aparte."""
     hit, why = False, []
 
     def keep(m: re.Match) -> str:
         why.append(m.groupdict().get("why") or "")
         return " "
-    for p in sorted(patterns, key=len, reverse=True):
+    for p in (patterns if ordered else sorted(patterns, key=len, reverse=True)):
         t, n = re.subn(rf"(?<![a-z]){p}(?![a-z])", keep, t)
         hit |= n > 0
     return t, hit, why
@@ -336,12 +380,16 @@ def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
     None = el mensaje no contiene ninguna señal de respuesta (el router sigue con las otras intenciones)."""
     rest, denials, reasons = t, [], []
     for action, phrases in SUB_ACTION_DENIALS.items():
-        rest, hit, why = _strip_denials(rest, [_CONTRAST + re.escape(x) + _DENIAL_OBJECT + _REASON for x in phrases]
-                                        + [_CONTRAST + x + _REASON for x in SUB_ACTION_DENIAL_PATTERNS.get(action, [])])
-        reasons += why
-        if hit:
+        # Primero las formas generales (verbo con objeto antes o después), luego las frases: "la tarjeta no" no debe
+        # comerse la mitad de "la tarjeta no me la bloqueen" y dejar el verbo suelto.
+        general = [_CONTRAST + x + _REASON for x in SUB_ACTION_DENIAL_PATTERNS.get(action, [])]
+        # de la más específica (al final de la lista) a la general
+        rest, hit0, why0 = _strip_denials(rest, general[::-1], ordered=True)
+        rest, hit, why = _strip_denials(rest, [_CONTRAST + re.escape(x) + _DENIAL_OBJECT + _REASON for x in phrases])
+        reasons += why0 + why
+        if hit or hit0:
             denials.append(action)
-    rest, only_main = _strip(rest, [_CONTRAST + re.escape(x) for x in ONLY_MAIN_ACTION])
+    rest, only_main = _strip(rest, [_CONTRAST + re.escape(x) for x in ONLY_MAIN_ACTION] + [_CONTRAST + ONLY_MAIN_RX])
     rest = _CONTRAST_YES.sub(" ", rest)  # "no reconozco ese cargo, PERO sí": el pero introduce el sí
     if only_main and "block_card" not in denials:
         denials.append("block_card")
@@ -352,15 +400,28 @@ def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
     asked_back |= bool(_scan(" ".join(reasons))[0])  # "no bloquees, que todavía NO confirmo nada": no es un motivo
     rest = QUESTION.sub(" ", rest)
     doubtful = "hedge" in _scan(rest)[0]  # "solo bloquea" es duda antes que un sí al bloqueo
+    self_action = bool(SELF_ACTION.search(rest))  # "sí, yo la bloqueo": lo hace el cliente, no lo autoriza
+    # Qué acciones nombra (ya sin los rechazos): define qué autoriza el sí (consentimiento por acción, #38)
+    dispute_asked = bool(DISPUTE_VERB.search(rest))
+    dispute_named = dispute_asked or bool(DISPUTE_NOUN.search(rest))
+    block_named = bool(BLOCK_MENTION.search(rest) or re.search(rf"(?<![a-z]){BLOCK_AFFIRM}", rest))
     rest, _ = _strip(rest, [BLOCK_AFFIRM])  # "sí, bloquéala": responde por el bloqueo, pero NO es un sí por sí solo
     labels, leftover = _scan(rest)
-    yes = "yes" in labels or only_main or both
+    # Gramática (#70): lo que sobra puede nombrar las acciones ofrecidas y unirlas ("sí, disputa y bloqueo").
+    for rx in (BLOCK_MENTION, DISPUTE_VERB, DISPUTE_NOUN, CARD_OBJECT):
+        leftover = rx.sub(" ", leftover)
+    leftover, both_yes = _strip(leftover, [re.escape(x) for x in BOTH_WITH_YES])
+    leftover = _GLUE_RX.sub(" ", _FILLER_RX.sub(" ", leftover))  # cortesía primero: "de inmediato" es una sola
+    yes = "yes" in labels or only_main or both or dispute_asked
     no = "no" in labels
     # "¿sí?" es una duda (el sí está DENTRO de la pregunta); "sí, ¿cuánto demora?" es un sí con una pregunta aparte
-    if "hedge" in labels or asked_back or doubtful:
+    if "hedge" in labels or asked_back or doubtful or self_action:
         return "unclear", denials
     if yes and _content(leftover):  # un sí con algo más ("sí, al ratito", "sí, lo que diga mi hijo"): no es puro
         return "unclear", denials
+    # Consentimiento por acción: si el cliente nombra SOLO la disputa ("sí, ábranla"), el bloqueo no quedó autorizado.
+    if yes and dispute_named and not (block_named or both or both_yes) and "block_card" not in denials:
+        denials.append("block_card")
     if yes and no:
         # "no, no la reconozco, ábrela": el "no" acompaña al reclamo repetido y el pedido es explícito
         return ("confirm" if restated else "unclear"), denials
@@ -410,6 +471,8 @@ def _has(t: str, kw: str) -> bool:
 
 def parse_amount(t: str) -> float | None:
     t = DATE_NUMBERS.sub(" ", t)
+    # Apóstrofo de millones (es-CO a mano: "1'946.878"): se lee como un separador de miles más
+    t = re.sub(r"(?<=\d)['’´`](?=\d{3}(?!\d))", ".", t)
     m = re.search(r"(?:\$|usd|mxn|cop|ars|r\$)?\s*(\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)"
                   r"(\s*(?:mil\b|lucas\b|k\b|millon\w*|milh\w*|palos?\b))?", t)
     if not m:
@@ -493,6 +556,7 @@ def parse_dates(t: str, today: dt.date) -> tuple[dt.date | None, dt.date | None]
 
 # "otro/outra/también": el cliente habla de OTRO movimiento, no contesta la pregunta pendiente.
 OTHER_ITEM = ["otro", "otra", "outro", "outra", "tambien", "mais um", "mais uma", "ademas", "alem disso"]
+ALSO_WORDS = ("tambien", "ademas", "alem disso")
 
 
 def _is_new_request(t: str, slots: Slots, confirmation: str | None) -> bool:
@@ -501,7 +565,9 @@ def _is_new_request(t: str, slots: Slots, confirmation: str | None) -> bool:
     reconozco otro cargo de 1200" es nuevo."""
     if not any(_has(t, k) for k in KEYWORDS["dispute_charge"] + KEYWORDS["block_card"]):
         return False
-    if any(_has(t, k) for k in OTHER_ITEM):
+    # "sí, y también bloquéenla": con un sí que la gramática aceptó entero, "también" suma la acción ofrecida
+    other = [k for k in OTHER_ITEM if not (confirmation == "confirm" and k in ALSO_WORDS)]
+    if any(_has(t, k) for k in other):
         return True
     has_data = slots.amount is not None or slots.date_from is not None or slots.country is not None
     return has_data and confirmation not in ("confirm", "deny")
@@ -525,6 +591,19 @@ HUMAN_REQUEST = [r"asesor\w*", r"humano\w*", r"humana\w*", r"operador\w*", r"eje
                  r"(hablar|comunicar\w*|pasar\w*|pasame|pasenme|contactar\w*) con (alguien|una persona|un\w* agente)",
                  r"falar com (alguem|uma pessoa|um agente)", r"atendimento humano", r"quiero una persona",
                  r"quero uma pessoa", r"que me llamen", r"me liguem"]
+# Pedido de humano con verbo de transferencia: prioridad sobre una confirmación pendiente. Los sustantivos sueltos
+# ("después hablo con mi gerente") siguen siendo un sí/no no claro, no una derivación.
+HUMAN_TRANSFER = [r"(hablar|comunicar\w*|pasar\w*|pasame|pasenme|paseme|contactar\w*) con (alguien|una persona|"
+                  r"un\w* (agente|asesor\w*|humano|ejecutiv\w*|operador\w*))",
+                  r"(falar|me passa|me transfere|transferir) (com|para) (alguem|uma pessoa|um (agente|atendente|humano))",
+                  r"persona (real|de verdad|de carne)", r"pessoa (real|de verdade)", r"atendimento humano"]
+# Retirarse mientras elige entre movimientos: nunca se actúa, se cierra la búsqueda.
+WITHDRAW = [r"no hagas nada", r"no hagan nada", r"no haga nada", r"nao faca nada", r"nao facam nada",
+            # "no fui yo" / "no la reconozco" / "não era minha" repiten el reclamo: nunca son retirarse
+            r"(?<!no )(?<!nao )(?<!yo no )fui yo", r"(?<!no )(?<!nao )fui eu", r"ya me acorde", r"ja lembrei",
+            r"ya (la|lo) reconoci", r"ja reconheci", r"(?<!no )(la|lo) reconozco", r"(?<!no )(?<!nao )era mi[ao]",
+            r"(?<!nao )era meu", r"(?<!nao )era minha", r"olvidalo", r"olvidelo",
+            r"deja(lo)? asi", r"deixa pra la", r"deixa quieto", r"mejor no", r"melhor nao"]
 CASE_ID = re.compile(r"\bdsp-?[a-z0-9]{3,}\b")
 # Palabras completas: "estado" no debe coincidir con "Estados Unidos", ni "caso" con "en caso de que".
 DISPUTE_REF = r"(disputa|reclamo|reclamacion|mi caso|contestacao|dsp-?[a-z0-9]{3,})(?![a-z])"
@@ -577,10 +656,12 @@ class RuleRouter:
         if awaiting == "option":
             if any(_has(t, k) for k in NONE_OF_THESE) and len(t) <= 60:  # antes que los dígitos: "ninguna de las 3"
                 return Understanding("none_of_these", 0.9, lang)
+            if _any(t, WITHDRAW):  # "ya me acordé, fui yo, no hagas nada": se retira mientras elegía
+                return Understanding("deny", 0.9, lang)
             m = LAST4.search(t)
             if m and len(t) <= 60:  # "la que termina en 3718": elige por los últimos 4 dígitos, no es un monto
                 return Understanding("select_option", 0.9, lang, Slots(last4=m.group(1)))
-            m = re.search(r"\b([1-9])\b", t)
+            m = re.search(r"\b([1-9])\b", amount_text(DATE_NUMBERS.sub(" ", t)))  # "el del 5 de junio" no es la 5
             if m and len(t) <= 40:
                 return Understanding("select_option", 0.95, lang, Slots(option=int(m.group(1))))
             o = next((v for k, v in ORDINALS.items() if _has(t, k)), None)
@@ -592,10 +673,13 @@ class RuleRouter:
         slots.amount = parse_amount(amount_text(t))
         slots.count = parse_count(t)
         slots.date_from, slots.date_to = parse_dates(t, today)
-        slots.country = next((v for k, v in COUNTRIES.items() if _has(t, k)), None)
+        # Dos países ("en Mendoza, Argentina, y nunca salí de Colombia"): no se adivina cuál es el del cargo
+        named = {v for k, v in COUNTRIES.items() if _has(t, k)}
+        slots.country = named.pop() if len(named) == 1 else None
         m = CARD_HINT.search(t)
         slots.card_hint = (m.group(1) or m.group(2)) if m else ("?" if "[tarjeta]" in t else None)
-        if awaiting == "confirmation":
+        # "mejor pásame con una persona": un pedido explícito de humano gana a su "no" (ni se lee como negativa)
+        if awaiting == "confirmation" and not _any(t, HUMAN_TRANSFER):
             state, denials = classify_confirmation(t)
             if state and not _is_new_request(t, slots, state):
                 return Understanding(state, 0.9, lang, sub_action_denials=denials)

@@ -75,14 +75,21 @@ def _wilson(k: int, n: int) -> str:
     return f"[{100 * max(0, c - h):.0f}–{100 * min(1, c + h):.0f}%]"
 
 
-def report(results: dict[str, list[dict]], sha: str, db: str) -> str:
+RERUN_NOTE = ("- **Segunda corrida sobre v3, tras arreglos informados por el análisis de v3 → ya NO es ciega.** Los "
+              "arreglos se escribieron mirando los desacuerdos de la primera corrida, así que este número mide cuánto "
+              "se corrigió de lo ya visto, no la generalización. El número ciego sigue siendo el de la primera corrida "
+              "(`reports/eval_blind_v3.md`); un número limpio post-arreglo necesita un test v4 nuevo.")
+
+
+def report(results: dict[str, list[dict]], sha: str, db: str, rerun: bool = False) -> str:
     git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     n = len(next(iter(results.values())))
-    L = ["# Test v3 ciego: medición única", "",
+    L = ["# Test v3: segunda corrida (ya no es ciega)" if rerun else "# Test v3 ciego: medición única", "",
          f"- Casos: **{n}** (`evals/cases/test_v3_blind.jsonl`, sha256 `{sha[:12]}…`, congelado en git antes de correr).",
          "- Autor: aislado; solo leyó `config/policy.yaml` y consultó la base. Nunca vio código, tests ni casos previos.",
          f"- Sistema: commit `{git}` · writer `templates` · sin LLM · base `{os.path.basename(db)}` · "
          f"fecha {dt.date.today().isoformat()}.",
+         RERUN_NOTE if rerun else
          "- **Corrida única.** No se ajustó nada con estos resultados. Las etiquetas son del autor ciego y se reportan "
          "tal cual; el análisis de desacuerdos (abajo) no cambia el número crudo.", "",
          "## Resultado crudo contra las etiquetas del autor", "",
@@ -123,8 +130,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=os.path.join(ROOT, "data", "serving.duckdb"))
     ap.add_argument("--router", action="append", default=None)
-    ap.add_argument("--out", default=os.path.join(ROOT, "reports", "eval_blind_v3.md"))
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--rerun", action="store_true",
+                    help="segunda corrida tras arreglos: no pisa el reporte ciego y se rotula como no ciega")
     a = ap.parse_args()
+    a.out = a.out or os.path.join(ROOT, "reports", "eval_blind_v3_rerun.md" if a.rerun else "eval_blind_v3.md")
     raw = open(CASES, "rb").read()
     sha = hashlib.sha256(raw).hexdigest()
     if sha != FROZEN_SHA256:
@@ -132,8 +142,8 @@ def main():
     cases = [json.loads(l) for l in raw.decode("utf-8").splitlines() if l.strip()]
     results = {r: [run_case(c, a.db, r) for c in cases] for r in (a.router or ["embeddings", "rules"])}
     with open(a.out, "w", encoding="utf-8") as f:
-        f.write(report(results, sha, a.db))
-    raw_out = os.path.join(ROOT, "data", "evals", "blind_v3_results.json")
+        f.write(report(results, sha, a.db, rerun=a.rerun))
+    raw_out = os.path.join(ROOT, "data", "evals", "blind_v3_rerun_results.json" if a.rerun else "blind_v3_results.json")
     os.makedirs(os.path.dirname(raw_out), exist_ok=True)
     json.dump(results, open(raw_out, "w", encoding="utf-8"), ensure_ascii=False, default=list, indent=1)
     for r, rs in results.items():

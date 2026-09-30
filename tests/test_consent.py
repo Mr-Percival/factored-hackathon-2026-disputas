@@ -19,11 +19,11 @@ CONFIRMATIONS = [
     ("sí", "confirm", []), ("si", "confirm", []), ("sí, confirmo", "confirm", []), ("dale", "confirm", []),
     ("ok", "confirm", []), ("de acuerdo", "confirm", []), ("claro", "confirm", []), ("órale, sí", "confirm", []),
     ("sale", "confirm", []), ("va", "confirm", []), ("listo", "confirm", []), ("de una", "confirm", []),
-    ("hacelo", "confirm", []), ("dale, abrila", "confirm", []), ("sí, hacelo nomás", "confirm", []),
+    ("hacelo", "confirm", []), ("dale, abrila", "confirm", ["block_card"]), ("sí, hacelo nomás", "confirm", []),
     ("hazlo por favor", "confirm", []), ("sí, ambas", "confirm", []), ("las dos", "confirm", []),
     ("sim", "confirm", []), ("isso", "confirm", []), ("com certeza", "confirm", []), ("pode sim", "confirm", []),
     ("sim, as duas", "confirm", []), ("beleza, pode fazer", "confirm", []), ("claro que sim", "confirm", []),
-    ("sí, no reconozco ese cargo", "confirm", []), ("no, no la reconozco, ábrela", "confirm", []),
+    ("sí, no reconozco ese cargo", "confirm", []), ("no, no la reconozco, ábrela", "confirm", ["block_card"]),
     ("sim, não fui eu", "confirm", []),
     # sí con rechazo explícito del bloqueo
     ("sí, pero no bloquees la tarjeta que la uso para todo", "confirm", ["block_card"]),
@@ -144,3 +144,140 @@ def test_no_template_renders_a_dangling_card_dash(lang):
         assert not re.search(r"(tarjeta|cart[aã]o)\s*-", tmpl), key
         if "{card}" in tmpl:
             assert key in {"confirm_dispute", "block_suffix", "block_confirm", "block_done", "account_takeover_block"}, key
+
+
+# ------------------------------------------------------------------ gramática del consentimiento (#70)
+# Test v3 ciego: el sí PURO re-preguntaba respuestas naturales que repiten lo que se autoriza ("sí, ábranla y
+# bloqueen la tarjeta"). Gramática: marcador afirmativo + mención de las acciones ofrecidas + cortesía; cualquier otra
+# palabra sigue siendo `unclear`. Frases nuevas del equipo (es-MX, es-CO, es-AR, pt-BR); ninguna sale del test v3.
+GRAMMAR = [
+    # sí + las dos acciones nombradas -> las dos
+    ("sí, abran la disputa y bloqueen la tarjeta", "confirm", []), ("sí, disputen y bloqueen", "confirm", []),
+    ("dale, ambas cosas", "confirm", []), ("sim, pode abrir a contestação e bloquear o cartão", "confirm", []),
+    ("órale, sí, la disputa y el bloqueo", "confirm", []), ("sí, las dos cosas por favor", "confirm", []),
+    ("claro, abran el reclamo y también bloqueen la tarjeta", "confirm", []),
+    ("sí señor, bloquéenme la tarjeta y abran el reclamo", "confirm", []), ("listo, disputa y bloqueo", "confirm", []),
+    ("de una, abrí la disputa y bloqueá la tarjeta", "confirm", []), ("dale, bloqueala también", "confirm", []),
+    ("joya, hacé las dos", "confirm", []), ("sí, a las dos", "confirm", []), ("sim, as duas coisas", "confirm", []),
+    ("pode fazer as duas, por favor", "confirm", []), ("isso, contesta e bloqueia", "confirm", []),
+    ("sim, bloqueia o cartão e abre a contestação", "confirm", []), ("beleza, pode bloquear e contestar", "confirm", []),
+    ("sí, con las dos", "confirm", []), ("sí, adelante con ambas", "confirm", []),
+    ("claro que sí, disputa y bloqueo de una vez", "confirm", []), ("sí, bloquéenla y ábranla", "confirm", []),
+    ("sí, todo", "confirm", []), ("sim, tudo", "confirm", []), ("sí, bloquéenla por las dudas", "confirm", []),
+    # sí que nombra SOLO la disputa -> el bloqueo no quedó autorizado (consentimiento por acción)
+    ("sí, ábranla", "confirm", ["block_card"]), ("sí, pero solo la disputa", "confirm", ["block_card"]),
+    ("sí, abran el reclamo", "confirm", ["block_card"]), ("dale, reclamalo", "confirm", ["block_card"]),
+    ("sim, pode contestar", "confirm", ["block_card"]), ("sí, abrí el reclamo nomás", "confirm", ["block_card"]),
+    ("sí, la disputa sí, el bloqueo no", "confirm", ["block_card"]),
+    ("sí, abran la disputa; bloquear no hace falta", "confirm", ["block_card"]),
+    ("sim, abre a contestação, o cartão não", "confirm", ["block_card"]),
+    ("claro, reclámenlo, pero no bloqueen nada", "confirm", ["block_card"]),
+    ("sim, só abrir a contestação", "confirm", ["block_card"]), ("sí, únicamente el reclamo", "confirm", ["block_card"]),
+    ("dale, nada más el reclamo, la tarjeta dejala", "confirm", ["block_card"]),
+    ("sí, abran la aclaración, bloqueo no", "confirm", ["block_card"]),
+    ("sim, pode abrir; bloquear não precisa", "confirm", ["block_card"]),
+    ("isso, contesta, mas sem bloquear", "confirm", ["block_card"]),
+    ("sí, pero la tarjeta no me la bloqueen", "confirm", ["block_card"]),
+    # nombra las acciones pero agrega condición, plazo, sarcasmo, a otra persona o lo hace él: nunca se actúa
+    ("sí, ábranla mañana", "unclear", []), ("sí, yo la bloqueo después", "unclear", []),
+    ("ya la bloqueé yo, solo abran la disputa", "unclear", ["block_card"]),
+    ("sim, eu mesmo bloqueio o cartão", "unclear", []), ("sí, bloquéenla si vuelve a pasar", "unclear", []),
+    ("dale, abrila cuando confirmes que fue fraude", "unclear", []), ("sí, disputa y bloqueo... es broma", "unclear", []),
+    ("claro, bloquéala, como si eso sirviera de algo", "unclear", []), ("sim, contesta se for fraude mesmo", "unclear", []),
+    ("sí, pero la disputa la abro yo en la sucursal", "unclear", []), ("sí, disputa no, solo bloqueo", "unclear", []),
+    ("sí, bloqueen la tarjeta pero la disputa no", "unclear", []),
+    ("sim, bloqueia, mas não abre a contestação", "unclear", []),
+    ("sí, abran la disputa y de paso cancelen mi seguro", "unclear", []),
+    ("sí, abran la disputa a nombre de mi hermano", "unclear", []),
+    ("dale, abrila, pero que lo decida mi contador", "unclear", []),
+    ("sí, ábranla y bloqueen la tarjeta de mi mamá", "unclear", []),
+    ("sim, abre a contestação daqui a pouco", "unclear", []), ("sí, bloqueen todas mis tarjetas", "unclear", []),
+    ("sí a la disputa, la tarjeta no la toquen", "unclear", ["block_card"]),
+    ("no, ni disputa ni bloqueo", "deny", []),
+]
+NEVER_CONFIRM = ["¿abren la disputa y bloquean la tarjeta?", "sí, disputen el otro cargo también",
+                 "sí, abran la disputa?", "¿y si la bloqueo yo?", "abran la disputa cuando mi esposo diga que sí",
+                 "sí, bloqueen también la de débito"]  # otra tarjeta: pedido nuevo, no un sí a lo ofrecido
+
+
+def test_grammar_corpus_is_large_and_new():
+    import json
+    import os
+
+    from bankagent.pipeline import ROOT
+    v3 = os.path.join(ROOT, "evals", "cases", "test_v3_blind.jsonl")
+    seen = {t["user"].lower() for line in open(v3, encoding="utf-8") if line.strip()
+            for t in json.loads(line)["turns"]}
+    ours = {x[0].lower() for x in GRAMMAR} | {x.lower() for x in NEVER_CONFIRM}
+    assert len(ours) >= 60 and not seen & ours
+
+
+@pytest.mark.parametrize("text,intent,denials", GRAMMAR)
+def test_consent_grammar_accepts_restated_actions_and_nothing_else(text, intent, denials):
+    u = RuleRouter().understand(text, TODAY, "confirmation")
+    assert (u.intent, u.sub_action_denials) == (intent, denials)
+
+
+@pytest.mark.parametrize("text", NEVER_CONFIRM)
+def test_questions_and_new_requests_are_never_consent(text):
+    assert RuleRouter().understand(text, TODAY, "confirmation").intent != "confirm"
+
+
+def test_restating_both_actions_opens_and_blocks(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    env.agent.chat(th, tok, "No reconozco un cargo de 77 dólares")
+    r = env.agent.chat(th, tok, "sí, ábranme la disputa y bloquéenme la tarjeta, gracias")
+    assert r["outcome"] == "resolved" and (disputes(env), blocks(env)) == (1, 1)
+
+
+def test_naming_only_the_dispute_does_not_block(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    env.agent.chat(th, tok, "No reconozco un cargo de 77 dólares")
+    r = env.agent.chat(th, tok, "dale, abran el reclamo")
+    assert r["outcome"] == "resolved" and (disputes(env), blocks(env)) == (1, 0)
+    assert "no bloqueé la tarjeta" in r["reply"]
+
+
+def test_also_block_is_part_of_the_answer_not_a_new_request(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    env.agent.chat(th, tok, "No reconozco un cargo de 77 dólares")
+    r = env.agent.chat(th, tok, "Sí, adelante con el reclamo. Y también bloquéenla")
+    assert r["outcome"] == "resolved" and (disputes(env), blocks(env)) == (1, 1)
+
+
+def test_explicit_human_request_wins_over_its_no(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    env.agent.chat(th, tok, "No reconozco un cargo de 77 dólares")
+    r = env.agent.chat(th, tok, "no, mejor pásenme con un asesor")
+    assert r["outcome"] == "handoff" and r["handoff"]["reason"] == "customer_request"
+    assert (disputes(env), blocks(env)) == (0, 0)
+
+
+# ------------------------------------------------------------------ elegir describiendo la opción (#70)
+def test_choice_by_description_selects_among_the_shown_options(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    r = env.agent.chat(th, tok, "no reconozco un cargo de 345 dólares")
+    assert r["awaiting"] == "option" and len(r["candidates"]) == 2
+    r = env.agent.chat(th, tok, "el del 5 de junio")
+    assert r["awaiting"] == "confirmation" and r["txn"]["transaction_id"] == "T-ANA-5"
+    assert r["match_method"] == "customer_choice" and (disputes(env), blocks(env)) == (0, 0)
+
+
+def test_choice_by_description_that_fits_two_options_does_not_guess(env):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    env.agent.chat(th, tok, "no reconozco un cargo de 345 dólares")
+    r = env.agent.chat(th, tok, "el de junio")
+    assert r["awaiting"] != "confirmation" and not r.get("pending_action")
+
+
+@pytest.mark.parametrize("text", ["ah no, ya me acordé, fui yo", "mejor no hagas nada", "deixa pra lá, era minha"])
+def test_withdrawing_while_choosing_cancels(env, text):
+    tok, th = env.login("CLI-ANA"), env.thread()
+    env.agent.chat(th, tok, "no reconozco un cargo de 345 dólares")
+    r = env.agent.chat(th, tok, text)
+    assert r["outcome"] == "cancelled" and (disputes(env), blocks(env)) == (0, 0)
+
+
+@pytest.mark.parametrize("text", ["no fui yo, es la 2", "no la reconozco", "não era minha"])
+def test_restating_the_claim_while_choosing_is_not_withdrawing(text):
+    assert RuleRouter().understand(text, TODAY, "option").intent != "deny"

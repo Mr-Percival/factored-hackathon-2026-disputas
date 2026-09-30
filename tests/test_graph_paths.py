@@ -92,6 +92,8 @@ def _expected(awaiting, intent, conf, pending):
         return "cancel"
     if awaiting == "option" and intent == "select_option":
         return "select_option"
+    if awaiting == "option" and intent == "deny" and conf >= 0.6:  # se retira mientras elige (#70): nunca actúa
+        return "cancel"
     if conf < 0.6 or intent == "unknown":
         return "respond"
     if intent == "out_of_scope":
