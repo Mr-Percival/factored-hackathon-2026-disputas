@@ -267,6 +267,8 @@ def build(data, metrics, n_tests):
             "metrics": [
                 ("Agente de la demo", m(metrics, "eval_agent"), m(metrics, "eval_agent_detail"),
                  f"{m(metrics, 'eval_rules')} · {m(metrics, 'eval_baseline')}"),
+                ("Test ciego (v3)", m(metrics, "eval_blind"), m(metrics, "eval_blind_detail"),
+                 m(metrics, "eval_blind_after")),
                 ("Componente aprendido", m(metrics, "ml_router"), m(metrics, "ml_router_detail"),
                  "Router de intención local vs reglas · corpus propio, split por autor (n=306)"),
                 ("Inyección y red team", "0 daños", m(metrics, "inj_harm"),
@@ -274,8 +276,8 @@ def build(data, metrics, n_tests):
                 ("Equidad por dialecto", m(metrics, "fairness"), "grupos con la misma decisión MX · CO · AR · pt-BR",
                  "No enrutamos por acento: el EDA no muestra efecto (FCR 76.7% vs 76.6%)"),
             ],
-            "foot": (f"Test congelado: {m(metrics, 'eval_cases')} (segunda medición, fuga leve declarada) · "
-                     f"{n_tests} tests en CI, sin datos ni API keys"),
+            "foot": (f"Test propio: {m(metrics, 'eval_cases')} (segunda medición, fuga leve declarada) · el ciego muestra "
+                     f"que 109/115 sobreestimaba la utilidad, no la seguridad · {n_tests} tests en CI"),
             "notes": (
                 "No entrenamos sobre las transcripciones del dataset: solo hay 42 textos de cliente distintos. Medimos donde "
                 "hay etiquetas válidas. Uno: el agente de la demo contra la línea base de reglas y contra dos líneas base "
@@ -284,8 +286,11 @@ def build(data, metrics, n_tests):
                 "contra las reglas, en un corpus propio dividido por autor. Tres: seguridad; con datasets públicos, "
                 f"{m(metrics, 'inj_detection')}, pero lo que importa es el daño, que medimos aparte: cero, aun con el guard "
                 "apagado. Y un red team propio de tres rondas sí encontró daño real, que corregimos en la raíz. Cuatro: "
-                "equidad; el mismo caso en dialectos distintos debe dar la misma decisión. Somos explícitos: el test ya se "
-                "midió dos veces y declaramos una fuga leve."),
+                "equidad; el mismo caso en dialectos distintos debe dar la misma decisión. Somos explícitos: el test propio ya se "
+                "midió dos veces, así que un autor aislado escribió un test ciego de 80 conversaciones que corrimos una vez. "
+                "La seguridad aguantó, cero acciones no esperadas; la utilidad bajó a 43 de 80, sobre todo porque el sí "
+                "estricto del red team re-preguntaba respuestas naturales. Lo arreglamos, pero la segunda corrida ya no es "
+                "ciega, y lo decimos."),
         },
         {  # 5 ----------------------------------------------------------------
             "kicker": "Datos e ingeniería que lo sostienen",

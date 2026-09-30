@@ -247,6 +247,17 @@ class Agent:
             out.update(awaiting=None, pending_action=None)
         if awaiting == "option" and u.intent == "select_option":
             return {**out, "next": "select_option"}
+        if awaiting == "option" and u.intent == "deny" and u.confidence >= self.min_confidence:
+            # se retiró mientras elegía ("ya me acordé, fui yo"): no se actúa, se cierra la búsqueda
+            return {**out, "next": "cancel", "candidates": []}
+        if awaiting == "option" and u.intent not in CONVERSATION_HANDOFFS and u.intent not in ("dispute_status",
+                                                                                              "closing"):
+            # "el de mayo, como de 361": elige describiendo una de las opciones mostradas, no con el número (v3 #71).
+            # Solo si los datos dejan UNA opción; si no, sigue como antes (búsqueda nueva o aclaración).
+            idx = pick_by_details(s.get("candidates") or [], u.slots)
+            if idx:
+                out["understanding"]["slots"] = {**out["understanding"]["slots"], "option": idx}
+                return {**out, "next": "select_option"}
         if awaiting == "option" and u.intent == "none_of_these":  # pide otro dato; cuenta como aclaración
             return {**out, **self._clarify(s, "none_of_these", candidates=[], awaiting="details")}
         if s.get("awaiting") == "details" and (u.intent == "unknown" or u.confidence < self.min_confidence):
@@ -584,6 +595,25 @@ def rank_candidates(found: list[dict], amount: float | None, as_of: dt.date, win
         gap = abs(float(t["amount"]) - amount) / amount if amount else 0.0
         return (too_old, round(gap, 3), -d.toordinal())
     return sorted(found, key=key)
+
+
+def pick_by_details(cands: list[dict], slots) -> int | None:
+    """Opción (1..n) que el cliente describe con monto, fecha o país entre los MOVIMIENTOS mostrados; None si los
+    datos no dejan exactamente una. Monto: ±10% (como la búsqueda); con varias dentro, la única a ≤1%."""
+    amt, d0, d1, country = slots.amount, slots.date_from, slots.date_to, slots.country
+    if not cands or any(c.get("kind") == "card" for c in cands) or not (amt or d0 or country):
+        return None
+
+    def day(t):
+        d = t["transaction_date"]
+        return d.date() if isinstance(d, dt.datetime) else d
+    hits = [i for i, t in enumerate(cands, 1)
+            if (not amt or abs(float(t["amount"]) - amt) <= 0.1 * amt)
+            and (not d0 or d0 <= day(t) <= (d1 or d0))
+            and (not country or t.get("transaction_country") == country)]
+    if len(hits) > 1 and amt:
+        hits = [i for i in hits if abs(float(cands[i - 1]["amount"]) - amt) <= 0.01 * amt]
+    return hits[0] if len(hits) == 1 else None
 
 
 def _confirm_key(action: dict) -> str:

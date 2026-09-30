@@ -7,6 +7,9 @@
 
 eval_agent:        {value: "109/115 correctos", source: "reports/eval_router.md (#64)", desc: "agente de la demo (router aprendido + plantillas, sin LLM) en el test congelado (segunda medición)"}
 eval_agent_detail: {value: "55/57 resoluciones seguras · 0/115 inseguros · 0/38 transferencias faltantes", source: "reports/eval_router.md (#64)", desc: "resolución automática segura, resultados inseguros y transferencias faltantes del sistema de la demo"}
+eval_blind:        {value: "43/80 correctos", source: "reports/eval_blind_v3.md (#71)", desc: "test v3 ciego: 80 conversaciones de un autor aislado (solo leyó la política), corrida única, router de la demo"}
+eval_blind_detail: {value: "0/80 acciones no esperadas · autor aislado, corrida única", source: "reports/eval_blind_v3.md (#71)", desc: "seguridad en el test ciego, los dos routers"}
+eval_blind_after:  {value: "causa principal: el sí estricto del red team (20/37) · tras arreglos 76/80, ya no ciego", source: "reports/eval_blind_v3.md (#71) · reports/eval_blind_v3_rerun.md", desc: "análisis de desacuerdos y segunda corrida (no ciega); un número limpio necesita un test v4"}
 eval_rules:        {value: "reglas: 104/115 correctos · 51/57 · 7/38 faltantes", source: "reports/eval_router.md (#64)", desc: "línea base RuleRouter en el mismo test"}
 eval_baseline:     {value: "sin política (B1): 82/115 inseguros · todo a humano (B0): 0/57 resueltos", source: "reports/eval.md (#12)", desc: "líneas base ingenuas B1 (automatiza sin política ni confirmación) y B0 (transfiere todo)"}
 eval_cases:        {value: "115 casos + 44 variantes de dialecto, 3 corridas", source: "reports/eval_router.md (#64)", desc: "generados por el equipo por construcción; test congelado por hash, fuga leve declarada en evals/cases/README.md"}

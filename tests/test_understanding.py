@@ -64,3 +64,33 @@ def test_card_last_four_is_an_option_not_an_amount():
     u = R.understand("la que termina en 3718", TODAY, "option")
     assert u.intent == "select_option" and u.slots.last4 == "3718" and u.slots.amount is None
     assert R.understand("o final 4279", TODAY, "option").slots.last4 == "4279"
+
+
+# ------------------------------------------------------------------ fallas genéricas vistas en el test v3 ciego (#71)
+@pytest.mark.parametrize("text,amount", [("un cobro de 2'350.400 pesos", 2_350_400), ("por 12'500.000", 12_500_000),
+                                         ("de 3’120.000 del martes", 3_120_000)])
+def test_apostrophe_million_separator(text, amount):
+    assert parse_amount(_norm(text)) == amount
+
+
+def test_two_countries_named_do_not_filter_by_the_wrong_one():
+    u = R.understand("me cobraron algo en Argentina y yo nunca salí de Colombia", TODAY, None)
+    assert u.slots.country is None  # Colombia (dónde vive) no es el país del cargo: no se filtra por ninguno
+    assert R.understand("un cargo en Argentina que no hice", TODAY, None).slots.country == "Argentina"
+
+
+def test_account_product_words_are_not_merchants():
+    from bankagent.understanding import match_merchant
+    names = ["Super Ahorro", "Corriente Express", "Farmacia Central"]
+    assert match_merchant("un débito en mi cuenta de ahorros que no reconozco", names) == []
+    assert match_merchant("una transferencia de mi conta corrente", names) == []
+    assert match_merchant("una compra en Super Ahorro", names) == ["Super Ahorro"]
+
+
+def test_embeddings_router_yields_to_takeover_evidence():
+    from bankagent.embedding_router import rule_backoff
+    from bankagent.understanding import Understanding
+    base = R.understand("me clonaron la tarjeta y hay compras que no hice", TODAY, None)
+    assert base.intent == "account_takeover"
+    assert rule_backoff(base, "dispute_charge") == "security"
+    assert rule_backoff(Understanding("dispute_charge", 0.85, "es"), "dispute_charge") is None

@@ -8,6 +8,7 @@
 | `test.jsonl` | Conjunto reservado **congelado**: 115 casos principales + 44 variantes de equidad (11 grupos × 4 dialectos). **Es el único que se reporta.** |
 | `dev.jsonl` | Conjunto de desarrollo: 61 principales + 20 de equidad. Es el único que se usa para ajustar routers. |
 | `manifest.json` | Semilla, versión de política, conteos pedidos y obtenidos, verificación cruzada con la política, sha256 de cada archivo. |
+| `test_v3_blind.jsonl` | Test v3 **ciego**: 80 conversaciones de un autor aislado que solo leyó `config/policy.yaml` y la base ([README propio](test_v3_blind.README.md)). **Ya se usó una vez** (ver abajo): ahora está abierto. |
 
 ## Test congelado
 - `test.jsonl` sha256 **`424d0f78dc21efdf2e659db03876f1717fa9419dacff9c1acd2cf09d1a89040b`**, congelado en el commit
@@ -104,6 +105,24 @@ transferencias innecesarias no se diagnosticaron justamente para no mirar casos.
 próxima versión hay que construir un test v3 con redacciones nuevas escritas por otra persona.
 
 El reporte completo (con variabilidad, desgloses y fallas) está en [`reports/eval.md`](../../reports/eval.md).
+
+## Test v3 ciego: usado una vez (#71)
+Protocolo seguido:
+1. Un autor aislado escribió 80 conversaciones leyendo solo `config/policy.yaml` y la base (nunca código, tests ni
+   casos previos) y las etiquetó con su lectura de la spec. El archivo se congeló en git (sha256 `cec03e51…`) **antes**
+   de correr el sistema; `bankagent.evals.blind` aborta si el hash cambia.
+2. **Corrida única y ciega** sobre el commit `f989c0d`: `embeddings` **43/80**, `rules` 36/80, 0/80 acciones no
+   esperadas ([`reports/eval_blind_v3.md`](../../reports/eval_blind_v3.md)). Ese es el número ciego y no se reemplaza.
+3. Después se abrió v3: se leyeron casos y respuestas por caso, se clasificaron los desacuerdos (sección «Análisis de
+   desacuerdos» del reporte) y se arreglaron las fallas genéricas con frases y tests propios, sin copiar frases de v3.
+4. Segunda corrida (`python -m bankagent.evals.blind --rerun`, reporte aparte
+   [`reports/eval_blind_v3_rerun.md`](../../reports/eval_blind_v3_rerun.md)): `embeddings` 76/80, `rules` 63/80.
+   **Ya no es ciega**: mide cuánto se corrigió de lo visto, no la generalización. Los dos huecos nuevos que mostró se
+   dejaron sin arreglar a propósito.
+
+**Para un número limpio después de estos arreglos hace falta un test v4**, escrito con el mismo protocolo por alguien
+que no haya visto v3 ni el código, congelado antes de correr y medido una sola vez. v3 queda como conjunto de
+desarrollo más (igual que dev): se puede usar para diagnosticar, pero su número ya no se reporta como ciego.
 
 ## Limitaciones
 Un solo proceso de etiquetado (sin segundo anotador); el cliente simulado es cooperativo y consistente; el portugués lo
