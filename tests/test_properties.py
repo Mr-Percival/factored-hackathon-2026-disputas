@@ -32,7 +32,7 @@ from hypothesis.stateful import (Bundle, RuleBasedStateMachine, consumes, initia
 
 from bankagent.audit import AuditLog, verify
 from bankagent.graph import EDGES, Agent
-from bankagent.guard import redact
+from bankagent.guard import redact, safe_display
 from bankagent.identity import IdentityService
 from bankagent.policy import POLICY, PolicyEngine
 from bankagent.responses import fmt_txn
@@ -589,7 +589,10 @@ class ConversationMachine(RuleBasedStateMachine):
             # `request` y `transcript` (#44) citan textos del propio hilo: se verifican aparte, abajo
             internal.append(json.dumps({k: v for k, v in packet.items() if k not in ("request", "transcript")},
                                        ensure_ascii=False, default=str))
-            known = set(th.user_texts) | set(th.replies)
+            # El paquete se codifica para mostrarse a una persona (guard.safe_display: sin invisibles, celdas-fórmula
+            # con apóstrofo). Los textos del hilo se comparan en esa misma forma: "-" del cliente llega como "'-".
+            # Encontrado por la corrida `deep`: era el oráculo, no una fuga.
+            known = {safe_display(t) for t in (*th.user_texts, *th.replies)} | set(th.user_texts) | set(th.replies)
             assert all(r in known for r in packet["request"]), "I2: el handoff cita texto que no es de este hilo"
             assert all(m["text"] in known for m in packet.get("transcript", [])), \
                 "I2: la transcripción del handoff cita texto que no es de este hilo"
