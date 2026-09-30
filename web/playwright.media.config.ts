@@ -10,11 +10,8 @@ import { defineConfig, devices } from "@playwright/test";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const mediaDir = process.env.MEDIA_DIR ?? path.resolve(here, "..", "data", "media");
 const size = { width: 1920, height: 1080 };
-// Equivale al zoom del navegador del checklist (125%): la ventana CSS mide 1536×864 y cada píxel CSS se pinta con
-// 1.25 píxeles reales, así texto y capturas salen nítidos a 1920×1080. MEDIA_ZOOM=1 graba la ventana 1920×1080 tal cual.
-const zoom = Number(process.env.MEDIA_ZOOM ?? 1.25);
-const viewport = { width: Math.round(size.width / zoom), height: Math.round(size.height / zoom) };
-
+// Ventana 1920×1080 tal cual: el video llena el cuadro. El texto se agranda con MEDIA_CSS_ZOOM (1.2 por defecto; lo aplica el overlay
+// con CSS `zoom` sobre la app; no se usa deviceScaleFactor, que deja el video en una esquina del cuadro).
 export default defineConfig({
   testDir: "./e2e-media",
   // En serie y sin reintentos en paralelo: el plan gratuito de Render no aguanta carga.
@@ -28,8 +25,8 @@ export default defineConfig({
   use: {
     ...devices["Desktop Chrome"],
     baseURL: process.env.DEMO_URL ?? "https://agente-disputas.onrender.com",
-    viewport,
-    deviceScaleFactor: zoom,
+    viewport: size,
+    deviceScaleFactor: 1,
     video: { mode: "on", size },
     // La CSP de la app (style-src 'self') bloquearía el overlay de subtítulos; solo en este navegador de grabación.
     bypassCSP: true,

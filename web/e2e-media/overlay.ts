@@ -22,6 +22,24 @@ const CSS = `
 #media-cursor.press { transform: scale(.7); }
 `;
 
+/**
+ * Agranda la app con CSS `zoom` sobre `#root` desde el primer cuadro (script de inicio, antes de que pinte). El overlay
+ * vive fuera de `#root`, así sus coordenadas siguen siendo las de la ventana. Con zoom, 100vh se pinta multiplicado:
+ * la grilla de 3 columnas (h-[calc(100vh-9.5rem)]) se recalcula para caber.
+ */
+export async function zoomApp(page: Page, zoom: number) {
+  if (zoom === 1) return;
+  const css = `#root { zoom: ${String(zoom)}; }
+    #root [class*="h-[calc(100vh-9.5rem)]"] { height: calc(100vh / ${String(zoom)} - 9.5rem) !important; }`;
+  await page.addInitScript((content) => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const style = document.createElement("style");
+      style.textContent = content;
+      document.head.appendChild(style);
+    });
+  }, css);
+}
+
 /** Inyecta (o reinyecta tras una navegación) el overlay. */
 export async function installOverlay(page: Page) {
   await page.addStyleTag({ content: CSS });
