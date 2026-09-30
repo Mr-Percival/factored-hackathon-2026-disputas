@@ -277,18 +277,25 @@ token, la política y la confirmación.
 ## E. Evaluación y analítica
 
 ### E1. ¿109/115 no está sobreajustado? Ya lo midieron dos veces.
-**Respuesta.** Es la segunda medición y lo decimos así en el README y en el reporte. La primera dio 106/115
-(`embeddings`) y 102/115 (`rules`); las correcciones entre ambas se diagnosticaron solo con dev, un dev ampliado con
-otras semillas, la demo y conversaciones propias, sin abrir casos ni salidas por caso de test. Además hubo una **fuga
-leve declarada en #54**: una ronda de arreglos genéricos después de ver números agregados de test. Por eso no es un
-test ciego para esta versión; la medición limpia es un test v3 escrito por otra persona.
-**Evidencia.** [`reports/eval_router.md`](../../reports/eval_router.md) (encabezado) · [`evals/cases/README.md`](../../evals/cases/README.md#segunda-ronda-robustez-conversacional-54) ·
-`tests/test_evals.py::test_frozen_test_set_is_not_overwritten` (sha256 `424d0f78…`).
-**Límite.** Las correcciones de grafo y handoff cambian a los dos sistemas, así que la comparación relativa (109 vs
-104) es más robusta que el número absoluto.
-**Repregunta.** *"¿Cómo sabemos que no miraron los casos?"* → Solo podemos mostrar el protocolo y que el reporte
-conserva solo tablas agregadas; el detalle por caso no está versionado. Por eso proponemos el test v3 en vez de pedir
-que nos crean.
+**Respuesta.** Sí, en parte, y lo medimos. 109/115 es una segunda medición sobre un test del equipo (con una fuga leve
+declarada en #54), así que escribimos un **test v3 ciego**: 80 conversaciones de un autor aislado que solo leyó
+`config/policy.yaml` y la base, congeladas por hash antes de correr, medidas **una sola vez**. Resultado:
+**seguridad intacta, 0/80 acciones no esperadas** con los dos routers; **utilidad 43/80 (54%)** con el router de la
+demo (`rules` 36/80). O sea: el 109/115 sobreestimaba la utilidad, no la seguridad.
+**Por qué bajó.** Leímos cada desacuerdo: 37 de 37 son fallas nuestras, no etiquetas dudosas. La causa principal
+(20 casos) es el **consentimiento estricto**: tras el red team (#65) el sí tenía que ser puro, y un cliente que dice
+«sí, disputen y bloqueen» recibía «no me quedó clara tu respuesta». Es el trade-off seguridad/utilidad, visto con
+datos que no escribimos nosotros. Le siguen elegir una opción describiéndola («el de mayo») y bugs de extracción.
+**Qué hicimos.** Una gramática del consentimiento (sí + acciones ofrecidas + cortesía; cualquier otra palabra sigue
+sin actuar) y los demás arreglos genéricos, con 69 frases de test propias; el red team sigue en 0 daños. Una
+segunda corrida sobre v3 da **76/80**, pero **ya no es ciega**: la hicimos después de mirar los casos. El número ciego
+es 43/80; para uno limpio post-arreglo hace falta un test v4.
+**Evidencia.** [`reports/eval_blind_v3.md`](../../reports/eval_blind_v3.md) (número ciego + «Análisis de desacuerdos») ·
+[`reports/eval_blind_v3_rerun.md`](../../reports/eval_blind_v3_rerun.md) · [`evals/cases/README.md`](../../evals/cases/README.md#test-v3-ciego-usado-una-vez-70) ·
+`tests/test_consent.py::test_grammar_corpus_is_large_and_new` · `tests/test_redteam.py::test_redteam_corpus_causes_no_harm`.
+**Límite.** 80 casos (IC 95% del 54%: 43–64%); un solo autor ciego; el 76/80 sirve para saber que lo arreglado se
+arregló, no para decir cuánto generaliza.
+**Repregunta.** *"¿Y el test viejo?"* → No empeora: 109/115 (`embeddings`) y 104/115 (`rules`), 0/115 inseguros.
 
 ### E2. Las etiquetas se generan por construcción desde la misma política. ¿No es circular?
 **Respuesta.** Es circular para la **política**, a propósito: la política es la especificación y no evaluamos si es

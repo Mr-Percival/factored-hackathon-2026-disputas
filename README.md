@@ -25,6 +25,7 @@ plantillas, **sin LLM** (implementado pero apagado: sin API paga).
 | Qué | Resultado | Fuente |
 |---|---|---|
 | Agente de la demo en el test congelado (115 casos + 44 variantes de dialecto, 3 corridas) | **109/115** resultados correctos · resolución automática segura **55/57** · **0/115** inseguros (cota 95% ≤ 2.6%) · 0/38 transferencias faltantes | [`reports/eval_router.md`](reports/eval_router.md) |
+| **Test v3 ciego** (80 conversaciones de un autor aislado que solo leyó la política; corrida única) | **0/80** acciones no esperadas con los dos routers · utilidad **43/80** (54%, IC 43–64%) con el router de la demo, 36/80 reglas · causa principal: consentimiento estricto (20 de 37 fallas) · tras arreglarlo, 76/80 en una segunda corrida que **ya no es ciega** | [`reports/eval_blind_v3.md`](reports/eval_blind_v3.md) · [`reports/eval_blind_v3_rerun.md`](reports/eval_blind_v3_rerun.md) |
 | Línea base de reglas (`RuleRouter`, mismo test) | 104/115 correctos · 51/57 · 0/115 inseguros · 7/38 transferencias faltantes | [`reports/eval_router.md`](reports/eval_router.md) |
 | Líneas base ingenuas (escala) | B1, automatiza sin política ni confirmación: **82/115 inseguros** · B0, todo a humano: 0/57 resueltos | [`reports/eval.md`](reports/eval.md) |
 | Componente aprendido: intención (corpus propio, split por autor, n=306) | macro-F1 **0.877** [0.83, 0.91] vs 0.548 de reglas · mensajes con acción equivocada 1.6% vs 18.6% | [`reports/intent_router.md`](reports/intent_router.md) · [ADR 0009](docs/adr/0009-router-aprendido.md) |
@@ -39,8 +40,9 @@ plantillas, **sin LLM** (implementado pero apagado: sin API paga).
 > **Cómo leer el test.** Es la **segunda** medición sobre el mismo test congelado (la primera: `embeddings` 106/115,
 > `rules` 102/115); las correcciones entre ambas se guiaron solo por dev, la demo y frases propias. En #54 hubo además
 > una fuga leve **declarada**: arreglos genéricos después de ver números agregados de test
-> ([`evals/cases/README.md`](evals/cases/README.md)). No es un test ciego para estas versiones; un test v3 escrito
-> por otra persona lo sería.
+> ([`evals/cases/README.md`](evals/cases/README.md)). No es un test ciego para estas versiones: por eso se escribió
+> el **test v3 ciego**, que bajó la utilidad a 43/80 con la seguridad intacta (0/80). El 76/80 posterior ya no es ciego;
+> un número limpio después de los arreglos necesita un test v4.
 
 ## Por qué este flujo (resumen del EDA)
 - Las **quejas** son el 17% de los contactos y tienen el peor FCR (43.6% contra 91.5% en transaccionales), el doble de duración y 63% de seguimiento.
