@@ -226,7 +226,7 @@ BOTH_ACTIONS = ["ambas", "ambos", "las dos", "los dos", "as duas", "os dois", "l
                 "ambas coisas", "as duas acoes"]
 # "a todo" / "tudo" también cubre las dos acciones ofrecidas, pero solo junto a un sí explícito ("va, sí a todo").
 BOTH_WITH_YES = ["a todo", "todo", "tudo", "a tudo", "para todo", "pra tudo"]
-# Gramática del consentimiento (v3 ciego, #70): sí + mención de las acciones OFRECIDAS + cortesía. El cliente suele
+# Gramática del consentimiento (v3 ciego, #71): sí + mención de las acciones OFRECIDAS + cortesía. El cliente suele
 # repetir lo que autoriza ("sí, ábranme la aclaración y bloqueen la tarjeta"); el sí puro lo re-preguntaba. Solo se
 # aceptan imperativos/infinitivos y sustantivos de las dos acciones, nunca la 1.ª persona ("yo la bloqueo", "ya la
 # abrí": lo hace el cliente, no es un pedido) ni otras palabras: todo lo demás sigue siendo contenido -> unclear.
@@ -407,7 +407,7 @@ def classify_confirmation(t: str) -> tuple[str | None, list[str]]:
     block_named = bool(BLOCK_MENTION.search(rest) or re.search(rf"(?<![a-z]){BLOCK_AFFIRM}", rest))
     rest, _ = _strip(rest, [BLOCK_AFFIRM])  # "sí, bloquéala": responde por el bloqueo, pero NO es un sí por sí solo
     labels, leftover = _scan(rest)
-    # Gramática (#70): lo que sobra puede nombrar las acciones ofrecidas y unirlas ("sí, disputa y bloqueo").
+    # Gramática (#71): lo que sobra puede nombrar las acciones ofrecidas y unirlas ("sí, disputa y bloqueo").
     for rx in (BLOCK_MENTION, DISPUTE_VERB, DISPUTE_NOUN, CARD_OBJECT):
         leftover = rx.sub(" ", leftover)
     leftover, both_yes = _strip(leftover, [re.escape(x) for x in BOTH_WITH_YES])

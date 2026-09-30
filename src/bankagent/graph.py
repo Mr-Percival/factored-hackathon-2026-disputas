@@ -252,7 +252,7 @@ class Agent:
             return {**out, "next": "cancel", "candidates": []}
         if awaiting == "option" and u.intent not in CONVERSATION_HANDOFFS and u.intent not in ("dispute_status",
                                                                                               "closing"):
-            # "el de mayo, como de 361": elige describiendo una de las opciones mostradas, no con el número (v3 #70).
+            # "el de mayo, como de 361": elige describiendo una de las opciones mostradas, no con el número (v3 #71).
             # Solo si los datos dejan UNA opción; si no, sigue como antes (búsqueda nueva o aclaración).
             idx = pick_by_details(s.get("candidates") or [], u.slots)
             if idx:

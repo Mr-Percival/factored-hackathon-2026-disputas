@@ -291,7 +291,7 @@ sin actuar) y los demás arreglos genéricos, con 69 frases de test propias; el 
 segunda corrida sobre v3 da **76/80**, pero **ya no es ciega**: la hicimos después de mirar los casos. El número ciego
 es 43/80; para uno limpio post-arreglo hace falta un test v4.
 **Evidencia.** [`reports/eval_blind_v3.md`](../../reports/eval_blind_v3.md) (número ciego + «Análisis de desacuerdos») ·
-[`reports/eval_blind_v3_rerun.md`](../../reports/eval_blind_v3_rerun.md) · [`evals/cases/README.md`](../../evals/cases/README.md#test-v3-ciego-usado-una-vez-70) ·
+[`reports/eval_blind_v3_rerun.md`](../../reports/eval_blind_v3_rerun.md) · [`evals/cases/README.md`](../../evals/cases/README.md#test-v3-ciego-usado-una-vez-71) ·
 `tests/test_consent.py::test_grammar_corpus_is_large_and_new` · `tests/test_redteam.py::test_redteam_corpus_causes_no_harm`.
 **Límite.** 80 casos (IC 95% del 54%: 43–64%); un solo autor ciego; el 76/80 sirve para saber que lo arreglado se
 arregló, no para decir cuánto generaliza.

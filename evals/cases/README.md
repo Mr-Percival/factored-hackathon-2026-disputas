@@ -106,7 +106,7 @@ próxima versión hay que construir un test v3 con redacciones nuevas escritas p
 
 El reporte completo (con variabilidad, desgloses y fallas) está en [`reports/eval.md`](../../reports/eval.md).
 
-## Test v3 ciego: usado una vez (#70)
+## Test v3 ciego: usado una vez (#71)
 Protocolo seguido:
 1. Un autor aislado escribió 80 conversaciones leyendo solo `config/policy.yaml` y la base (nunca código, tests ni
    casos previos) y las etiquetó con su lectura de la spec. El archivo se congeló en git (sha256 `cec03e51…`) **antes**

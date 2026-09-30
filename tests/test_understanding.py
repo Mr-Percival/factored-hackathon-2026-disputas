@@ -66,7 +66,7 @@ def test_card_last_four_is_an_option_not_an_amount():
     assert R.understand("o final 4279", TODAY, "option").slots.last4 == "4279"
 
 
-# ------------------------------------------------------------------ fallas genéricas vistas en el test v3 ciego (#70)
+# ------------------------------------------------------------------ fallas genéricas vistas en el test v3 ciego (#71)
 @pytest.mark.parametrize("text,amount", [("un cobro de 2'350.400 pesos", 2_350_400), ("por 12'500.000", 12_500_000),
                                          ("de 3’120.000 del martes", 3_120_000)])
 def test_apostrophe_million_separator(text, amount):

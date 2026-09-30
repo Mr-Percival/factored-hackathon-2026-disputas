@@ -146,7 +146,7 @@ def test_no_template_renders_a_dangling_card_dash(lang):
             assert key in {"confirm_dispute", "block_suffix", "block_confirm", "block_done", "account_takeover_block"}, key
 
 
-# ------------------------------------------------------------------ gramática del consentimiento (#70)
+# ------------------------------------------------------------------ gramática del consentimiento (#71)
 # Test v3 ciego: el sí PURO re-preguntaba respuestas naturales que repiten lo que se autoriza ("sí, ábranla y
 # bloqueen la tarjeta"). Gramática: marcador afirmativo + mención de las acciones ofrecidas + cortesía; cualquier otra
 # palabra sigue siendo `unclear`. Frases nuevas del equipo (es-MX, es-CO, es-AR, pt-BR); ninguna sale del test v3.
@@ -253,7 +253,7 @@ def test_explicit_human_request_wins_over_its_no(env):
     assert (disputes(env), blocks(env)) == (0, 0)
 
 
-# ------------------------------------------------------------------ elegir describiendo la opción (#70)
+# ------------------------------------------------------------------ elegir describiendo la opción (#71)
 def test_choice_by_description_selects_among_the_shown_options(env):
     tok, th = env.login("CLI-ANA"), env.thread()
     r = env.agent.chat(th, tok, "no reconozco un cargo de 345 dólares")
