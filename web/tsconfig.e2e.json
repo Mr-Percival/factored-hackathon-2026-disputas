@@ -15,5 +15,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["e2e", "playwright.config.ts"]
+  "include": ["e2e", "e2e-media", "playwright.config.ts", "playwright.media.config.ts"]
 }

@@ -37,6 +37,6 @@ export default defineConfig({
     css: false,
     restoreMocks: true,
     // e2e/ es de Playwright (npm run e2e), no de Vitest.
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    exclude: [...configDefaults.exclude, "e2e/**", "e2e-media/**"],
   },
 });
