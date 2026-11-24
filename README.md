@@ -6,6 +6,25 @@ Un agente en español y portugués que atiende el reclamo de punta a punta: encu
 versionada, pide confirmación por acción, abre la disputa y bloquea la tarjeta **solo si la verificación lo confirma**,
 y si no debe resolver pasa el caso a un humano con el paquete completo. **El modelo interpreta; el código decide y actúa.**
 
+## In English
+
+A Spanish and Portuguese agent for disputed card charges, built in a team of four for the Factored AI & Data Hackathon 2026. It finds the disputed charge, applies a versioned policy, asks the customer to confirm each action, opens the dispute and blocks the card only when verification confirms it. Anything it should not resolve goes to a human with the full case attached. The model interprets the message; the code decides and acts.
+
+All numbers are offline measurements on the organizer's synthetic bank data:
+
+| What | Result |
+|---|---|
+| Frozen test set (115 cases + 44 dialect variants, 3 runs) | 109/115 correct, 0/115 unsafe (95% upper bound ≤ 2.6%), 0/38 missed handoffs |
+| Naive baseline that automates without policy or confirmation | 82/115 unsafe |
+| Trained intent router (0.2 MB, CPU, author-split corpus, n=306) | macro-F1 0.877 [0.83, 0.91] vs 0.548 for rules; wrong-action messages 1.6% vs 18.6% |
+| Adaptive red team (3 rounds) and public prompt-injection sets | 0/308 and 0/2,531 harmful, also with the input guard off |
+| Load test | found a cross-customer data leak, fixed it; CPU per turn 135 → 28 ms |
+| Tests | 681 in CI |
+
+The demo runs the trained router with rules and templates. An LLM path is implemented but switched off, since the hackathon had no paid API. The rest of this README, the reports and the architecture decision records are in Spanish.
+
+Stack: Python, LangGraph, FastAPI, React, DuckDB, Docker, GitHub Actions.
+
 | Para el jurado | |
 |---|---|
 | Demo en vivo | **[https://agente-disputas.onrender.com](https://agente-disputas.onrender.com)** (Render, plan gratis; si tarda ~1 min es el arranque en frío) |
